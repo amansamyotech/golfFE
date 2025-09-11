@@ -1,0 +1,80 @@
+'use client';
+
+import React, { useState } from 'react';
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    Typography,
+    Box,
+} from '@mui/material';
+import { toast } from 'react-toastify';
+import { deleteMember } from '@/services/memberService';
+
+type DeleteMemberProps = {
+    open: boolean;
+    handleClose: () => void;
+    id: string;
+};
+
+const DeleteMember = ({ open, handleClose, id }: DeleteMemberProps) => {
+    const [loading, setLoading] = useState(false);
+
+    const handleDelete = async () => {
+        try {
+            setLoading(true);
+            await deleteMember(id);
+        } catch (error) {
+            console.error('Error deleting member:', error);
+            toast.error('Failed to delete member.');
+        } finally {
+            setLoading(false);
+            handleClose();
+        }
+    };
+
+    return (
+        <Dialog
+            open={open}
+            onClose={handleClose}
+            maxWidth="xs"
+            fullWidth
+            PaperProps={{
+                sx: { borderRadius: 3, p: 2 },
+            }}
+        >
+            <DialogTitle>
+                <Typography variant="h6" component="div">
+                    Delete Member Confirmation
+                </Typography>
+            </DialogTitle>
+
+            <DialogContent>
+                <Box sx={{ mt: 1 }}>
+                    <Typography variant="subtitle1" color="text.secondary">
+                        Are you sure you want to delete this member?
+                    </Typography>
+                </Box>
+            </DialogContent>
+
+            <DialogActions sx={{ px: 3, pb: 2 }}>
+                <Button
+                    onClick={handleDelete}
+                    color="error"
+                    variant="contained"
+                    loading={loading}
+                >
+                    Delete
+                </Button>
+                <Button onClick={handleClose} color="inherit" variant="outlined">
+                    Cancel
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+export default DeleteMember;
+
