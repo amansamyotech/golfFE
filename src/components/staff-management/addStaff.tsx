@@ -17,11 +17,28 @@ import FileInput from '../form/input/FileInput';
 import TextArea from '../form/input/TextArea';
 import { ChevronDownIcon } from '@/icons';
 import { addStaff, updateStaff } from '@/services/staffService';
+import Image from 'next/image';
+
+interface EmployeeData {
+    _id?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    gender?: string;
+    staffProfileImg?: string;
+    address?: string;
+    jobTitle?: string;
+    department?: string;
+    employmentType?: string;
+    dateOfJoining?: string;
+    workShift?: string;
+    salary?: number | string;
+}
 
 interface AddEmployeeProps {
     open: boolean;
     handleClose: () => void;
-    data: any;
+    data?: EmployeeData;
 }
 
 const validationSchema = Yup.object({
@@ -77,7 +94,6 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
         enableReinitialize: true,
         validationSchema,
         onSubmit: async (values) => {
-            console.log("Submitted values:", values);
             setLoading(true);
             try {
                 if (data) {
@@ -201,7 +217,13 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         <Label>Profile Image / Government ID</Label>
                         <FileInput onChange={handleFileChange} className="custom-class" />
                         {imagePreview && (
-                            <img src={imagePreview} alt="Preview" className="mt-2 w-32 h-32 object-cover" />
+                            <Image
+                                src={imagePreview}
+                                alt="Preview"
+                                width={128}
+                                height={128}
+                                className="mt-2 object-cover rounded"
+                            />
                         )}
                         {formik.touched.staffProfileImg && formik.errors.staffProfileImg && (
                             <div className="text-red-400 text-xs ">{formik.errors.staffProfileImg}</div>

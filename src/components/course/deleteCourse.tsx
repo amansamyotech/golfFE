@@ -20,8 +20,6 @@ type DeleteCourseProps = {
 };
 
 const DeleteCourse = ({ open, handleClose, id }: DeleteCourseProps) => {
-    console.log("id :", id);
-
     const [loading, setLoading] = useState(false);
 
     const handleDelete = async () => {

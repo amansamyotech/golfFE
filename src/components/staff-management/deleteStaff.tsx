@@ -10,7 +10,6 @@ import {
     Typography,
     Box,
 } from '@mui/material';
-import { deletePlan } from '@/services/plansService';
 import { deleteStaff } from '@/services/staffService';
 
 type DeleteStaffProps = {

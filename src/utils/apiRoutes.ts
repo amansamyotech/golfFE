@@ -1,6 +1,3 @@
-import { addBooking } from "@/services/bookingService";
-import { get } from "http";
-
 export const api_urls = {
     baseUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}`,
     imageBaseUrl: `${process.env.NEXT_PUBLIC_API_IMG_URL}`,
@@ -26,6 +23,14 @@ export const api_urls = {
         getById: 'member',
     },
 
+    customer: {
+        add: 'customer/create',
+        getAll: 'customer/get-all',
+        update: 'customer/update',
+        delete: 'customer/delete',
+        getById: 'customer',
+    },
+
     guest: {
         add: 'guest/create',
         getAll: 'guest/get-all',
@@ -43,6 +48,12 @@ export const api_urls = {
 
     booking: {
         add: 'booking/create',
+        getAll: 'booking/get-all',
+        updateGuestBooking: 'booking/update-guest',
+        cancelGuestBooking: 'booking/cancel-guest',
+        assignSlot: "booking/assign-slot",
+        bookingById: "booking",
+        updateBookingAssignSlot: "booking/update-assign-slot"
     },
 
     timeslot: {
@@ -50,5 +61,8 @@ export const api_urls = {
         getAll: 'time-slot/get-all',
         update: 'time-slot/update',
         delete: 'time-slot/delete',
+        getByStartAndCourse: 'time-slot/slots',
+        getAllIndividualSlots: 'time-slot/all-slots',
+        getIndividualSlotsByDate: 'time-slot/by-date'
     }
 };

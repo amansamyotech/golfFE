@@ -1,21 +1,12 @@
 import * as React from 'react';
 import {
-    Dialog,
     Button,
-    FormHelperText,
-    FormLabel,
     Grid,
-    DialogContent,
-    DialogTitle,
     Typography,
-    DialogActions,
-    TextField
 } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useFormik } from 'formik';
 import { Modal } from '@/components/ui/modal';
-import { useModal } from '@/hooks/useModal';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { useState, useEffect } from 'react';
 import Label from '../form/Label';
 import Input from '../form/input/InputField';
@@ -23,12 +14,13 @@ import DatePicker from '../form/date-picker';
 import Select from '../form/Select';
 import { ChevronDownIcon } from '@/icons';
 import FileInput from '../form/input/FileInput';
-import TextArea from '../form/input/TextArea';
-import { toast } from "react-toastify";
 import { getAllPlan } from '@/services/plansService';
 import { getAllCourses } from '@/services/courseService';
 import { addMember, updateMember } from '@/services/memberService';
+import { updateCustomer } from '@/services/customerService';
+import { addCustomer } from '@/services/customerService';
 import * as Yup from 'yup';
+import Image from 'next/image';
 
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
@@ -38,18 +30,42 @@ const validationSchema = Yup.object().shape({
         .required('Phone is required'),
     dob: Yup.date().required('Date of birth is required'),
     gender: Yup.string().required('Gender is required'),
-    image: Yup.mixed().nullable(),
+    govId: Yup.mixed().nullable(),
     plan: Yup.string().required('Plan is required'),
     startDate: Yup.date().required('Start date is required'),
-
-    teeTime: Yup.string().required('Tee time is required'),
-    course: Yup.string().required('Course is required'),
+    preferredTeeTime: Yup.string().required('Tee time is required'),
     profileType: Yup.string().required('Profile type is required'),
 });
 
+interface MemberData {
+    _id?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    dob?: string;
+    gender?: string;
+    govId?: string;
+    plan?: { _id: string };
+    startDate?: string;
+    preferredTeeTime?: string;
+    profileType?: string;
+}
 
-const AddMember = ({ open, handleClose, data }: any) => {
-    const [image, setImage] = useState(null);
+interface Plan {
+    _id: string;
+    title: string;
+    numberOfDays: number;
+}
+
+const AddMember = ({
+    open,
+    handleClose,
+    data
+}: {
+    open: boolean;
+    handleClose: () => void;
+    data?: MemberData;
+}) => {
     const [imagePreview, setImagePreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [plans, setPlans] = useState([]);
@@ -62,24 +78,35 @@ const AddMember = ({ open, handleClose, data }: any) => {
             phone: data?.phone || '',
             dob: data?.dob || '',
             gender: data?.gender || '',
-            image: data?.image || '',
+            govId: data?.govId || '',
             plan: data?.plan._id || '',
             startDate: data?.startDate || '',
-            teeTime: data?.teeTime || '',
-            course: data?.course._id || '',
+            preferredTeeTime: data?.preferredTeeTime || '',
             profileType: data?.profileType || '',
         },
         validationSchema,
         enableReinitialize: true,
         onSubmit: async (values) => {
-            console.log("values :", values);
+            const formData = new FormData();
+
+            formData.append('role', 'member');
+            formData.append('name', values.name);
+            formData.append('email', values.email);
+            formData.append('phone', values.phone);
+            formData.append('dob', values.dob);
+            formData.append('gender', values.gender);
+            formData.append('govId', values.govId);
+            formData.append('plan', values.plan);
+            formData.append('startDate', values.startDate);
+            formData.append('preferredTeeTime', values.preferredTeeTime);
+            formData.append('profileType', values.profileType);
+
             setLoading(true);
             try {
-                console.log("Call API");
                 if (data) {
-                    await updateMember(data._id, values);
+                    await updateCustomer(data._id, formData);
                 } else {
-                    await addMember(values);
+                    await addCustomer(formData);
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -117,13 +144,13 @@ const AddMember = ({ open, handleClose, data }: any) => {
         const file = event.target.files?.[0];
         if (file) {
             setImagePreview(URL.createObjectURL(file));
-            formik.setFieldValue("image", file);
+            formik.setFieldValue("govId", file);
         }
     };
 
     const fetchPlans = async () => {
         const fetchedPlans = await getAllPlan();
-        const formattedPlans = fetchedPlans.map((plan: any) => ({
+        const formattedPlans = fetchedPlans.map((plan: Plan) => ({
             value: plan._id,
             label: plan.title,
             days: plan.numberOfDays,
@@ -131,39 +158,16 @@ const AddMember = ({ open, handleClose, data }: any) => {
         setPlans(formattedPlans);
     };
 
-    const fetchCourses = async () => {
-        const fetchedCourses = await getAllCourses();
-        const formattedCourses = fetchedCourses.map((course: any) => ({
-            value: course._id,
-            label: course.name,
-        }));
-        setCourses(formattedCourses);
-    };
-
     useEffect(() => {
         fetchPlans();
-        fetchCourses();
     }, [open]);
 
     useEffect(() => {
-        if (data?.image) {
-            const imgPreviewUrl = `${process.env.NEXT_PUBLIC_API_IMG_URL}${data?.image}`
+        if (data?.govId) {
+            const imgPreviewUrl = `${process.env.NEXT_PUBLIC_API_IMG_URL}${data?.govId}`
             setImagePreview(imgPreviewUrl);
         }
     }, [data]);
-
-    // useEffect(() => {
-    //     const selectedPlan = plans.find(p => p.value === formik.values.plan);
-    //     console.log("---  selectedPlan :", selectedPlan);
-    //     const startDate = formik.values.startDate;
-
-    //     if (selectedPlan && startDate) {
-    //         const duration = selectedPlan.days || 0;
-    //         const newEndDate = new Date(startDate);
-    //         newEndDate.setDate(newEndDate.getDate() + duration - 1);
-    //     }
-    // }, [formik.values.plan, formik.values.startDate]);
-
 
     return (
         <Modal
@@ -239,30 +243,12 @@ const AddMember = ({ open, handleClose, data }: any) => {
                                 placeholder="Select a date"
                                 defaultDate={formik.values.dob}
                                 onChange={(date) => {
-                                    console.log("date :", date);
                                     formik.setFieldValue('dob', date)
                                 }}
                             />
                             {formik.touched.dob && formik.errors.dob && (
                                 <div className="text-red-400 text-xs ">{formik.errors.dob}</div>
                             )}
-
-                            {/* <Grid item xs={12}>
-                                <DatePicker
-                                    id="dob"
-                                    label="Date of Birth"
-                                    placeholder="Select a date"
-                                    defaultDate={formik.values.dob ? new Date(formik.values.dob) : undefined}
-                                    onChange={(selectedDates) => {
-                                        const formattedDate = selectedDates[0]; // Already formatted as 'YYYY-MM-DD'
-                                        console.log("formattedDate:", formattedDate);
-                                        formik.setFieldValue('dob', formattedDate);
-                                    }}
-                                />
-                                {formik.touched.dob && formik.errors.dob && (
-                                    <div className="text-red-400 text-xs">{formik.errors.dob}</div>
-                                )}
-                            </Grid> */}
                         </Grid>
 
                         <Grid item xs={12}>
@@ -286,13 +272,20 @@ const AddMember = ({ open, handleClose, data }: any) => {
                         </Grid>
 
                         <Grid item xs={12}>
-                            <Label>Upload file</Label>
+                            <Label>Upload Goverment Id</Label>
+
                             <FileInput onChange={handleFileChange} className="custom-class" />
                             {imagePreview && (
-                                <img src={imagePreview} alt="Preview" className="mt-2 w-32 h-32 object-cover" />
+                                <Image
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    width={128}
+                                    height={128}
+                                    className="mt-2 object-cover rounded"
+                                />
                             )}
-                            {formik.touched.image && formik.errors.image && (
-                                <div className="text-red-400 text-xs ">{formik.errors.image}</div>
+                            {formik.touched.govId && formik.errors.govId && (
+                                <div className="text-red-400 text-xs ">{formik.errors.govId}</div>
                             )}
                         </Grid>
 
@@ -336,41 +329,23 @@ const AddMember = ({ open, handleClose, data }: any) => {
                             <Label>Select Preferred Tee Time</Label>
                             <div className="relative">
                                 <Select
-                                    id="teeTime"
+                                    id="preferredTeeTime"
                                     options={teeTimeOptions}
                                     placeholder="Select Preferred Time"
-                                    value={formik.values.teeTime}
-                                    onChange={(option) => formik.setFieldValue("teeTime", option)}
+                                    value={formik.values.preferredTeeTime}
+                                    onChange={(option) => formik.setFieldValue("preferredTeeTime", option)}
                                     className="dark:bg-dark-900"
                                 />
                                 <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                                     <ChevronDownIcon />
                                 </span>
-                                {formik.touched.teeTime && formik.errors.teeTime && (
-                                    <div className="text-red-400 text-xs ">{formik.errors.teeTime}</div>
+                                {formik.touched.preferredTeeTime && formik.errors.preferredTeeTime && (
+                                    <div className="text-red-400 text-xs ">{formik.errors.preferredTeeTime}</div>
                                 )}
                             </div>
                         </Grid>
 
-                        <Grid item xs={12}>
-                            <Label>Select Course</Label>
-                            <div className="relative">
-                                <Select
-                                    id="course"
-                                    options={courses}
-                                    placeholder="Select Course"
-                                    value={formik.values.course}
-                                    onChange={(option) => formik.setFieldValue("course", option)}
-                                    className="dark:bg-dark-900"
-                                />
-                                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                                    <ChevronDownIcon />
-                                </span>
-                                {formik.touched.course && formik.errors.course && (
-                                    <div className="text-red-400 text-xs ">{formik.errors.course}</div>
-                                )}
-                            </div>
-                        </Grid>
+
 
                         <Grid item xs={12}>
                             <Label>Profile Type</Label>

@@ -7,10 +7,7 @@ import {
     Container,
     Typography,
     Card,
-    Box,
-    Chip,
     IconButton,
-    Menu,
     MenuItem,
     Popover
 } from '@mui/material';
@@ -20,14 +17,26 @@ import TableStyle from '@/components/ui/table-style';
 import AddCourse from '@/components/course/addCourse';
 import DeleteCourse from '@/components/course/deleteCourse';
 import { getAllCourses } from '@/services/courseService';
+import { GridRenderCellParams } from '@mui/x-data-grid';
+
+interface Course {
+    _id: string;
+    name: string;
+    courseNumber: string;
+    holes: number;
+    location: string;
+}
+
+
 
 export default function Course() {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
     const [open, setOpen] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [rowData, setRowData] = useState(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [rowData, setRowData] = useState<Course | null>(null);
+
     const [openDelete, setOpenDelete] = useState(false);
-    const [courses, setCourses] = useState([]);
+    const [courses, setCourses] = useState<Course[]>([]);
 
     const paginatedRows = courses.slice(
         paginationModel.page * paginationModel.pageSize,
@@ -50,13 +59,14 @@ export default function Course() {
         { field: 'name', headerName: 'Course Name', flex: 1 },
         { field: 'courseNumber', headerName: 'Course No.', flex: 0.7 },
         { field: 'holes', headerName: 'No. of Holes', flex: 0.7 },
+        { field: 'capacity', headerName: 'Capacity', flex: 0.7 },
         { field: 'location', headerName: 'Location', flex: 1 },
         {
             field: 'action',
             headerName: 'Action',
             width: 80,
             sortable: false,
-            renderCell: (params) => {
+            renderCell: (params: GridRenderCellParams<Course>) => {
                 return (
                     <>
                         <IconButton onClick={(e) => handleClick(e, params.row)}>
@@ -80,7 +90,7 @@ export default function Course() {
             }
         }
     ];
-    const handleClick = (event, row) => {
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>, row: Course) => {
         setAnchorEl(event.currentTarget);
         setRowData(row);
     };
@@ -89,9 +99,7 @@ export default function Course() {
         setAnchorEl(null);
     };
 
-    const handleOpenEdit = (row: any) => {
-        console.log("Editing row:", row);
-
+    const handleOpenEdit = (row: Course) => {
         setRowData(row);
         setOpen(true);
         handleClosePopover();
@@ -118,7 +126,7 @@ export default function Course() {
     };
     const fetchCourses = async () => {
         try {
-            const response = await getAllCourses();
+            const response = await getAllCourses() as Course[];
             setCourses(response);
         } catch (error) {
             console.error('Error fetching courses:', error);
@@ -132,7 +140,7 @@ export default function Course() {
     return (
         <>
             <AddCourse open={open} handleClose={handleCloseAdd} data={rowData} />
-            <DeleteCourse open={openDelete} handleClose={handleCloseDelete} id={rowData?._id} />
+            <DeleteCourse open={openDelete} handleClose={handleCloseDelete} id={rowData?._id || ''} />
             <Container>
                 <Stack direction="row" alignItems="center" mb={5} justifyContent="space-between">
                     <Typography variant="h6">Course Management</Typography>
@@ -150,7 +158,6 @@ export default function Course() {
                             paginationModel={paginationModel}
                             onPaginationModelChange={setPaginationModel}
                             pageSizeOptions={[5, 10]}
-                            checkboxSelection
                             getRowId={(row) => row?._id}
                             sx={{
                                 border: 0,

@@ -7,10 +7,7 @@ import {
     Container,
     Typography,
     Card,
-    Box,
-    Chip,
     IconButton,
-    Menu,
     MenuItem,
     Popover
 } from '@mui/material';
@@ -20,17 +17,27 @@ import TableStyle from '@/components/ui/table-style';
 import AddPlans from '@/components/membership-plans/addPlan';
 import DeletePlan from '@/components/membership-plans/deletePlan';
 import { getAllPlan } from '@/services/plansService';
+import Image from 'next/image';
+
+interface Plan {
+    _id: string;
+    planImage?: string;
+    title: string;
+    description: string;
+    price: number;
+    numberOfDays: number;
+}
 
 const defaultImage = 'https://via.placeholder.com/40';
 
 export default function MembershipPlans() {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
     const [open, setOpen] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [rowData, setRowData] = useState(null);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [rowData, setRowData] = useState<Plan | null>(null);
     const [openDelete, setOpenDelete] = useState(false);
-    const [plans, setPlans] = useState([]);
-   
+    const [plans, setPlans] = useState<Plan[]>([]);
+
     const paginatedRows = plans.slice(
         paginationModel.page * paginationModel.pageSize,
         (paginationModel.page + 1) * paginationModel.pageSize
@@ -43,24 +50,28 @@ export default function MembershipPlans() {
 
     const columns = [
         { field: 'sNo', headerName: 'S.No', width: 80 },
-        {
-            field: 'planImage',
-            headerName: 'Image',
-            width: 80,
-            sortable: false,
-            renderCell: (params) => {
-                const imgSrc = params.row.planImage
-                    ? `${process.env.NEXT_PUBLIC_API_IMG_URL}${params.row.planImage}`
-                    : defaultImage;
-                return (
-                    <img
-                        src={imgSrc}
-                        alt={params.row.title}
-                        style={{ width: 40, height: 40, borderRadius: 4, objectFit: 'cover' }}
-                    />
-                );
-            },
-        },
+        // {
+        //     field: 'planImage',
+        //     headerName: 'Image',
+        //     width: 80,
+        //     sortable: false,
+        //     renderCell: (params: { row: Plan }) => {
+        //         const imgSrc = params.row.planImage
+        //             ? `${process.env.NEXT_PUBLIC_API_IMG_URL}${params.row.planImage}`
+        //             : defaultImage;
+        //         return (
+                   
+
+        //             <Image
+        //                 src={imgSrc}
+        //                 alt={params.row.title}
+        //                 width={40}
+        //                 height={40}
+        //                 style={{ borderRadius: 4, objectFit: 'cover' }}
+        //             />
+        //         );
+        //     },
+        // },
         { field: 'title', headerName: 'Title', flex: 1 },
         { field: 'description', headerName: 'Description', flex: 1.5 },
         { field: 'price', headerName: 'Price', flex: 1 },
@@ -70,7 +81,7 @@ export default function MembershipPlans() {
             headerName: 'Action',
             width: 80,
             sortable: false,
-            renderCell: (params) => {
+            renderCell: (params: { row: Plan }) => {
                 return (
                     <>
                         <IconButton onClick={(e) => handleClick(e, params.row)}>
@@ -95,7 +106,7 @@ export default function MembershipPlans() {
         }
     ];
 
-    const handleClick = (event, row) => {
+    const handleClick = (event: React.MouseEvent<HTMLElement>, row: Plan) => {
         setAnchorEl(event.currentTarget);
         setRowData(row);
     };
@@ -132,7 +143,7 @@ export default function MembershipPlans() {
     const fetchPlans = async () => {
         try {
             const response = await getAllPlan();
-            setPlans(response);
+            setPlans(response as Plan[]);
         } catch (error) {
             console.error('Error fetching courses:', error);
         }
@@ -144,8 +155,8 @@ export default function MembershipPlans() {
 
     return (
         <>
-            <AddPlans open={open} handleClose={handleCloseAdd} data={rowData} />
-            <DeletePlan open={openDelete} handleClose={handleCloseDelete} id={rowData?._id} />
+            <AddPlans open={open} handleClose={handleCloseAdd} data={rowData ?? undefined} />
+            <DeletePlan open={openDelete} handleClose={handleCloseDelete} id={rowData?._id || ''} />
             <Container>
                 <Stack direction="row" alignItems="center" mb={5} justifyContent="space-between">
                     <Typography variant="h6">Membership Plan Management</Typography>
@@ -163,8 +174,8 @@ export default function MembershipPlans() {
                             paginationModel={paginationModel}
                             onPaginationModelChange={setPaginationModel}
                             pageSizeOptions={[5, 10]}
-                            checkboxSelection
-                            getRowId={(row) => row._id}
+                            // checkboxSelection
+                            getRowId={(row) => row._id || ''}
                             sx={{
                                 border: 0,
                                 '& .MuiDataGrid-row': {

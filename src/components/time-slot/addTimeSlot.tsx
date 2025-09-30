@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dialog, Button, Typography, Grid, MenuItem } from '@mui/material';
+import { Button, Typography, Grid } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useFormik } from 'formik';
 import { Modal } from '@/components/ui/modal';
@@ -10,65 +10,118 @@ import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 import DatePicker from '../form/date-picker';
 import { TimeInput } from "@heroui/react";
-import { addTimeSlot } from '@/services/timeslotService';
+import { addTimeSlot, updateTimeSlot } from '@/services/timeslotService';
+import { getAllCourses } from '@/services/courseService';
+import Select from '../form/Select';
+import { ChevronDownIcon } from '@/icons';
+import { Time } from "@internationalized/date";
 
+
+interface TimeSlotData {
+    start_date?: string;
+    course: { _id: string; name: string };
+    slot_time_hours?: number | string;
+    slot_time_minutes?: number | string;
+    buffer_time?: number | string;
+    status?: 'available' | 'booked';
+}
 interface AddTimeSlotProps {
     open: boolean;
     handleClose: () => void;
-    data?: any;
+    data?: TimeSlotData;
 }
 
 const validationSchema = Yup.object().shape({
     start_date: Yup.date().required('Start date is required'),
-    end_date: Yup.date().required('End date is required'),
+    // end_date: Yup.date().required('End date is required'),
+    course: Yup.string().required('Course is required'),
+    slot_time_hours: Yup.number()
+        .typeError('Slot time must be a number')
+        .required('Slot time is required')
+        .positive('Must be greater than 0')
+        .integer('Must be an integer'),
     slot_time_minutes: Yup.number()
         .typeError('Slot time must be a number')
         .required('Slot time is required')
         .positive('Must be greater than 0')
         .integer('Must be an integer'),
-    buffer_time_minutes: Yup.number()
+    buffer_time: Yup.number()
         .typeError('Buffer time must be a number')
         .required('Buffer time is required')
         .positive('Must be greater than 0')
         .integer('Must be an integer'),
-    ground_opening_time: Yup.string().required('Ground opening time is required'),
-    ground_closing_time: Yup.string().required('Ground closing time is required'),
+    weekday_opening_time: Yup.string().required('Weekday opening time is required'),
+    weekday_closing_time: Yup.string().required('Weekday closing time is required'),
+    weekend_opening_time: Yup.string().required('Weekend opening time is required'),
+    weekend_closing_time: Yup.string().required('Weekend closing time is required'),
     status: Yup.string()
         .oneOf(['available', 'booked'], 'Invalid status')
         .required('Status is required'),
 });
 
+function formatTimeString(time: string) {
+    if (!time) return "";
+    const [h, m] = time.split(":");
+    return `${h.padStart(2, "0")}:${m.padStart(2, "0")}`;
+}
+
+
+
 const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) => {
+
+
     const [loading, setLoading] = useState(false);
+    const [courses, setCourses] = useState([]);
 
     const formik = useFormik({
         initialValues: {
             start_date: data?.start_date ? data.start_date.split('T')[0] : '',
-            end_date: data?.end_date ? data.end_date.split('T')[0] : '',
+            // end_date: data?.end_date ? data.end_date.split('T')[0] : '',
+            slot_time_hours: data?.slot_time_hours || '',
             slot_time_minutes: data?.slot_time_minutes || '',
-            buffer_time_minutes: data?.buffer_time_minutes || '',
-            ground_opening_time: data?.ground_opening_time || '',
-            ground_closing_time: data?.ground_closing_time || '',
+            buffer_time: data?.buffer_time || '',
+            weekday_opening_time: data?.weekday_opening_time || '',
+            weekday_closing_time: data?.weekday_closing_time || '',
+            weekend_opening_time: data?.weekend_opening_time || '',
+            weekend_closing_time: data?.weekend_closing_time || '',
             status: data?.status || 'available',
         },
         enableReinitialize: true,
         validationSchema,
         onSubmit: async (values) => {
-            console.log("this is values", values);
+            const totalSlotTimeMinutes = Number(values.slot_time_hours) * 60 + Number(values.slot_time_minutes);
+            values.total_slot_time = totalSlotTimeMinutes;
+
             setLoading(true);
             try {
-                await addTimeSlot(values);
-                toast.success('Time slot saved successfully');
-                handleClose();
-                formik.resetForm();
+                if (data) {
+                    await updateTimeSlot(data._id, values);
+                } else {
+                    await addTimeSlot(values);
+                }
             } catch (error) {
                 console.error('Error:', error);
                 toast.error('Failed to save time slot');
             } finally {
                 setLoading(false);
+                handleClose();
+                formik.resetForm();
             }
         },
     });
+
+    const fetchCourses = async () => {
+        const fetchedCourses = await getAllCourses();
+        const formattedCourses = fetchedCourses?.map((course) => ({
+            value: course._id,
+            label: course.name,
+        }));
+        setCourses(formattedCourses);
+    };
+
+    useEffect(() => {
+        fetchCourses();
+    }, [open]);
 
     return (
         <Modal isOpen={open} onClose={handleClose} className="max-w-[500px] p-6 lg:p-10">
@@ -95,7 +148,7 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
                             )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        {/* <Grid item xs={12}>
                             <DatePicker
                                 id="end_date"
                                 label="End Date"
@@ -106,10 +159,47 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
                             {formik.touched.end_date && formik.errors.end_date && (
                                 <div className="text-red-400 text-xs ">{formik.errors.end_date}</div>
                             )}
+                        </Grid> */}
+
+                        <Grid item xs={12}>
+                            <Label>Course</Label>
+                            <div className="relative">
+                                <Select
+                                    id="course"
+                                    options={courses}
+                                    placeholder="Select Course"
+                                    value={formik.values.course}
+                                    onChange={(option) => formik.setFieldValue("course", option)}
+                                    className="dark:bg-dark-900"
+                                />
+                                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                                    <ChevronDownIcon />
+                                </span>
+                                {formik.touched.course && formik.errors.course && (
+                                    <div className="text-red-400 text-xs ">{formik.errors.course}</div>
+                                )}
+                            </div>
                         </Grid>
 
                         <Grid item xs={12}>
-                            <Label>Slot Time (Minutes)</Label>
+                            <Label>Slot Time Hours</Label>
+                            <Input
+                                id="slot_time_hours"
+                                name="slot_time_hours"
+                                type="number"
+                                placeholder="e.g., 1"
+                                value={formik.values.slot_time_hours}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                className="w-full"
+                            />
+                            {formik.touched.slot_time_hours && formik.errors.slot_time_hours && (
+                                <div className="text-red-400 text-xs">{formik.errors.slot_time_hours}</div>
+                            )}
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Label>Slot Time Minutes</Label>
                             <Input
                                 id="slot_time_minutes"
                                 name="slot_time_minutes"
@@ -128,58 +218,141 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
                         <Grid item xs={12}>
                             <Label>Buffer Time (Minutes)</Label>
                             <Input
-                                id="buffer_time_minutes"
-                                name="buffer_time_minutes"
+                                id="buffer_time"
+                                name="buffer_time"
                                 type="number"
                                 placeholder="e.g., 10"
-                                value={formik.values.buffer_time_minutes}
+                                value={formik.values.buffer_time}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                                 className="w-full"
                             />
-                            {formik.touched.buffer_time_minutes && formik.errors.buffer_time_minutes && (
-                                <div className="text-red-400 text-xs">{formik.errors.buffer_time_minutes}</div>
+                            {formik.touched.buffer_time && formik.errors.buffer_time && (
+                                <div className="text-red-400 text-xs">{formik.errors.buffer_time}</div>
                             )}
                         </Grid>
 
-
-
                         <Grid item xs={12}>
                             <Label className="block text-sm font-medium text-gray-700 mb-2">
-                                Ground Opening Time
+                                Ground Opening Time (On Weekdays)
                             </Label>
                             <div className="border border-gray-300 rounded-lg shadow-sm">
                                 <TimeInput
                                     isRequired
-                                    value={formik.values.ground_opening_time}
-                                    onChange={(time) => formik.setFieldValue("ground_opening_time", time)}
+                                    value={
+                                        formik.values.weekday_opening_time
+                                            ? (() => {
+                                                const [h, m] = formik.values.weekday_opening_time.split(":").map(Number);
+                                                return new Time(h, m);
+                                            })()
+                                            : undefined
+                                    }
+                                    onChange={(time) =>
+                                        formik.setFieldValue(
+                                            "weekday_opening_time",
+                                            time ? `${String(time.hour).padStart(2, "0")}:${String(time.minute).padStart(2, "0")}` : ""
+                                        )
+                                    }
                                     className="w-full"
                                 />
 
-                                {formik.touched.ground_opening_time && formik.errors.ground_opening_time && (
+                                {formik.touched.weekday_opening_time && formik.errors.weekday_opening_time && (
                                     <div className="text-red-500 text-xs mt-1">
-                                        {formik.errors.ground_opening_time}
+                                        {formik.errors.weekday_opening_time}
                                     </div>
                                 )}
                             </div>
                         </Grid>
 
-
                         <Grid item xs={12}>
                             <Label className="block text-sm font-medium text-gray-700 mb-2">
-                                Ground Closing Time
+                                Ground Closing Time (On Weekdays)
                             </Label>
                             <div className="border border-gray-300 rounded-lg shadow-sm">
                                 <TimeInput
                                     isRequired
-                                    value={formik.values.ground_closing_time}
-                                    onChange={(time) => formik.setFieldValue("ground_closing_time", time)}
+                                    value={
+                                        formik.values.weekday_closing_time
+                                            ? (() => {
+                                                const [h, m] = formik.values.weekday_closing_time.split(":").map(Number);
+                                                return new Time(h, m);
+                                            })()
+                                            : undefined
+                                    }
+                                    onChange={(time) =>
+                                        formik.setFieldValue(
+                                            "weekday_closing_time",
+                                            time ? `${String(time.hour).padStart(2, "0")}:${String(time.minute).padStart(2, "0")}` : ""
+                                        )
+                                    }
+                                    className="w-full"
+                                />
+                                {formik.touched.weekday_closing_time && formik.errors.weekday_closing_time && (
+                                    <div className="text-red-500 text-xs mt-1">
+                                        {formik.errors.weekday_closing_time}
+                                    </div>
+                                )}
+                            </div>
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Label className="block text-sm font-medium text-gray-700 mb-2">
+                                Ground Opening Time (On Weekends)
+                            </Label>
+                            <div className="border border-gray-300 rounded-lg shadow-sm">
+                                <TimeInput
+                                    isRequired
+                                    value={
+                                        formik.values.weekend_opening_time
+                                            ? (() => {
+                                                const [h, m] = formik.values.weekend_opening_time.split(":").map(Number);
+                                                return new Time(h, m);
+                                            })()
+                                            : undefined
+                                    }
+                                    onChange={(time) =>
+                                        formik.setFieldValue(
+                                            "weekend_opening_time",
+                                            time ? `${String(time.hour).padStart(2, "0")}:${String(time.minute).padStart(2, "0")}` : ""
+                                        )
+                                    }
                                     className="w-full"
                                 />
 
-                                {formik.touched.ground_closing_time && formik.errors.ground_closing_time && (
+                                {formik.touched.weekend_opening_time && formik.errors.weekend_opening_time && (
                                     <div className="text-red-500 text-xs mt-1">
-                                        {formik.errors.ground_closing_time}
+                                        {formik.errors.weekend_opening_time}
+                                    </div>
+                                )}
+                            </div>
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Label className="block text-sm font-medium text-gray-700 mb-2">
+                                Ground Closing Time (On Weekdays)
+                            </Label>
+                            <div className="border border-gray-300 rounded-lg shadow-sm">
+                                <TimeInput
+                                    isRequired
+                                    value={
+                                        formik.values.weekend_closing_time
+                                            ? (() => {
+                                                const [h, m] = formik.values.weekend_closing_time.split(":").map(Number);
+                                                return new Time(h, m);
+                                            })()
+                                            : undefined
+                                    }
+                                    onChange={(time) =>
+                                        formik.setFieldValue(
+                                            "weekend_closing_time",
+                                            time ? `${String(time.hour).padStart(2, "0")}:${String(time.minute).padStart(2, "0")}` : ""
+                                        )
+                                    }
+                                    className="w-full"
+                                />
+                                {formik.touched.weekend_closing_time && formik.errors.weekend_closing_time && (
+                                    <div className="text-red-500 text-xs mt-1">
+                                        {formik.errors.weekend_closing_time}
                                     </div>
                                 )}
                             </div>

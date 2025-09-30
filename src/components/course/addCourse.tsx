@@ -1,29 +1,34 @@
 import * as React from 'react';
 import {
     Button,
-    FormHelperText,
-    FormLabel,
     Grid,
     Typography,
+
 } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useFormik } from 'formik';
 import { Modal } from '@/components/ui/modal';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Label from '../form/Label';
 import Input from '../form/input/InputField';
-import DatePicker from '../form/date-picker';
-import Select from '../form/Select';
-import { ChevronDownIcon } from '@/icons';
-import FileInput from '../form/input/FileInput';
-import TextArea from '../form/input/TextArea';
 import { addCourse, updateCourse } from '@/services/courseService';
 import * as Yup from 'yup';
+import { ChevronDownIcon } from '@/icons';
+import Select from '../form/Select';
+
+interface Course {
+    _id?: string;
+    name?: string;
+    courseNumber?: string;
+    holes?: number;
+    location?: string;
+    capacity?: number;
+}
 
 interface AddCourseProps {
     open: boolean;
     handleClose: () => void;
-    data: any;
+    data: Course | null;
 }
 
 const validationSchema = Yup.object({
@@ -32,7 +37,9 @@ const validationSchema = Yup.object({
     holes: Yup.number()
         .required('Number of holes is required')
         .typeError('Must be a number'),
-    // .oneOf([9, 18], 'Number of holes must be either 9 or 18'),
+    capacity: Yup.number()
+        .required('Number of Capacity is required')
+        .typeError('Must be a number'),
     location: Yup.string().required('Location is required'),
 });
 
@@ -45,14 +52,13 @@ const AddCourse: React.FC<AddCourseProps> = ({ open, handleClose, data }) => {
             courseNumber: data?.courseNumber || '',
             holes: data?.holes || '',
             location: data?.location || '',
+            capacity: data?.capacity || '',
         },
         enableReinitialize: true,
         validationSchema,
         onSubmit: async (values) => {
-            console.log("values:", values);
             setLoading(true);
             try {
-                console.log("Calling API...");
                 if (data) {
                     await updateCourse(data?._id, values);
                 } else {
@@ -67,6 +73,17 @@ const AddCourse: React.FC<AddCourseProps> = ({ open, handleClose, data }) => {
             }
         },
     });
+
+    const options = {
+        holes: [
+            { value: '9', label: '9' },
+            { value: '18', label: '18' },
+        ],
+        capacity: [
+            { value: 2, label: "2 Players" },
+            { value: 4, label: "4 Players" },
+        ],
+    };
 
 
 
@@ -120,20 +137,39 @@ const AddCourse: React.FC<AddCourseProps> = ({ open, handleClose, data }) => {
                     </Grid>
 
                     <Grid item xs={12}>
-                        <Label>Number of Holes</Label>
-                        <Input
-                            id="holes"
-                            name="holes"
-                            type="number"
-                            placeholder="e.g. 18"
-                            fullWidth
-                            value={formik.values.holes}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
+                        <Label>Capacity</Label>
+                        <Select
+                            id="capacity"
+                            name="capacity"
+                            options={options.capacity}
+                            placeholder="Select Capacity"
+                            value={formik.values.capacity}
+                            onChange={(option) => formik.setFieldValue("capacity", option)}
+                            className="dark:bg-dark-900"
                         />
-                        {formik.touched.holes && formik.errors.holes && (
-                            <div className="text-red-400 text-xs ">{formik.errors.holes}</div>
+                        {formik.touched.capacity && formik.errors.capacity && (
+                            <div className="text-red-400 text-xs">{formik.errors.capacity}</div>
                         )}
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <Label>Number of Holes</Label>
+                        <div className="relative">
+                            <Select
+                                id="holes"
+                                options={options.holes}
+                                placeholder="Select Holes"
+                                value={formik.values.holes}
+                                onChange={(option) => formik.setFieldValue("holes", option)}
+                                className="dark:bg-dark-900"
+                            />
+                            <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                                <ChevronDownIcon />
+                            </span>
+                            {formik.touched.holes && formik.errors.holes && (
+                                <div className="text-red-400 text-xs ">{formik.errors.holes}</div>
+                            )}
+                        </div>
                     </Grid>
 
                     <Grid item xs={12}>

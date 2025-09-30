@@ -50,8 +50,6 @@ interface MemberDetailDialogProps {
 }
 
 const MemberDetailDialog: React.FC<MemberDetailDialogProps> = ({ open, handleClose, member }) => {
-    console.log('--- MemberDetailDialog member:', member);
-
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
             <DialogTitle>Member Details</DialogTitle>

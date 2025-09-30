@@ -1,47 +1,66 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
 });
 
 // --- GET ---
-export const getData = async (url: string, config = {}) => {
-    const res = await api.get(url, config);
+export const getData = async <T = unknown>(url: string, config: AxiosRequestConfig = {}): Promise<T> => {
+    const res = await api.get<T>(url, config);
     return res.data;
 };
 
 // --- POST ---
-export const postData = async (url: string, data: any, config = {}) => {
-    const res = await api.post(url, data, config);
+export const postData = async <T = unknown, P = Record<string, unknown>>(
+    url: string,
+    data: P,
+    config: AxiosRequestConfig = {}
+): Promise<T> => {
+    const res = await api.post<T>(url, data, config);
     return res.data;
 };
 
 // --- PUT ---
-export const putData = async (url: string, data: any, config = {}) => {
-    const res = await api.put(url, data, config);
+export const putData = async <T = unknown, P = Record<string, unknown>>(
+    url: string,
+    data: P,
+    config: AxiosRequestConfig = {}
+): Promise<T> => {
+    const res = await api.put<T>(url, data, config);
     return res.data;
 };
 
 // --- DELETE ---
-export const deleteData = async (url: string, config = {}) => {
-    const res = await api.delete(url, config);
+export const deleteData = async <T = unknown>(url: string, config: AxiosRequestConfig = {}): Promise<T> => {
+    const res = await api.delete<T>(url, config);
     return res.data;
 };
 
-// --- POST WITH IMAGE ---
-export const postFormData = async (url: string, data: any, config = {}) => {
-    const formData = new FormData();
-    for (const key in data) {
-        formData.append(key, data[key]);
-    }
+// --- POST WITH FORM DATA ---
+// export const postFormData = async <T = unknown, P extends Record<string, unknown>>(
+//     url: string,
+//     data: P,
+//     config: AxiosRequestConfig = {}
+// ): Promise<T> => {
+//     const formData = new FormData();
+//     for (const key in data) {
+//         formData.append(key, String(data[key]));
+//     }
 
-    // Log actual FormData content
-    console.log("FormData content:");
-    for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-    }
+//     const res = await api.post<T>(url, formData, {
+//         headers: { 'Content-Type': 'multipart/form-data' },
+//         ...config,
+//     });
 
-    const res = await api.post(url, formData, {
+//     return res.data;
+// };
+
+export const postFormData = async <T = unknown>(
+    url: string,
+    formData: FormData,
+    config: AxiosRequestConfig = {}
+): Promise<T> => {
+    const res = await api.post<T>(url, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         ...config,
     });
@@ -49,19 +68,17 @@ export const postFormData = async (url: string, data: any, config = {}) => {
     return res.data;
 };
 
-// --- PUT WITH IMAGE ---
-export const putFormData = async (url: string, data: any, config = {}) => {
-    const formData = new FormData();
 
-    for (const key in data) {
-        formData.append(key, data[key]);
-    }
-
-    const res = await api.put(url, formData, {
+// --- PUT WITH FORM DATA ---
+export const putFormData = async <T = unknown>(
+    url: string,
+    formData: FormData,
+    config: AxiosRequestConfig = {}
+): Promise<T> => {
+    const res = await api.put<T>(url, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         ...config,
     });
 
     return res.data;
 };
-

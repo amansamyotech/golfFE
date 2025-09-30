@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-    Dialog,
     Button,
     Typography,
     Grid
@@ -16,11 +15,21 @@ import TextArea from '../form/input/TextArea';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 import { addPlan, updatePlan } from '@/services/plansService';
+import Image from 'next/image';
+
+interface PlanData {
+    _id?: string;
+    title?: string;
+    description?: string;
+    price?: number | string;
+    numberOfDays?: number | string;
+    planImage?: string;
+}
 
 interface AddPlansProps {
     open: boolean;
     handleClose: () => void;
-    data: any;
+    data?: PlanData;
 }
 
 const validationSchema = Yup.object().shape({
@@ -43,8 +52,8 @@ const validationSchema = Yup.object().shape({
         .positive('Number of days must be greater than 0')
         .integer('Number of days must be an integer'),
 
-    planImage: Yup.mixed()
-        .required('Image is required')
+    // planImage: Yup.mixed()
+    //     .required('Image is required')
 });
 
 const AddPlans: React.FC<AddPlansProps> = ({ open, handleClose, data }) => {
@@ -57,7 +66,7 @@ const AddPlans: React.FC<AddPlansProps> = ({ open, handleClose, data }) => {
             description: data?.description || '',
             price: data?.price || '',
             numberOfDays: data?.numberOfDays || '',
-            planImage: data?.planImage ? data.planImage.split('/').pop() : ''
+            // planImage: data?.planImage ? data.planImage.split('/').pop() : ''
         },
         enableReinitialize: true,
         validationSchema,
@@ -169,22 +178,30 @@ const AddPlans: React.FC<AddPlansProps> = ({ open, handleClose, data }) => {
                                 value={formik.values.numberOfDays}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
+                                disabled={!!data}
                             />
                             {formik.touched.numberOfDays && formik.errors.numberOfDays && (
                                 <div className="text-red-400 text-xs ">{formik.errors.numberOfDays}</div>
                             )}
+
+                            {/* Show message in edit mode */}
+                            {data && (
+                                <div className="text-red-400 text-xs mt-1">
+                                    Duration cannot be changed after plan creation.
+                                </div>
+                            )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        {/* <Grid item xs={12}>
                             <Label>Upload Image</Label>
                             <FileInput onChange={handleFileChange} className="custom-class" />
                             {imagePreview && (
-                                <img src={imagePreview} alt="Preview" className="mt-2 w-32 h-32 object-cover" />
+                                <Image src={imagePreview} alt="Preview" className="mt-2 w-32 h-32 object-cover" />
                             )}
                             {formik.touched.planImage && formik.errors.planImage && (
                                 <div className="text-red-400 text-xs ">{formik.errors.planImage}</div>
                             )}
-                        </Grid>
+                        </Grid> */}
                     </Grid>
 
                     <div className="flex justify-center mt-6 gap-4">

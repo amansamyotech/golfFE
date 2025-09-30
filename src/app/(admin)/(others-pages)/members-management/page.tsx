@@ -19,18 +19,44 @@ import TableStyle from '@/components/ui/table-style';
 import AddMember from '@/components/members-management/addMember';
 import DeleteMember from '@/components/members-management/deleteMember';
 import { getAllMember } from '@/services/memberService';
-import MemberDetailDialog from '@/components/members-management/MemberDetailDialog';
+import { getAllCustomer } from '@/services/customerService';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { GridRenderCellParams } from '@mui/x-data-grid';
+import moment from 'moment';
+
+// Define Member interface
+interface Member {
+    _id: string;
+    name: string;
+    email: string;
+    plan?: { _id: string; title: string } | null;
+    course?: { _id: string; name: string } | null;
+    status: boolean | string;
+}
+
+// Define MemberData interface (copied from AddMember for mapping)
+interface MemberData {
+    _id?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    dob?: string;
+    gender?: string;
+    image?: string;
+    plan?: { _id: string };
+    startDate?: string;
+    teeTime?: string;
+    course?: { _id: string };
+    profileType?: string;
+}
 
 export default function Member() {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
     const [open, setOpen] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [rowData, setRowData] = useState(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const [rowData, setRowData] = useState<Member | null>(null);
     const [openDelete, setOpenDelete] = useState(false);
-    const [members, setMembers] = useState([]);
-    const [detailOpen, setDetailOpen] = useState(false);
+    const [members, setMembers] = useState<Member[]>([]);
 
     const paginatedRows = members.slice(
         paginationModel.page * paginationModel.pageSize,
@@ -44,43 +70,48 @@ export default function Member() {
 
 
 
-    const handleViewMoreClose = () => {
-        setRowData(null);
-        setDetailOpen(false);
-    };
-
     const columns = [
         { field: 'sNo', headerName: 'S.No', width: 80 },
         { field: 'name', headerName: 'Name', flex: 1 },
-        { field: 'email', headerName: 'Email', flex: 1.5 },
+        {
+            field: 'email',
+            headerName: 'Email',
+            flex: 1.5,
+            renderCell: (params: GridRenderCellParams) => (
+                <Box display="flex" flexDirection="column">
+                    <Typography variant="body2">{params.row.email}</Typography>
+                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                        {params.row.phone}
+                    </Typography>
+                </Box>
+            ),
+        },
         {
             field: 'plan', headerName: 'Plan', width: 120,
-            renderCell: (params) => (
+            renderCell: (params: GridRenderCellParams) => (
                 <Typography variant="body2" mt={2}>
                     {params.row.plan?.title || 'N/A'}
                 </Typography>
             ),
         },
         {
-            field: 'course',
-            headerName: 'course',
-            width: 120,
-            renderCell: (params) => (
-                <Typography variant="body2" mt={2}>
-                    {params.row.course?.name || 'N/A'}
-                </Typography>
+            field: 'startDate',
+            headerName: 'Start Date',
+            flex: 1,
+            renderCell: (params: GridRenderCellParams) => (
+                params.row.startDate ? moment(params.row.startDate).format('DD MMM YYYY') : 'N/A'
             ),
         },
         {
             field: 'status',
             headerName: 'Status',
             width: 120,
-            renderCell: (params) => {
+            renderCell: (params: GridRenderCellParams) => {
                 const isActive =
                     typeof params.value === 'boolean'
                         ? params.value
-                        : params.value === 'Active';
-                const label = isActive ? 'Active' : 'Inactive';
+                        : params.value === 'ACTIVE';
+                const label = isActive ? 'ACTIVE' : 'INACTIVE';
                 return (
                     <Chip
                         label={label}
@@ -89,6 +120,7 @@ export default function Member() {
                             backgroundColor: isActive ? '#e5f8fe' : '#ffeae9',
                             minWidth: '80px',
                             borderRadius: '12px',
+                            fontSize: '12px'
                         }}
                     />
                 );
@@ -99,7 +131,7 @@ export default function Member() {
             headerName: 'More',
             width: 130,
             sortable: false,
-            renderCell: (params) => (
+            renderCell: (params: GridRenderCellParams) => (
                 <Link href={`/members-management/${params.row._id}`} passHref>
                     <Box
                         sx={{
@@ -132,7 +164,7 @@ export default function Member() {
             headerName: 'Action',
             width: 80,
             sortable: false,
-            renderCell: (params) => {
+            renderCell: (params: GridRenderCellParams<Member>) => {
                 return (
                     <>
                         <IconButton onClick={(e) => handleClick(e, params.row)}>
@@ -157,11 +189,12 @@ export default function Member() {
         }
     ];
 
-    const handleClick = (event, row) => {
+
+
+    const handleClick = (event: React.MouseEvent<HTMLElement>, row: Member) => {
         setAnchorEl(event.currentTarget);
         setRowData(row);
     };
-
     const handleClosePopover = () => {
         setAnchorEl(null);
     };
@@ -193,8 +226,9 @@ export default function Member() {
 
     const fetchMembers = async () => {
         try {
-            const response = await getAllMember();
-            setMembers(response);
+            const response = await getAllCustomer();
+            const filterData = response?.filter((member: Member) => member.role === "member")
+            setMembers(filterData as Member[]);
         } catch (error) {
             console.error('Error fetching members:', error);
         }
@@ -206,13 +240,11 @@ export default function Member() {
 
     return (
         <>
-            <AddMember open={open} handleClose={handleCloseAdd} data={rowData} />
-            <DeleteMember open={openDelete} handleClose={handleCloseDelete} id={rowData?._id} />
-            <MemberDetailDialog
-                open={detailOpen}
-                handleClose={handleViewMoreClose}
-                member={rowData}
+            <AddMember open={open} handleClose={handleCloseAdd}
+                // data={mapMemberToMemberData(rowData)} 
+                data={rowData}
             />
+            <DeleteMember open={openDelete} handleClose={handleCloseDelete} id={rowData?._id || ''} />
             <Container>
                 <Stack direction="row" alignItems="center" mb={5} justifyContent="space-between">
                     <Typography variant="h6">Member Management</Typography>

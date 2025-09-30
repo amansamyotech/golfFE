@@ -3,35 +3,58 @@
 import React, { useState, useEffect } from 'react';
 import {
     Stack,
-    Button,
     Container,
     Typography,
     Card,
     Box,
-    Chip,
-    IconButton,
-    Menu,
-    MenuItem,
 } from '@mui/material';
-import { Add, Delete, MoreVert, Edit } from '@mui/icons-material';
+
 import { DataGrid } from '@mui/x-data-grid';
 import TableStyle from '@/components/ui/table-style';
 import { getAllMember } from '@/services/memberService';
 import moment from 'moment';
+import { GridRenderCellParams } from '@mui/x-data-grid';
+
+interface Plan {
+    _id: string;
+    title: string;
+}
+
+interface Membership {
+    _id: string;
+    name: string;
+    expiryDate: string;
+    plan?: Plan;
+}
+
+interface Member {
+    _id: string;
+    name: string;
+    endDate: string;
+    plan?: Plan;
+
+}
 
 export default function ExpiringMemberships() {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-    const [open, setOpen] = useState(false);
-    const [members, setMembers] = useState([]);
+    const [members, setMembers] = useState<Member[]>([]);
 
     const paginatedRows = members.slice(
         paginationModel.page * paginationModel.pageSize,
         (paginationModel.page + 1) * paginationModel.pageSize
     );
 
-    const rows = paginatedRows.map((row, index) => ({
-        ...row,
+    // const rows = paginatedRows.map((row: Membership, index) => ({
+    //     ...row,
+    //     sNo: paginationModel.page * paginationModel.pageSize + index + 1,
+    // }));
+
+    const rows: Membership[] = paginatedRows.map((member: Member, index) => ({
         sNo: paginationModel.page * paginationModel.pageSize + index + 1,
+        _id: member._id,
+        name: member.name,
+        expiryDate: member.endDate, // map endDate to expiryDate
+        plan: member.plan, // include plan if exists
     }));
 
     const columns = [
@@ -39,14 +62,14 @@ export default function ExpiringMemberships() {
         { field: 'name', headerName: 'Name', flex: 1 },
         { field: 'email', headerName: 'Email', flex: 1.5 },
         {
-            field: 'plan', headerName: 'Plan Name', flex: 1, renderCell: (params) => (
+            field: 'plan', headerName: 'Plan Name', flex: 1, renderCell: (params: GridRenderCellParams<Membership>) => (
                 <Typography variant="body2" mt={2}>
                     {params.row.plan?.title || 'N/A'}
                 </Typography>
             ),
         },
-        { field: 'startDate', headerName: 'Start Date', flex: 1, renderCell: (params) => moment(params.value).format('YYYY-MM-DD') },
-        { field: 'endDate', headerName: 'End Date', flex: 1, renderCell: (params) => moment(params.value).format('YYYY-MM-DD') },
+        { field: 'startDate', headerName: 'Start Date', flex: 1, renderCell: (params: GridRenderCellParams<Membership>) => moment(params.value).format('YYYY-MM-DD') },
+        { field: 'endDate', headerName: 'End Date', flex: 1, renderCell: (params: GridRenderCellParams<Membership>) => moment(params.value).format('YYYY-MM-DD') },
         {
             field: 'more',
             headerName: 'More',
@@ -80,14 +103,9 @@ export default function ExpiringMemberships() {
     ];
 
     const fetchMembers = async () => {
-        // try {
-        //     const response = await getAllMember();
-        //     setMembers(response);
-        // } catch (error) {
-        //     console.error('Error fetching members of expring plan :', error);
-        // }
         try {
-            const response = await getAllMember();
+            // const response = await getAllMember();
+            const response = await getAllMember() as Member[];
             const currentDate = new Date();
             const expiredMembers = response.filter(member => {
                 const endDate = new Date(member.endDate);
@@ -107,7 +125,6 @@ export default function ExpiringMemberships() {
 
     return (
         <>
-
             <Container>
                 <Stack direction="row" alignItems="center" mb={5} justifyContent="space-between">
                     <Typography variant="h6">Expiring Memberships</Typography>

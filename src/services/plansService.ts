@@ -1,10 +1,17 @@
 import { api_urls } from "@/utils/apiRoutes";
-import { getData, deleteData, postFormData, putFormData } from "@/utils/apiHandler";
+import { getData, deleteData, postFormData, putFormData, postData, putData } from "@/utils/apiHandler";
 import { handleApiResponse } from "@/utils/common";
 
-export const addPlan = async (payload: any) => {
+interface PlanPayload {
+    name: string;
+    description: string;
+    price: number;
+    durationInMonths: number;
+}
+
+export const addPlan = async (payload: PlanPayload) => {
     const url = api_urls.baseUrl + api_urls.plan.add;
-    const response = await postFormData(url, payload);
+    const response = await postData(url, payload);
     return await handleApiResponse(response);
 };
 
@@ -14,9 +21,9 @@ export const getAllPlan = async () => {
     return await handleApiResponse(response);
 };
 
-export const updatePlan = async (id: string, payload: any) => {
+export const updatePlan = async (id: string, payload: PlanPayload) => {
     const url = `${api_urls.baseUrl}${api_urls.plan.update}/${id}`;
-    const response = await putFormData(url, payload);
+    const response = await putData(url, payload);
     return await handleApiResponse(response, 'UPDATE');
 };
 

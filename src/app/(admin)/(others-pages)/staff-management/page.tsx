@@ -7,35 +7,40 @@ import {
     Container,
     Typography,
     Card,
-    Box,
-    Chip,
     IconButton,
-    Menu,
     MenuItem,
     Popover
 } from '@mui/material';
 import { Add, Delete, MoreVert, Edit } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
 import TableStyle from '@/components/ui/table-style';
-// import AddPlans from '@/components/membership-plans/addPlan';
-// import DeletePlan from '@/components/membership-plans/deletePlan';
-import { getAllPlan } from '@/services/plansService';
 import AddEmployee from '@/components/staff-management/addStaff';
 import DeleteStaff from '@/components/staff-management/deleteStaff';
 import { getAllStaff } from '@/services/staffService';
 import moment from 'moment';
+import Image from 'next/image';
+import { GridColDef } from '@mui/x-data-grid';
 
+interface StaffMember {
+    _id: string;
+    profileImg?: string;
+    name: string;
+    email: string;
+    jobTitle: string;
+    department: string;
+    dateOfJoining: string;
+    title: string;
+}
 
 const defaultImage = 'https://via.placeholder.com/40';
 
 export default function StaffManagement() {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
     const [open, setOpen] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [rowData, setRowData] = useState(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const [rowData, setRowData] = useState<StaffMember | null>(null);
     const [openDelete, setOpenDelete] = useState(false);
-    const [plans, setPlans] = useState([]);
-    const [staff, setStaffMembers] = useState([]);
+    const [staff, setStaffMembers] = useState<StaffMember[]>([]);
 
     const paginatedRows = staff.slice(
         paginationModel.page * paginationModel.pageSize,
@@ -47,22 +52,29 @@ export default function StaffManagement() {
         sNo: paginationModel.page * paginationModel.pageSize + index + 1,
     }));
 
-    const columns = [
+    const columns: GridColDef[] = [
         { field: 'sNo', headerName: 'S.No', width: 80 },
         {
             field: 'profileImg',
             headerName: 'Image',
             width: 80,
             sortable: false,
-            renderCell: (params) => {
+            renderCell: (params: { row: StaffMember }) => {
                 const imgSrc = params.row.profileImg
                     ? `${process.env.NEXT_PUBLIC_API_IMG_URL}${params.row.profileImg}`
                     : defaultImage;
                 return (
-                    <img
+                    // <img
+                    //     src={imgSrc}
+                    //     alt={params.row.title}
+                    //     style={{ width: 40, height: 40, borderRadius: 4, objectFit: 'cover' }}
+                    // />
+                    <Image
                         src={imgSrc}
                         alt={params.row.title}
-                        style={{ width: 40, height: 40, borderRadius: 4, objectFit: 'cover' }}
+                        width={40}
+                        height={40}
+                        style={{ borderRadius: 4, objectFit: 'cover' }}
                     />
                 );
             },
@@ -102,7 +114,7 @@ export default function StaffManagement() {
         }
     ];
 
-    const handleClick = (event, row) => {
+    const handleClick = (event: React.MouseEvent<HTMLElement>, row: StaffMember) => {
         setAnchorEl(event.currentTarget);
         setRowData(row);
     };
@@ -139,7 +151,7 @@ export default function StaffManagement() {
     const fetchStaff = async () => {
         try {
             const response = await getAllStaff();
-            setStaffMembers(response);
+            setStaffMembers(response as StaffMember[]);
         } catch (error) {
             console.error('Error fetching staff:', error);
         }
@@ -149,10 +161,12 @@ export default function StaffManagement() {
         fetchStaff();
     }, [open, openDelete]);
 
+
+
     return (
         <>
-            <AddEmployee open={open} handleClose={handleCloseAdd} data={rowData} />
-            <DeleteStaff open={openDelete} handleClose={handleCloseDelete} id={rowData?._id} />
+            <AddEmployee open={open} handleClose={handleCloseAdd} data={rowData ?? undefined} />
+            <DeleteStaff open={openDelete} handleClose={handleCloseDelete} id={rowData?._id || ''} />
             <Container>
                 <Stack direction="row" alignItems="center" mb={5} justifyContent="space-between">
                     <Typography variant="h6">Staff Management</Typography>

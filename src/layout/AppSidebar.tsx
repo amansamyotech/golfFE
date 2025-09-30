@@ -16,15 +16,12 @@ import {
   PlugInIcon,
   TableIcon,
   UserCircleIcon,
-  UserInfoIcon,
   Persons,
   Paymnets,
   Product,
   Comnucation,
   Settings,
-  TimeIcon
 } from "../icons/index";
-import SidebarWidget from "./SidebarWidget";
 
 type NavItem = {
   name: string;
@@ -39,13 +36,14 @@ const navItems: NavItem[] = [
     name: "Dashboard",
     path: "/",
     pro: false
-    // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   },
   {
-    // icon: <CalenderIcon />, 
-    // name: "Calendar",
-    // path: "/calendar", 
-
+    icon: <GridIcon />,
+    name: "Time Slot Management",
+    path: "/time-slot",
+    pro: false
+  },
+  {
     icon: <CalenderIcon />,
     name: "Tee Time Management",
     path: "/calendar",
@@ -55,26 +53,16 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    // icon: <UserCircleIcon />, Member Management
-    // name: "User Profile",
-    // path: "/profile",
-
     icon: <UserCircleIcon />,
     name: "Member Management",
     path: "/profile",
     subItems: [
-      // { name: "Member List", path: "/profile", pro: false }, 
       { name: "Member List", path: "/members-management", pro: false },
       { name: "Membership Plans", path: "/membership-plans", pro: false },
       { name: "Expiring Memberships", path: "/expiring-memberships", pro: false }
     ],
   },
-
   {
-    // name: "Forms",
-    // icon: <ListIcon />,
-    // subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-
     name: "Guest Management",
     icon: <ListIcon />,
     subItems: [
@@ -83,10 +71,6 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    // name: "Tables",
-    // icon: <TableIcon />,
-    // subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-
     name: "Tournament",
     icon: <TableIcon />,
     subItems: [{ name: "Upcoming Tournaments", path: "/basic-tables", pro: false },
@@ -97,13 +81,6 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    // name: "Pages",
-    // icon: <PageIcon />,
-    // subItems: [
-    //   { name: "Blank Page", path: "/blank", pro: false },
-    //   { name: "404 Error", path: "/error-404", pro: false },
-    // ],
-
     name: "Pro Shop",
     icon: <Product />,
     subItems: [
@@ -161,12 +138,6 @@ const navItems: NavItem[] = [
       { name: "Integrations (Stripe, Maps)", path: "/xyz17", pro: false },
       { name: "Backup & Restore", path: "/xyz18", pro: false },
     ],
-  },
-  {
-    icon: <GridIcon />,
-    name: "Time Slot Management",
-    path: "/time-slot",
-    pro: false
   },
 ];
 

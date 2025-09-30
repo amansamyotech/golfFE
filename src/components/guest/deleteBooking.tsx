@@ -9,9 +9,12 @@ import {
     Button,
     Typography,
     Box,
+    IconButton,
 } from '@mui/material';
 import { toast } from 'react-toastify';
 import { deleteGuest } from '@/services/guestService';
+import { cancelGuestBooking } from '@/services/bookingService';
+import CloseIcon from '@mui/icons-material/Close';
 
 type DeleteBookingProps = {
     open: boolean;
@@ -25,7 +28,7 @@ const DeleteBooking = ({ open, handleClose, id }: DeleteBookingProps) => {
     const handleDelete = async () => {
         try {
             setLoading(true);
-            await deleteGuest(id);
+            await cancelGuestBooking(id);
         } catch (error) {
             console.error('Error deleting booking:', error);
             toast.error('Failed to delete booking.');
@@ -47,14 +50,17 @@ const DeleteBooking = ({ open, handleClose, id }: DeleteBookingProps) => {
         >
             <DialogTitle>
                 <Typography variant="h6" component="div">
-                    Delete Booking Confirmation
+                    Cancel Booking Confirmation
                 </Typography>
+                <IconButton onClick={handleClose} size="small">
+                    <CloseIcon />
+                </IconButton>
             </DialogTitle>
 
             <DialogContent>
                 <Box sx={{ mt: 1 }}>
                     <Typography variant="subtitle1" color="text.secondary">
-                        Are you sure you want to delete this booking?
+                        Are you sure you want to cancel this booking?
                     </Typography>
                 </Box>
             </DialogContent>
@@ -66,7 +72,7 @@ const DeleteBooking = ({ open, handleClose, id }: DeleteBookingProps) => {
                     variant="contained"
                     loading={loading}
                 >
-                    Delete
+                    Confirm
                 </Button>
                 <Button onClick={handleClose} color="inherit" variant="outlined">
                     Cancel

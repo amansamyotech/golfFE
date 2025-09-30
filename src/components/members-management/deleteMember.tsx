@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { toast } from 'react-toastify';
 import { deleteMember } from '@/services/memberService';
+import { deleteCustomer } from '@/services/customerService';
 
 type DeleteMemberProps = {
     open: boolean;
@@ -25,7 +26,7 @@ const DeleteMember = ({ open, handleClose, id }: DeleteMemberProps) => {
     const handleDelete = async () => {
         try {
             setLoading(true);
-            await deleteMember(id);
+            await deleteCustomer(id);
         } catch (error) {
             console.error('Error deleting member:', error);
             toast.error('Failed to delete member.');
