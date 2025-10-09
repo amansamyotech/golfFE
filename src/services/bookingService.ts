@@ -65,6 +65,32 @@ export const updateBookingSlotService = async (
     return await handleApiResponse(response, 'UPDATE');
 };
 
+export const cancelBookingSlotService = async (
+    bookingId: string,
+    slotId: string
+) => {
+    const url = `${api_urls.baseUrl}${api_urls.booking.cancelBookingAssignSlot}/${bookingId}`;
+    const payload = {
+        slotId,
+    }
+    const response = await putData(url, payload);
+    return await handleApiResponse(response, 'DELETE');
+};
+
+export const cancelBookingOfGuest = async (
+    bookingId: string,
+    slotId: string
+) => {
+    const url = `${api_urls.baseUrl}${api_urls.booking.cancelBookingOfGuest}/${bookingId}`;
+    const payload = {
+        slotId,
+    }
+    const response = await putData(url, payload);
+    return await handleApiResponse(response, 'DELETE');
+};
+
+
+
 
 
 

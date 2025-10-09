@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Typography, Box, Chip, CircularProgress, Badge } from '@mui/material';
-import { getAllIndividualSlots } from '@/services/timeslotService';
+import { getAllIndividualSlots, getIndividualSlotsByTimeSlotId } from '@/services/timeslotService';
 import moment from 'moment';
 import { EventAvailable, EventBusy } from '@mui/icons-material';
 
-const AssignSlotForBooking = () => {
+const AssignSlotForBooking = ({ timeSlotId }: any) => {
     const [slots, setSlots] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -13,7 +13,8 @@ const AssignSlotForBooking = () => {
         const fetchSlots = async () => {
             try {
                 setLoading(true);
-                const response = await getAllIndividualSlots();
+                // const response = await getAllIndividualSlots();
+                const response = await getIndividualSlotsByTimeSlotId(timeSlotId);
                 setSlots(response || []);
             } catch (err) {
                 setError('Failed to fetch slots');

@@ -13,7 +13,7 @@ import {
     Popover,
     Chip
 } from '@mui/material';
-import { Add, Delete, MoreVert, Edit, Visibility } from '@mui/icons-material';
+import { Add, Delete, MoreVert, Edit, Visibility, Height } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
 import TableStyle from '@/components/ui/table-style';
 import AddGuestBookings from '@/components/guest/addBooking';
@@ -24,10 +24,7 @@ import moment from "moment";
 import Link from 'next/link';
 import { GridRenderCellParams } from '@mui/x-data-grid';
 import { getBooking } from '@/services/bookingService';
-
-
-
-
+import AssignSlotToGuest from '@/components/guest/assignSlotToGuest';
 interface Guest {
     _id: string;
     name: string;
@@ -36,7 +33,6 @@ interface Guest {
     groupSize: number;
     dateTime: string;
 }
-
 interface GuestBookingData {
     _id?: string;
     name?: string;
@@ -54,28 +50,6 @@ interface GuestBookingData {
     acknowledgePolicy?: boolean;
 }
 
-const transformToGuestBookingData = (guest: Guest | undefined): GuestBookingData | undefined => {
-    if (!guest) return undefined;
-    return {
-        _id: guest._id,
-        name: guest.name,
-        email: guest.email,
-        course: guest.course,
-        groupSize: guest.groupSize.toString(),
-        startDateTime: guest.dateTime,
-        endDateTime: undefined,
-        phone: undefined,
-        govId: undefined,
-        caddyCart: undefined,
-        amount: undefined,
-        paymentMode: undefined,
-        acceptRules: undefined,
-        acknowledgePolicy: undefined,
-    };
-};
-
-
-
 export default function GuestManagement() {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
     const [open, setOpen] = useState(false);
@@ -84,6 +58,8 @@ export default function GuestManagement() {
     const [openDelete, setOpenDelete] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     const [guests, setGuests] = useState<Guest[]>([]);
+    const [openAssignSlot, setOpenAssignSlot] = useState(false);
+    const [slotsAvailable, setSlotsAvailable] = useState<boolean | null>(null);
 
     const paginatedRows = guests.slice(
         paginationModel.page * paginationModel.pageSize,
@@ -96,48 +72,147 @@ export default function GuestManagement() {
         name: row.customerId ? row.customerId.name : row.name,
         role: row.customerId ? row.customerId.role : row.role,
         courseName: row.course?.name || '',
-        startDate: moment(row.startTime).format('YYYY-MM-DD') || '',
-        slotTiming: `${moment(row.startTime).format('HH:mm')} to ${moment(row.endTime).format('HH:mm')}`,
     }));
 
+    const handleOpenAssignSlots = (row: any) => {
+        setRowData(row);
+        setOpenAssignSlot(true);
+    }
+
+    const handleCloseAssignSlots = () => {
+        setRowData(null);
+        setOpenAssignSlot(false);
+    }
+
     const columns = [
-        { field: 'sNo', headerName: 'S.No', width: 80, sortable: false },
+        { field: 'sNo', headerName: 'S.No', flex: 0.5, sortable: false },
         {
-            field: 'name', headerName: 'Customer Info', flex: 1
-        },
-        { field: 'courseName', headerName: 'Course Name', flex: 1 },
-        { field: 'startDate', headerName: 'Booking Date', flex: 1 },
-        { field: 'slotTiming', headerName: 'Slot Timing', flex: 1 },
-        {
-            field: 'more',
-            headerName: 'Booking',
-            width: 160,
-            sortable: false,
+            field: 'name',
+            headerName: 'Contact Info',
+            flex: 1,
             renderCell: (params: GridRenderCellParams) => (
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        width: '100%',
-                        height: '100%',
-                    }}
-                >
-                    <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        sx={{
-                            textTransform: 'none',
-                            borderRadius: '8px',
-                            fontWeight: 600,
-                        }}
-                        onClick={()=> handleDelete(params.row)}
-                    >
-                        Cancel Booking
-                    </Button>
+                <Box display="flex" flexDirection="column">
+                    <Typography variant="body2">{params.row.customerId.name}</Typography>
+                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                        {params.row.customerId.phone}
+                    </Typography>
                 </Box>
             ),
+        },
+        { field: 'courseName', headerName: 'Course Name', flex: 1 },
+        {
+            field: 'startDate', headerName: 'Booking Date', flex: 1, renderCell: (params) => {
+                const dateValue = params.row.customerId?.startDate;
+
+                if (!dateValue) return '--';
+
+                const formattedDate = moment(dateValue).format('DD MMM YYYY');
+
+                return (
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        width="100%"
+                        height="100%"
+                    >
+                        <Typography
+                            variant="body2"
+                            sx={{ textAlign: 'center' }}
+                        >
+                            {formattedDate}
+                        </Typography>
+                    </Box>
+
+                );
+            },
+        },
+        {
+            field: 'slotIds', headerName: 'Slot Time', flex: 1.2, renderCell: (params) => {
+                const slots = params.row.slotIds;
+                if (!slots || slots.length === 0) return '--';
+
+                const slot = slots[0];
+
+                const startTime = moment(slot.start, 'YYYY-MM-DD HH:mm').format('hh:mm A');
+                const endTime = moment(slot.end, 'YYYY-MM-DD HH:mm').format('hh:mm A');
+
+                return (
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        width="100%"
+                        height="100%"
+                    >
+                        <Typography variant="body2" sx={{ textAlign: 'center' }}>
+                            {`${startTime} - ${endTime}`}
+                        </Typography>
+                    </Box>);
+            },
+        },
+        {
+            field: 'bookingStatus',
+            headerName: 'Booking Status',
+            flex: 1,
+            width: 100,
+            renderCell: (params) => {
+                const status = params.value;
+                const statusColorMap = {
+                    pending: 'warning',
+                    confirmed: 'info',
+                    completed: 'success',
+                    canceled: 'error',
+                };
+
+                const chipColor = statusColorMap[status] || 'default';
+
+                // Optional: Capitalize the label
+                const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : '-';
+
+                return (
+                    <Chip
+                        label={label}
+                        color={chipColor}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                            width: '100%',
+                            borderRadius: '5px',
+                            textTransform: 'capitalize',
+                            fontSize: '13px',
+                            padding: '0px',
+                            margin: '0px'
+                        }}
+                    />
+                );
+            },
+        },
+        {
+            field: 'assignSlot',
+            headerName: 'Assign Slot',
+            width: 100,
+            sortable: false,
+            renderCell: (params) => {
+                const isConfirmed = params.row.bookingStatus === 'confirmed';
+
+                return (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleOpenAssignSlots(params.row)}
+                        disabled={isConfirmed}
+                        sx={{
+                            textTransform: 'none',
+                            opacity: isConfirmed ? 0.6 : 1,
+                            cursor: isConfirmed ? 'not-allowed' : 'pointer',
+                        }}
+                    >
+                        Assign Slot
+                    </Button>
+                );
+            },
         },
         {
             field: 'action',
@@ -196,11 +271,6 @@ export default function GuestManagement() {
         setRowData(undefined);
     };
 
-    const handleDelete = (row) => {
-        setSelectedId(row._id);
-        setOpenDelete(true);
-    };
-
     const handleCloseDelete = () => {
         setOpenDelete(false);
         setSelectedId(null);
@@ -210,7 +280,7 @@ export default function GuestManagement() {
     const fetchAllBookings = async () => {
         try {
             const response = await getBooking();
-            const filterData = response?.filter((data: Guest) => data?.customerId?.role === "guest")
+            const filterData = response?.filter((data: Guest) => data?.customerId?.role === "guest" && data.isDeleted !== true);
             setGuests(filterData as Guest[]);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -219,20 +289,20 @@ export default function GuestManagement() {
 
     useEffect(() => {
         fetchAllBookings();
-    }, [open, openDelete]);
+    }, [open, openDelete, openAssignSlot]);
 
     return (
         <>
+            <AssignSlotToGuest open={openAssignSlot} onClose={handleCloseAssignSlots} data={rowData} onSlotsLoaded={setSlotsAvailable} />
             <AddGuestBookings open={open} handleClose={handleCloseAdd} data={rowData} />
             <DeleteBooking open={openDelete} handleClose={handleCloseDelete} id={selectedId} />
             <Container>
                 <Stack direction="row" alignItems="center" mb={5} justifyContent="space-between">
                     <Typography variant="h6">Guest Booking Management</Typography>
-                    <Button variant="contained" startIcon={<Add />} onClick={handleOpenAdd} sx={{ textTransform: 'none' }}>
+                    <Button variant="contained" startIcon={<Add />} onClick={handleOpenAdd} disabled={slotsAvailable === false} sx={{ textTransform: 'none' }}>
                         New Booking
                     </Button>
                 </Stack>
-
                 <TableStyle>
                     <Card sx={{ height: '100vh' }}>
                         <DataGrid
@@ -255,9 +325,6 @@ export default function GuestManagement() {
                                 },
                             }}
                         />
-
-
-
                     </Card>
                 </TableStyle>
             </Container>

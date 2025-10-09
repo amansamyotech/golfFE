@@ -120,10 +120,8 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                 .filter((member: Member) => member.role === "member")
                 .map((member: Member) => ({
                     value: member._id,
-                    label: member.name,
+                    label: `${member.name} | ${member.status}`,
                 }));
-
-
             setMembers(formattedMembers);
         } catch (error) {
             console.error('Error fetching members:', error);

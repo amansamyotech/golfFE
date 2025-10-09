@@ -10,11 +10,12 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { EventAvailable, EventBusy } from "@mui/icons-material";
-import { getAllIndividualSlots } from "@/services/timeslotService";
+import { getAllIndividualSlots, getIndividualSlotsByCourseId } from "@/services/timeslotService";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import isBetween from "dayjs/plugin/isBetween";
 import ConfirmationBookingModal from "./ConfirmationBookingModal";
+import { toast } from "react-toastify";
 
 dayjs.extend(isoWeek);
 dayjs.extend(isBetween);
@@ -150,20 +151,20 @@ export default function AssignSlotModalWithTabs({
     open,
     onClose,
     data,
+    onSlotsLoaded,
 }: {
     open: boolean;
     onClose: () => void;
     data: any;
+    onSlotsLoaded?: (hasSlots: boolean) => void;
 }) {
     const [tab, setTab] = useState(0);
     const [slots, setSlots] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [openConfirmationModal, setOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<any>(null);
-
     const [weekIndex, setWeekIndex] = useState(0);
     const [selectedWeeklySlots, setSelectedWeeklySlots] = useState<Record<string, any>>({});
-
 
     const planStart = dayjs(data?.customerId?.startDate);
     const planEnd = dayjs(data?.customerId?.expiryDate);
@@ -202,7 +203,6 @@ export default function AssignSlotModalWithTabs({
         const dateKey = dayjs(slot.start).format("YYYY-MM-DD");
 
         setSelectedWeeklySlots((prev) => {
-            // if same slot clicked again → unselect it
             if (prev[dateKey]?.start === slot.start && prev[dateKey]?.end === slot.end) {
                 const updated = { ...prev };
                 delete updated[dateKey];
@@ -212,12 +212,15 @@ export default function AssignSlotModalWithTabs({
         });
     };
 
-
-
-
     const handleConfirmWeeklyBooking = () => {
         const selected = Object.values(selectedWeeklySlots);
-        if (!selected.length) return;
+
+        const daysInWeek = currentWeekEnd.diff(currentWeekStart, "day") + 1;
+
+        if (selected.length !== daysInWeek) {
+            toast.warning(`Please select all ${daysInWeek} days before confirming.`);
+            return;
+        }
         setOpen(true);
         setSelectedSlot({
             ...data,
@@ -234,8 +237,15 @@ export default function AssignSlotModalWithTabs({
     const fetchSlots = async () => {
         try {
             setLoading(true);
-            const response = await getAllIndividualSlots();
+            const res = await getAllIndividualSlots();
+            const hasSlots = Array.isArray(res) && res.length > 0;
+            onSlotsLoaded?.(hasSlots);
+
+            const response = await getIndividualSlotsByCourseId(data?.course?._id);
             setSlots(response || []);
+
+
+
         } catch (err) {
             console.error("Error fetching slots:", err);
         } finally {
@@ -245,7 +255,7 @@ export default function AssignSlotModalWithTabs({
 
     useEffect(() => {
         fetchSlots();
-    }, []);
+    }, [data]);
 
     const groupSlots = (filterFn: (slot: any) => boolean) => {
         const filteredSlots = slots.filter(filterFn);
@@ -297,6 +307,7 @@ export default function AssignSlotModalWithTabs({
                     <Tabs value={tab} onChange={handleTabChange} variant="fullWidth">
                         <Tab label="Daily" />
                         <Tab label="Weekly" />
+                        {/* <Tab label="Monthly" /> */}
                     </Tabs>
 
                     {loading ? (
@@ -320,6 +331,88 @@ export default function AssignSlotModalWithTabs({
 
                             {/* Weekly */}
                             <TabPanel value={tab} index={1}>
+                                {/* <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                                    <button
+                                        onClick={() => setWeekIndex((prev) => Math.max(prev - 1, 0))}
+                                        disabled={weekIndex === 0}
+                                        style={{
+                                            padding: "6px 12px",
+                                            background: weekIndex === 0 ? "#ccc" : "#1976d2",
+                                            color: "#fff",
+                                            border: "none",
+                                            borderRadius: "4px",
+                                            cursor: weekIndex === 0 ? "not-allowed" : "pointer",
+                                        }}
+                                    >
+                                        Previous Week
+                                    </button> */}
+
+                                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                                    Week: {currentWeekStart.format("DD MMM YYYY")} - {currentWeekEnd.format("DD MMM YYYY")}
+                                </Typography>
+
+                                {/* <button
+                                        onClick={() => {
+                                            const nextStart = planStart.add((weekIndex + 1) * 7, "day");
+                                            if (nextStart.isBefore(planEnd)) {
+                                                setWeekIndex((prev) => prev + 1);
+                                            }
+                                        }}
+                                        disabled={!planStart.add((weekIndex + 1) * 7, "day").isBefore(planEnd)}
+                                        style={{
+                                            padding: "6px 12px",
+                                            background: planStart.add((weekIndex + 1) * 7, "day").isBefore(planEnd)
+                                                ? "#1976d2"
+                                                : "#ccc",
+                                            color: "#fff",
+                                            border: "none",
+                                            borderRadius: "4px",
+                                            cursor: planStart.add((weekIndex + 1) * 7, "day").isBefore(planEnd)
+                                                ? "pointer"
+                                                : "not-allowed",
+                                        }}
+                                    >
+                                        Next Week
+                                    </button>
+                                </Box> */}
+
+                                {Object.keys(
+                                    groupSlots((slot) =>
+                                        dayjs(slot.start).isBetween(currentWeekStart, currentWeekEnd, null, "[]")
+                                    )
+                                ).length ? (
+                                    <>
+                                        <GroupedSlots
+                                            groupedSlots={groupSlots((slot) =>
+                                                dayjs(slot.start).isBetween(currentWeekStart, currentWeekEnd, null, "[]")
+                                            )}
+                                            onSlotClick={handleWeeklySlotClick}
+                                            // selectedSlots={selectedWeeklySlots}
+                                            selectedSlots={Object.values(selectedWeeklySlots)}
+                                        />
+                                        <Box textAlign="center" mt={2}>
+                                            <button
+                                                onClick={handleConfirmWeeklyBooking}
+                                                style={{
+                                                    padding: "8px 16px",
+                                                    background: "#1976d2",
+                                                    color: "#fff",
+                                                    border: "none",
+                                                    borderRadius: "4px",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                Confirm Weekly Booking
+                                            </button>
+                                        </Box>
+                                    </>
+                                ) : (
+                                    <Typography mt={2}>No slots found for this week.</Typography>
+                                )}
+                            </TabPanel>
+
+                            {/* Monthly */}
+                             {/* <TabPanel value={tab} index={2}>
                                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                                     <button
                                         onClick={() => setWeekIndex((prev) => Math.max(prev - 1, 0))}
@@ -336,11 +429,11 @@ export default function AssignSlotModalWithTabs({
                                         Previous Week
                                     </button>
 
-                                    <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                                        Week: {currentWeekStart.format("DD MMM YYYY")} - {currentWeekEnd.format("DD MMM YYYY")}
-                                    </Typography>
+                                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                                    Week: {currentWeekStart.format("DD MMM YYYY")} - {currentWeekEnd.format("DD MMM YYYY")}
+                                </Typography>
 
-                                    <button
+                                <button
                                         onClick={() => {
                                             const nextStart = planStart.add((weekIndex + 1) * 7, "day");
                                             if (nextStart.isBefore(planEnd)) {
@@ -398,7 +491,7 @@ export default function AssignSlotModalWithTabs({
                                 ) : (
                                     <Typography mt={2}>No slots found for this week.</Typography>
                                 )}
-                            </TabPanel>
+                            </TabPanel> */}
                         </>
                     )}
                 </Box>

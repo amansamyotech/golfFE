@@ -38,7 +38,7 @@ const navItems: NavItem[] = [
     pro: false
   },
   {
-    icon: <GridIcon />,
+    icon: <TableIcon />,
     name: "Time Slot Management",
     path: "/time-slot",
     pro: false
@@ -49,7 +49,7 @@ const navItems: NavItem[] = [
     path: "/calendar",
     subItems: [{ name: "View Tee Sheet", path: "/tee-time-management", pro: false },
     { name: "Tee Time Calendar", path: "/calendar", pro: false },
-    { name: "Cancellations & Reschedules", path: "/calendar2", pro: false }
+      // { name: "Cancellations & Reschedules", path: "/calendar2", pro: false }
     ],
   },
   {
@@ -59,7 +59,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Member List", path: "/members-management", pro: false },
       { name: "Membership Plans", path: "/membership-plans", pro: false },
-      { name: "Expiring Memberships", path: "/expiring-memberships", pro: false }
+      // { name: "Expiring Memberships", path: "/expiring-memberships", pro: false }
     ],
   },
   {
@@ -73,11 +73,15 @@ const navItems: NavItem[] = [
   {
     name: "Tournament",
     icon: <TableIcon />,
-    subItems: [{ name: "Upcoming Tournaments", path: "/basic-tables", pro: false },
-    { name: "Register Players", path: "/basic-tables1", pro: false },
-    { name: "Leaderboards", path: "/basic-tables2", pro: false },
-    { name: "Past Events", path: "/basic-tables3", pro: false }
+    subItems: [
+      // { name: "Upcoming Tournaments", path: "/basic-tables", pro: false },
+      // { name: "Register Players", path: "/basic-tables1", pro: false },
+      // { name: "Leaderboards", path: "/basic-tables2", pro: false },
+      // { name: "Past Events", path: "/basic-tables3", pro: false }
 
+      { name: "Events", path: "/basic-tables", pro: false },
+      { name: "Register Players", path: "/basic-tables1", pro: false },
+      { name: "Leaderboards", path: "/basic-tables2", pro: false },
     ],
   },
   {

@@ -36,6 +36,7 @@ export default function TimeSlot() {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [rowData, setRowData] = useState(null);
     const [openView, setOpenView] = useState(false);
+    const [selectedTimeSlotId, setSelectedTimeSlotId] = useState<string | null>(null);
 
     const handleOpenAdd = () => {
         setOpen(true);
@@ -63,9 +64,15 @@ export default function TimeSlot() {
         setRowData(row);
     };
 
-    const handleViewSlots = () => {
+    // const handleViewSlots = () => {
+    //     setOpenView(true);
+    // }
+
+    const handleViewSlots = (rowId: string) => {
+        setSelectedTimeSlotId(rowId); // store the selected _id
         setOpenView(true);
-    }
+    };
+
     const handleCloseViewSlots = () => {
         setOpenView(false);
     }
@@ -102,7 +109,13 @@ export default function TimeSlot() {
                 return row ? `${row.slot_time_hours || 0}h ${row.slot_time_minutes || 0}m` : '';
             }
         },
-        { field: 'buffer_time', headerName: 'Buffer Time', flex: 0.7 },
+        {
+            field: 'buffer_time', headerName: 'Buffer Time', flex: 0.7,
+            renderCell: (params) => {
+                const row = params?.row;
+                return row ? `${row.buffer_time || 0}m` : '';
+            }
+        },
         {
             field: 'weekday_opening_time',
             headerName: 'Weekdays Timing',
@@ -132,7 +145,7 @@ export default function TimeSlot() {
                         variant="contained"
                         color="primary"
                         size="small"
-                        onClick={() => handleViewSlots()}
+                        onClick={() => handleViewSlots(params.row._id)}
                     >
                         View Slots
                     </Button>
@@ -189,6 +202,7 @@ export default function TimeSlot() {
                     </Card>
                 </TableStyle>
             </Container>
+
             <Dialog open={openView} onClose={handleCloseViewSlots} maxWidth="md" fullWidth>
                 <DialogTitle sx={{ m: 0, p: 2 }}>
                     Time Slot Management
@@ -207,7 +221,7 @@ export default function TimeSlot() {
                 </DialogTitle>
                 <DialogContent>
                     {/* <SlotManagementPage /> */}
-                    <AssignSlotForBooking />
+                    <AssignSlotForBooking timeSlotId={selectedTimeSlotId} />
                 </DialogContent>
             </Dialog>
         </>

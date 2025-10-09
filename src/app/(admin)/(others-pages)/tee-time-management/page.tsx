@@ -7,13 +7,7 @@ import {
     Container,
     Typography,
     Card,
-    IconButton,
-    MenuItem,
-    Popover,
     Chip,
-    Dialog,
-    DialogTitle,
-    DialogContent,
     Box
 } from '@mui/material';
 import { Add, Delete, MoreVert, Edit, Visibility } from '@mui/icons-material';
@@ -25,9 +19,6 @@ import TeeTimeBooking from '@/components/tee-time-management/addTeeTimeBooking';
 import moment from "moment";
 import { getBooking } from '@/services/bookingService';
 import Link from 'next/link';
-import CloseIcon from '@mui/icons-material/Close';
-import AssignSlotForBooking from '@/components/tee-time-management/assignSlotForBooking';
-// AssignSlotModalWithTabs
 import AssignSlotModalWithTabs from '@/components/tee-time-management/assignSlotOptionModal';
 
 type Booking = {
@@ -60,7 +51,7 @@ export default function TeeTimeManagement() {
     const [openDelete, setOpenDelete] = useState(false);
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [openAssignSlot, setOpenAssignSlot] = useState(false);
-
+    const [slotsAvailable, setSlotsAvailable] = useState<boolean | null>(null);
 
     const paginatedRows = bookings.slice(
         paginationModel.page * paginationModel.pageSize,
@@ -71,55 +62,121 @@ export default function TeeTimeManagement() {
         ...row,
         sNo: paginationModel.page * paginationModel.pageSize + index + 1,
         name: row.customerId ? row.customerId.name : row.name,
-        role: row.customerId ? row.customerId.role : row.role,
         courseName: row.course?.name || '',
-        startDate: moment(row.customerId?.startDate).format('YYYY-MM-DD') || '',
-        // expiryDate: moment(row.customerId?.expiryDate).format('YYYY-MM-DD') || '',
+        startDate: moment(row.customerId?.startDate).format('DD-MM-YYYY') || '',
         slotTiming: row.startTime ? `${moment(row.startTime).format('HH:mm')} to ${moment(row.endTime).format('HH:mm')}` : '- -',
-        // `${moment(row.startTime).format('HH:mm')} to ${moment(row.endTime).format('HH:mm')}`
     }));
 
     const columns = [
         { field: 'sNo', headerName: 'S.No', width: 80, sortable: false },
         {
-            field: 'name', headerName: 'Customer Info', flex: 1
+            field: 'name',
+            headerName: 'Contact Info',
+            flex: 1,
+            renderCell: (params: GridRenderCellParams) => (
+                <Box display="flex" flexDirection="column">
+                    <Typography variant="body2">{params.row.customerId.name}</Typography>
+                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                        {params.row.customerId.phone}
+                    </Typography>
+                </Box>
+            ),
         },
         { field: 'courseName', headerName: 'Course Name', flex: 1 },
-        { field: 'startDate', headerName: 'Start Date', flex: 1 },
-        { field: 'bookingType', headerName: 'Booking Type', flex: 1 },
+        {
+            field: 'startDate', headerName: 'Booking Date', flex: 1, renderCell: (params) => {
+                const dateValue = params.row.customerId?.startDate;
+
+                if (!dateValue) return '--';
+
+                const formattedDate = moment(dateValue).format('DD MMM YYYY');
+
+                return (
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        width="100%"
+                        height="100%"
+                    >
+                        <Typography
+                            variant="body2"
+                            sx={{ textAlign: 'center' }}
+                        >
+                            {formattedDate}
+                        </Typography>
+                    </Box>
+
+                );
+            },
+        },
+        {
+            field: 'bookingType', headerName: 'Booking Type', flex: 1,
+            renderCell: (params: any) => {
+                const value = params.value || ''; 
+                const formattedValue =
+                    value.charAt(0).toUpperCase() + value.slice(1).toLowerCase(); // Capitalize first letter
+                return formattedValue;
+            },
+
+        },
         {
             field: 'bookingStatus',
             headerName: 'Booking Status',
             flex: 1,
-            renderCell: (params) => (
-                <Chip
-                    label={params.value}
-                    color='primary'
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                        width: 80,
-                        borderRadius: '5px'
-                    }}
-                />
-            ),
+            width: 100,
+            renderCell: (params) => {
+                const status = params.value;
+
+                const statusColorMap = {
+                    pending: 'warning',
+                    confirmed: 'info',
+                    completed: 'success',
+                    canceled: 'error',
+                };
+
+                const chipColor = statusColorMap[status] || 'default';
+
+                const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : '-';
+
+                return (
+                    <Chip
+                        label={label}
+                        color={chipColor}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                            width: '100%',
+                            borderRadius: '5px',
+                            textTransform: 'capitalize',
+                            fontSize: '13px',
+                        }}
+                    />
+                );
+            },
         },
         {
             field: 'assignSlot',
             headerName: 'Assign Slot',
             width: 120,
             sortable: false,
-            renderCell: (params: { row: Booking }) => (
-                <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => handleOpenAssignSlots(params.row)}
-                    sx={{ textTransform: 'none' }}
-                >
-                    Assign Slot
-                </Button>
-            )
+            renderCell: (params: { row: Booking }) => {
+                // const isConfirmed = params.row.bookingStatus === 'confirmed';
+                return (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleOpenAssignSlots(params.row)}
+                        // disabled={isConfirmed}
+                        sx={{ textTransform: 'none' }}
+                    >
+                        Assign Slot
+                    </Button>
+                );
+            }
+
+
         },
         {
             field: 'bookedSlot',
@@ -170,38 +227,6 @@ export default function TeeTimeManagement() {
         //             </Popover>
         //         </>
         //     )
-        // },
-
-        // {
-        //     field: 'more',
-        //     headerName: 'Booking',
-        //     width: 160,
-        //     sortable: false,
-        //     renderCell: (params) => (
-        //         <Box
-        //             sx={{
-        //                 display: 'flex',
-        //                 justifyContent: 'center',
-        //                 alignItems: 'center',
-        //                 width: '100%',
-        //                 height: '100%',
-        //             }}
-        //         >
-        //             <Button
-        //                 variant="contained"
-        //                 color="error"
-        //                 size="small"
-        //                 sx={{
-        //                     textTransform: 'none',
-        //                     borderRadius: '8px',
-        //                     fontWeight: 600,
-        //                 }}
-        //                 onClick={() => handleDelete(params.row)}
-        //             >
-        //                 Cancel Booking
-        //             </Button>
-        //         </Box>
-        //     ),
         // },
     ];
 
@@ -264,7 +289,7 @@ export default function TeeTimeManagement() {
 
     useEffect(() => {
         fetchAllBookings();
-    }, [open]);
+    }, [open, openAssignSlot]);
 
     const handleOpenAssignSlots = (row: Booking) => {
         setRowData(row);
@@ -282,7 +307,7 @@ export default function TeeTimeManagement() {
             <Container>
                 <Stack direction="row" alignItems="center" mb={5} justifyContent="space-between">
                     <Typography variant="h6">Tee-Time Management</Typography>
-                    <Button variant="contained" startIcon={<Add />} onClick={handleOpenAdd} sx={{ textTransform: 'none' }}>
+                    <Button variant="contained" startIcon={<Add />} onClick={handleOpenAdd} disabled={slotsAvailable === false} sx={{ textTransform: 'none' }}>
                         New Booking
                     </Button>
                 </Stack>
@@ -311,29 +336,7 @@ export default function TeeTimeManagement() {
                     </Card>
                 </TableStyle>
             </Container>
-
-            {/* <Dialog open={openAssignSlot} onClose={handleCloseAssignSlots} maxWidth="md" fullWidth>
-                <DialogTitle sx={{ m: 0, p: 2 }}>
-                    Assign Time Slot For Booking
-                    <IconButton
-                        aria-label="close"
-                        onClick={handleCloseAssignSlots}
-                        sx={{
-                            position: 'absolute',
-                            right: 8,
-                            top: 8,
-                            color: (theme) => theme.palette.grey[500],
-                        }}
-                    >
-                        <CloseIcon />
-                    </IconButton>
-                </DialogTitle>
-                <DialogContent>
-                    <AssignSlotForBooking />
-                </DialogContent>
-            </Dialog> */}
-
-            <AssignSlotModalWithTabs open={openAssignSlot} onClose={handleCloseAssignSlots} data={rowData} />
+            <AssignSlotModalWithTabs open={openAssignSlot} onClose={handleCloseAssignSlots} data={rowData} onSlotsLoaded={setSlotsAvailable} />
         </>
     );
 }

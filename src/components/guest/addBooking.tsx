@@ -103,6 +103,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
         validationSchema,
         enableReinitialize: true,
         onSubmit: async (values) => {
+            
             setLoading(true);
             try {
                 const formData = new FormData();
@@ -132,10 +133,12 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
             } catch (error) {
                 console.error('Error:', error);
             } finally {
+               
+                
                 setLoading(false);
                 formik.resetForm();
-                setImagePreview(null);
                 handleClose();
+                setImagePreview(null)
             }
         },
     });
@@ -355,7 +358,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                     </div>
                 </Grid>
 
-                {availableSlots.length > 0 && (
+                {/* {availableSlots.length > 0 && (
                     <div className="mt-4">
                         <Label>Available Time Slots</Label>
                         <div className="grid grid-cols-3 gap-4 mt-2">
@@ -383,7 +386,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                             ))}
                         </div>
                     </div>
-                )}
+                )} */}
 
 
                 <Grid item xs={12}>

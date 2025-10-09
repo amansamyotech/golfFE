@@ -14,12 +14,15 @@ import {
     Button,
     Grid,
     Collapse,
-    IconButton
+    IconButton,
+    CardContent,
+    Chip
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon, ExpandMore, ExpandLess, Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'next/navigation';
 import { getBookingByID } from '@/services/bookingService';
 import RescheduleBookingModal from '@/components/tee-time-management/rescheduleBooking';
+import CancelBookingOftheDay from '@/components/tee-time-management/cancelBookingOfTheDay';
 
 interface Course {
     _id: string;
@@ -59,24 +62,25 @@ export default function GuestDetailPage() {
     const [openMonth, setOpenMonth] = useState<string | null>(null);
     const [openRescheduleModal, setOpenRescheduleModal] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
+    const [openCancelModal, setOpenCancelModal] = useState(false);
 
     const handleBack = () => {
         window.history.back();
     };
 
     useEffect(() => {
-        async function fetchMember() {
+        async function fetchBookedSlots() {
             try {
                 const response = await getBookingByID(id) as Guest;
                 setGuest(response);
             } catch (error) {
-                console.error('Failed to fetch member:', error);
+                console.error('Failed to fetch data:', error);
             } finally {
                 setLoading(false);
             }
         }
-        fetchMember();
-    }, [id]);
+        fetchBookedSlots();
+    }, [id, openRescheduleModal, openCancelModal]);
 
     const groupSlotsByMonth = (slots: Slot[]) => {
         const grouped: { [month: string]: Slot[] } = {};
@@ -108,9 +112,18 @@ export default function GuestDetailPage() {
         setOpenRescheduleModal(false);
     }
 
+    const handleOpenCancel = (slot: any) => {
+        setSelectedSlot(slot);
+        setOpenCancelModal(true);
+    }
+
+    const handleCloseCancel = () => {
+        setOpenCancelModal(false);
+    }
 
     return (
         <>
+            <CancelBookingOftheDay open={openCancelModal} onClose={handleCloseCancel} slot={selectedSlot} bookingId={id} />
             <RescheduleBookingModal open={openRescheduleModal} onClose={handleCloseReschedule} slot={selectedSlot} bookingId={id} />
             <Container maxWidth="lg" sx={{ py: 4 }}>
                 {/* Member Details */}
@@ -148,42 +161,133 @@ export default function GuestDetailPage() {
                 {/* Slots Section */}
                 <Box>
                     <Typography variant="h6" mb={2}>Assigned Slots</Typography>
-                    {Object.entries(groupedSlots).map(([month, slots]) => (
-                        <Box key={month} sx={{ mb: 3 }}>
-                            <Card
-                                sx={{ p: 2, display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}
-                                onClick={() => setOpenMonth(openMonth === month ? null : month)}
+                    {
+                        Object.keys(groupedSlots).length === 0 ? (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: '150px',
+                                }}
                             >
-                                <Typography variant="subtitle1">{month} ({slots.length} Slots)</Typography>
-                                <IconButton>{openMonth === month ? <ExpandLess /> : <ExpandMore />}</IconButton>
-                            </Card>
+                                <Typography color="text.secondary" align="center">
+                                    No slots assigned yet.
+                                </Typography>
+                            </Box>
+                        ) : (Object.entries(groupedSlots).map(([month, slots]) => (
+                            <Box key={month} sx={{ mb: 3 }}>
+                                <Card
+                                    sx={{ p: 2, display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}
+                                    onClick={() => setOpenMonth(openMonth === month ? null : month)}
+                                >
+                                    <Typography variant="subtitle1">{month} ({slots.length} Slots)</Typography>
+                                    <IconButton>{openMonth === month ? <ExpandLess /> : <ExpandMore />}</IconButton>
+                                </Card>
+                                <Collapse in={openMonth === month}>
+                                    <Grid container spacing={2} sx={{ mt: 1, padding: 0 }}>
+                                        {slots.map((slot) => (
+                                            <Grid item xs={12} sm={6} md={4} key={slot._id}>
+                                                <Card
+                                                    sx={{
+                                                        border: "1px solid #e5e7eb",
+                                                        borderRadius: 3,
+                                                        p: 2,
+                                                        backgroundColor: "#fff",
+                                                        transition: "0.2s",
+                                                        "&:hover": {
+                                                            borderColor: "#3b82f6",
+                                                            backgroundColor: "#f9fafb",
+                                                        },
+                                                    }}
+                                                >
+                                                    <Stack spacing={1}>
+                                                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                                            <Typography variant="subtitle1" fontWeight={600}>
+                                                                {new Date(slot.start).toLocaleDateString("en-US", {
+                                                                    weekday: "long",
+                                                                    month: "long",
+                                                                    day: "numeric",
+                                                                })}
+                                                            </Typography>
 
-                            <Collapse in={openMonth === month}>
-                                <Grid container spacing={2} sx={{ mt: 1 }}>
-                                    {slots.map(slot => (
-                                        <Grid item xs={12} sm={6} md={4} key={slot._id}>
-                                            <Card sx={{ p: 2 }}>
-                                                <Typography><strong>Start:</strong> {slot.start}</Typography>
-                                                <Typography><strong>End:</strong> {slot.end}</Typography>
-                                                <Typography><strong>Status:</strong> {slot.status}</Typography>
+                                                            <Chip
+                                                                label={slot.status.charAt(0).toUpperCase() + slot.status.slice(1)}
+                                                                size="small"
+                                                                sx={{
+                                                                    width: "fit-content",
+                                                                    bgcolor: slot.status === "booked" ? "#dcfce7" : "#fee2e2",
+                                                                    color: slot.status === "booked" ? "#16a34a" : "#dc2626",
+                                                                    fontWeight: 600,
+                                                                    mt: 1,
+                                                                    borderRadius: 1,
+                                                                }}
+                                                            />
+                                                        </Stack>
 
-                                                <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
-                                                    <Button variant="contained" startIcon={<Edit />} size="small" onClick={() => handleOpenReschedule(slot)}>
-                                                        Reschedule
-                                                    </Button>
-                                                    <Button variant="outlined" color="error" startIcon={<Delete />} size="small">
-                                                        Cancel
-                                                    </Button>
-                                                </Stack>
-                                            </Card>
-                                        </Grid>
-                                    ))}
-                                </Grid>
-                            </Collapse>
-                        </Box>
-                    ))}
+                                                        <Typography variant="body2">
+                                                            <strong>Slot :</strong>{" "}
+                                                            {`${new Date(slot.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${new Date(slot.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                                                        </Typography>
+
+                                                        <Stack direction="row" spacing={1.5} sx={{ mt: 2 }}>
+                                                            <Button
+                                                                // variant="contained"
+                                                                variant="outlined"
+                                                                size="small"
+                                                                onClick={() => handleOpenReschedule(slot)}
+                                                                startIcon={<Edit />}
+
+                                                            >
+                                                                Reschedule
+                                                            </Button>
+                                                            <Button
+                                                                variant="outlined"
+                                                                size="small"
+                                                                color="error"
+                                                                onClick={() => handleOpenCancel(slot)}
+                                                                startIcon={<Delete />}
+                                                            >
+                                                                Cancel
+                                                            </Button>
+                                                        </Stack>
+                                                    </Stack>
+                                                </Card>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                </Collapse>
+                            </Box>
+                        )))
+                    }
                 </Box>
             </Container>
         </>
     );
 }
+
+
+
+
+{/* <Collapse in={openMonth === month}>
+                                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                                        {slots.map(slot => (
+                                            <Grid item xs={12} sm={6} md={4} key={slot._id}>
+                                                <Card sx={{ p: 2 }}>
+                                                    <Typography><strong>Start:</strong> {slot.start}</Typography>
+                                                    <Typography><strong>End:</strong> {slot.end}</Typography>
+                                                    <Typography><strong>Status:</strong> {slot.status}</Typography>
+
+                                                    <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                                                        <Button variant="contained" startIcon={<Edit />} size="small" onClick={() => handleOpenReschedule(slot)}>
+                                                            Reschedule
+                                                        </Button>
+                                                        <Button variant="outlined" color="error" startIcon={<Delete />} size="small">
+                                                            Cancel
+                                                        </Button>
+                                                    </Stack>
+                                                </Card>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                </Collapse> */}

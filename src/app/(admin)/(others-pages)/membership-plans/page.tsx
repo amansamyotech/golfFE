@@ -50,31 +50,13 @@ export default function MembershipPlans() {
 
     const columns = [
         { field: 'sNo', headerName: 'S.No', width: 80 },
-        // {
-        //     field: 'planImage',
-        //     headerName: 'Image',
-        //     width: 80,
-        //     sortable: false,
-        //     renderCell: (params: { row: Plan }) => {
-        //         const imgSrc = params.row.planImage
-        //             ? `${process.env.NEXT_PUBLIC_API_IMG_URL}${params.row.planImage}`
-        //             : defaultImage;
-        //         return (
-                   
-
-        //             <Image
-        //                 src={imgSrc}
-        //                 alt={params.row.title}
-        //                 width={40}
-        //                 height={40}
-        //                 style={{ borderRadius: 4, objectFit: 'cover' }}
-        //             />
-        //         );
-        //     },
-        // },
         { field: 'title', headerName: 'Title', flex: 1 },
         { field: 'description', headerName: 'Description', flex: 1.5 },
-        { field: 'price', headerName: 'Price', flex: 1 },
+        {
+            field: 'price', headerName: 'Price', flex: 1, renderCell: (params: any) => (
+                <span>Rs {params.value} /-</span>
+            )
+        },
         { field: 'numberOfDays', headerName: 'Duration (In Days)', flex: 1 },
         {
             field: 'action',

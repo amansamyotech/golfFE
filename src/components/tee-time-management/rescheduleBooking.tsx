@@ -45,7 +45,6 @@ export default function RescheduleBookingModal({
     bookingId,
 }: ConfirmationBookingModalProps) {
     const [slots, setSlots] = useState<SlotDetails[]>([]);
-
     const [selectedSlot, setSelectedSlot] = useState<SlotDetails | null>(null);
     const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -54,7 +53,7 @@ export default function RescheduleBookingModal({
             if (!slot) return;
             const dateOnly = dayjs(slot.start).format("YYYY-MM-DD");
             try {
-                const response = await getIndividualSlotsByDate(dateOnly);
+                const response = await getIndividualSlotsByDate(dateOnly, slot?.course);
                 setSlots(response || []);
             } catch (err) {
                 console.error("Error fetching slots:", err);

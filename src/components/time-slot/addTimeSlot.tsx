@@ -43,7 +43,7 @@ const validationSchema = Yup.object().shape({
     slot_time_minutes: Yup.number()
         .typeError('Slot time must be a number')
         .required('Slot time is required')
-        .positive('Must be greater than 0')
+        // .positive('Must be greater than 0')
         .integer('Must be an integer'),
     buffer_time: Yup.number()
         .typeError('Buffer time must be a number')

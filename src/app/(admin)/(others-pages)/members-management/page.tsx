@@ -13,7 +13,7 @@ import {
     MenuItem,
     Popover
 } from '@mui/material';
-import { Add, Delete, MoreVert, Edit } from '@mui/icons-material';
+import { Add, Delete, MoreVert, Edit, Visibility } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
 import TableStyle from '@/components/ui/table-style';
 import AddMember from '@/components/members-management/addMember';
@@ -87,6 +87,14 @@ export default function Member() {
             ),
         },
         {
+            field: 'startDate',
+            headerName: 'Start Date',
+            flex: 1,
+            renderCell: (params: GridRenderCellParams) => (
+                params.row.startDate ? moment(params.row.startDate).format('DD MMM YYYY') : 'N/A'
+            ),
+        },
+        {
             field: 'plan', headerName: 'Plan', width: 120,
             renderCell: (params: GridRenderCellParams) => (
                 <Typography variant="body2" mt={2}>
@@ -95,12 +103,13 @@ export default function Member() {
             ),
         },
         {
-            field: 'startDate',
-            headerName: 'Start Date',
-            flex: 1,
-            renderCell: (params: GridRenderCellParams) => (
-                params.row.startDate ? moment(params.row.startDate).format('DD MMM YYYY') : 'N/A'
-            ),
+            field: 'profileType', headerName: 'Profile Type', width: 120,
+            renderCell: (params: any) => {
+                const value = params.value || '';
+                const formattedValue =
+                    value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+                return formattedValue;
+            },
         },
         {
             field: 'status',
@@ -111,54 +120,26 @@ export default function Member() {
                     typeof params.value === 'boolean'
                         ? params.value
                         : params.value === 'ACTIVE';
+
                 const label = isActive ? 'ACTIVE' : 'INACTIVE';
+
                 return (
                     <Chip
                         label={label}
+                        size="small"
+                        variant="outlined"
                         sx={{
-                            color: isActive ? '#79dbfb' : '#ff6a67',
-                            backgroundColor: isActive ? '#e5f8fe' : '#ffeae9',
-                            minWidth: '80px',
-                            borderRadius: '12px',
-                            fontSize: '12px'
+                            color: isActive ? 'success.main' : 'error.main',
+                            borderColor: isActive ? 'success.main' : 'error.main',
+                            width: '100%',
+                            borderRadius: '5px',
+                            fontSize: '12px',
                         }}
                     />
                 );
             },
         },
-        {
-            field: 'more',
-            headerName: 'More',
-            width: 130,
-            sortable: false,
-            renderCell: (params: GridRenderCellParams) => (
-                <Link href={`/members-management/${params.row._id}`} passHref>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            width: '100%',
-                            height: '100%',
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                backgroundColor: '#f0f0f0',
-                                padding: '6px 12px',
-                                borderRadius: '12px',
-                                cursor: 'pointer',
-                            }}
 
-                        >
-                            <Typography color="grey" fontSize="0.8rem" fontWeight={500}>
-                                View More
-                            </Typography>
-                        </Box>
-                    </Box>
-                </Link>
-            ),
-        },
         {
             field: 'action',
             headerName: 'Action',
@@ -179,9 +160,16 @@ export default function Member() {
                             <MenuItem onClick={handleOpenEdit}>
                                 <Edit fontSize="small" style={{ marginRight: 8 }} /> Edit
                             </MenuItem>
-                            <MenuItem onClick={handleDelete} sx={{ color: 'red' }}>
-                                <Delete fontSize="small" style={{ marginRight: 8 }} /> Delete
+                            <MenuItem
+                                component={Link}
+                                href={params?.row?._id ? `/members-management/${params.row._id}` : "#"}
+                                sx={{ color: "blue" }}
+                            >
+                                <Visibility fontSize="small" style={{ marginRight: 8 }} /> View
                             </MenuItem>
+                            {/* <MenuItem onClick={handleDelete} sx={{ color: 'red' }}>
+                                <Delete fontSize="small" style={{ marginRight: 8 }} /> Delete
+                            </MenuItem> */}
                         </Popover>
                     </>
                 );

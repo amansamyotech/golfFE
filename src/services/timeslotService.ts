@@ -50,11 +50,26 @@ export const getAllIndividualSlots = async () => {
     return await handleApiResponse(response);
 };
 
-export const getIndividualSlotsByDate = async (date) => {
-    const url = `${api_urls.baseUrl}${api_urls.timeslot.getIndividualSlotsByDate}/${date}`;
+export const getIndividualSlotsByDate = async (date, id) => {
+    const url = `${api_urls.baseUrl}${api_urls.timeslot.getIndividualSlotsByDate}/${date}/${id}`;
     const response = await getData(url);
     return await handleApiResponse(response);
 };
+
+export const getIndividualSlotsByTimeSlotId = async (id: string) => {
+    const url = `${api_urls.baseUrl}${api_urls.timeslot.getAllIndividualSlotsByTimeSlotId}/${id}`;
+    const response = await getData(url);
+    return await handleApiResponse(response);
+}
+
+export const getIndividualSlotsByCourseId = async (id: string) => {
+    console.log("Fetching slots for course ID:", id);
+
+    const url = `${api_urls.baseUrl}${api_urls.timeslot.getAllIndividualSlotsByCourseId}/${id}`;
+    console.log("url:", url);
+    const response = await getData(url);
+    return await handleApiResponse(response);
+}
 
 
 

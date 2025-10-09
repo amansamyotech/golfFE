@@ -53,7 +53,9 @@ export const api_urls = {
         cancelGuestBooking: 'booking/cancel-guest',
         assignSlot: "booking/assign-slot",
         bookingById: "booking",
-        updateBookingAssignSlot: "booking/update-assign-slot"
+        updateBookingAssignSlot: "booking/update-assign-slot",
+        cancelBookingAssignSlot: "booking/cancel-assign-slot",
+        cancelBookingOfGuest: "booking/cancel-booking-guest",
     },
 
     timeslot: {
@@ -63,6 +65,8 @@ export const api_urls = {
         delete: 'time-slot/delete',
         getByStartAndCourse: 'time-slot/slots',
         getAllIndividualSlots: 'time-slot/all-slots',
-        getIndividualSlotsByDate: 'time-slot/by-date'
+        getIndividualSlotsByDate: 'time-slot/by-date',
+        getAllIndividualSlotsByTimeSlotId: 'time-slot/by-timeslot',
+        getAllIndividualSlotsByCourseId: 'time-slot/by-course',
     }
 };

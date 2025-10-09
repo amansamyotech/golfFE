@@ -1,233 +1,255 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Container, Card, Box, Typography, Divider, Stack, Button } from '@mui/material';
+import {
+    Container,
+    Card,
+    Box,
+    Typography,
+    Divider,
+    Stack,
+    Button,
+    Grid,
+    Collapse,
+    IconButton,
+    CardContent,
+    Chip
+} from '@mui/material';
+import { ArrowBack as ArrowBackIcon, ExpandMore, ExpandLess, Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'next/navigation';
-import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import Image from 'next/image';
-import { getById } from '@/services/guestService';
+import { getBookingByID } from '@/services/bookingService';
+import RescheduleBookingModal from '@/components/tee-time-management/rescheduleBooking';
+import CancelBookingOftheDay from '@/components/tee-time-management/cancelBookingOfTheDay';
+import CancelBookingOfGuest from '@/components/guest/cancelBookingOfGuest';
 import moment from 'moment';
 
-interface Course {
-    _id: string;
-    name: string;
-}
 interface Guest {
     _id: string;
-    name: string;
-    email: string;
-    phone: string;
-    govId: string;
-    acceptRules: boolean;
-    acknowledgePolicy: boolean;
-    course?: Course;
+    customerId: Customer;
+    course: Course;
     amount: number;
-    paymentMode: string;
-    startDateTime: string;
-    endDateTime: string;
+    bookingStatus: string;
+    bookingType: string;
+    caddyCart: boolean;
+    slotIds: Slot[];
+    specialInfo: string;
+    createdAt: string;
+    updatedAt: string;
+}
+interface Slot {
+    _id: string;
+    start: string;
+    end: string;
+    status: string;
 }
 
 export default function GuestDetailPage() {
     const theme = useTheme();
     const { id } = useParams();
-
     const [guest, setGuest] = useState<Guest | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const [openRescheduleModal, setOpenRescheduleModal] = useState(false);
+    const [selectedSlot, setSelectedSlot] = useState(null);
+    const [openCancelModal, setOpenCancelModal] = useState(false);
 
     const handleBack = () => {
         window.history.back();
     };
 
     useEffect(() => {
-        async function fetchMember() {
+        async function fetchBookedSlots() {
             try {
-                const response = await getById(id) as Guest;
+                const response = await getBookingByID(id) as Guest;
                 setGuest(response);
             } catch (error) {
-                console.error('Failed to fetch member:', error);
+                console.error('Failed to fetch data:', error);
             } finally {
                 setLoading(false);
             }
         }
+        fetchBookedSlots();
+    }, [id, openRescheduleModal, openCancelModal]);
 
-        fetchMember();
-    }, [id]);
+    const groupSlotsByMonth = (slots: Slot[]) => {
+        const grouped: { [month: string]: Slot[] } = {};
+        slots?.forEach(slot => {
+            const month = new Date(slot.start).toLocaleString('default', { month: 'long', year: 'numeric' });
+            if (!grouped[month]) grouped[month] = [];
+            grouped[month].push(slot);
+        });
+        return grouped;
+    };
 
+    if (loading) {
+        return <Typography variant="h6" sx={{ mt: 4 }}>Loading...</Typography>;
+    }
 
+    if (!guest) {
+        return <Typography variant="h6" sx={{ mt: 4 }}>No booking found.</Typography>;
+    }
 
+    const groupedSlots = groupSlotsByMonth(guest.slotIds);
 
-    if (!id) return <Typography>ID not found.</Typography>;
-    if (loading) return <Typography>Loading guest details...</Typography>;
-    if (!guest) return <Typography>Guest not found.</Typography>;
+    const handleOpenReschedule = (slot: any) => {
+        setSelectedSlot(slot);
+        setOpenRescheduleModal(true);
+    }
+
+    const handleCloseReschedule = () => {
+        setSelectedSlot(null);
+        setOpenRescheduleModal(false);
+    }
+
+    const handleOpenCancel = (slot: any) => {
+        setSelectedSlot(slot);
+        setOpenCancelModal(true);
+    }
+
+    const handleCloseCancel = () => {
+        setOpenCancelModal(false);
+    }
 
     return (
-        <Container maxWidth="lg">
-            <Card
-                sx={{
-                    p: { xs: 3, sm: 3, md: 4 },
-                    boxShadow: theme.shadows[4],
-                    borderRadius: 3,
-                    bgcolor: theme.palette.background.paper,
-                    transition: 'all 0.3s ease-in-out',
-                }}
-                role="region"
-                aria-labelledby="member-details-heading"
-            >
-                {/* Header */}
-                <Box sx={{ mb: 4 }}>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            flexWrap: 'wrap',
-                            textAlign: { xs: 'center', sm: 'left' },
-                        }}
-                    >
-                        <Typography
-                            variant="h5"
-                            id="member-details-heading"
-                            sx={{
-                                fontWeight: 700,
-                                color: theme.palette.text.primary,
-                                fontSize: { xs: '1.5rem', sm: '1.75rem' },
-                            }}
-                        >
-                            {guest.customerId.name}
+        <>
+            <CancelBookingOfGuest open={openCancelModal} onClose={handleCloseCancel} slot={selectedSlot} bookingId={id} />
+            <RescheduleBookingModal open={openRescheduleModal} onClose={handleCloseReschedule} slot={selectedSlot} bookingId={id} />
+            <Container maxWidth="lg" sx={{ py: 4 }}>
+                <Card
+                    sx={{
+                        p: 4,
+                        mb: 4,
+                        boxShadow: theme.shadows[4],
+                        borderRadius: 3,
+                        backgroundColor: "#fff",
+                    }}
+                >
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                        <Typography variant="h5" fontWeight={700}>
+                            {guest?.customerId?.name} - Booking Details
                         </Typography>
-
-                        <Button
-                            variant="outlined"
-                            startIcon={<ArrowBackIcon />}
-                            onClick={handleBack}
-                            sx={{ mt: { xs: 2, sm: 0 } }}
-                        >
+                        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
                             Back
                         </Button>
                     </Box>
 
-                    <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mt: 1, fontSize: '0.875rem', textAlign: { xs: 'center', sm: 'left' } }}
-                    >
-                        Guest ID: {guest._id}
-                    </Typography>
-                </Box>
+                    <Divider sx={{ my: 2 }} />
 
-                <Divider sx={{ mb: 4, borderColor: theme.palette.divider, opacity: 0.8 }} />
+                    <Grid container spacing={2} sx={{ mb: 2 }}>
+                        <Grid item xs={12} md={6}>
+                            <Stack spacing={1.5}>
+                                <Typography><strong>Email:</strong> {guest?.customerId?.email}</Typography>
+                                <Typography><strong>Course Name:</strong> {guest?.course?.name}</Typography>
+                                <Typography><strong>Booking Type:</strong> {guest?.bookingType}</Typography>
+                                <Typography><strong>Amount:</strong> {guest?.amount}</Typography>
+                            </Stack>
+                        </Grid>
 
-                <Stack direction={{ xs: 'column', md: 'row' }} spacing={6}>
-                    <Box sx={{ flex: 1, paddingRight: { xs: 0, md: 4 } }}>
-                        <Stack spacing={3}>
-                            <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                    Email
+                        <Grid item xs={12} md={6}>
+                            <Stack spacing={1.5}>
+                                <Typography><strong>Phone:</strong> {guest?.customerId?.phone}</Typography>
+                                <Typography>
+                                    <strong>Booking Date:</strong> {moment().format('DD MMM YYYY')}
                                 </Typography>
-                                <Typography variant="body2">
-                                    <a href={`mailto:${guest.email}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                        {guest.customerId.email}
-                                    </a>
-                                </Typography>
+                                <Typography><strong>Group Size:</strong> {guest?.groupSize}</Typography>
+                                <Typography><strong>Payment Mode:</strong> {guest?.paymentMode}</Typography>
+                            </Stack>
+                        </Grid>
+                    </Grid>
+
+                    <Divider sx={{ my: 2 }} />
+                   
+
+                    {guest.slotIds && guest.slotIds.length > 0 ? (
+                        guest.slotIds.map((slot) => (
+                            <Box key={slot._id} sx={{ mt: 3 }}>
+                                <Stack
+                                    direction="row"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                    sx={{ mb: 1 }}
+                                >
+                                    <Typography variant="h6" fontWeight={600}>
+                                        Assigned Slot
+                                    </Typography>
+
+                                    <Chip
+                                        label={guest?.bookingStatus.charAt(0).toUpperCase() + guest?.bookingStatus.slice(1)}
+                                        size="small"
+                                        sx={{
+                                            bgcolor: guest?.bookingStatus === "confirmed" ? "#dcfce7" : "#fee2e2",
+                                            color: guest?.bookingStatus === "confirmed" ? "#16a34a" : "#dc2626",
+                                            fontWeight: 600,
+                                            borderRadius: 1,
+                                        }}
+                                    />
+                                </Stack>
+
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} md={4}>
+                                        <Typography>
+                                            <strong>Date:</strong>{" "}
+                                            {new Date(slot.start).toLocaleDateString("en-GB", {
+                                                weekday: "long",
+                                                day: "2-digit",
+                                                month: "short",
+                                                year: "numeric",
+                                            })}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid item xs={12} md={4}>
+                                        <Typography>
+                                            <strong>Time:</strong>{" "}
+                                            {`${new Date(slot.start).toLocaleTimeString([], {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })} - ${new Date(slot.end).toLocaleTimeString([], {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}`}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid item xs={12} md={4}>
+                                        <Typography>
+                                            <strong>Course:</strong> {guest.course?.name || "N/A"}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+
+                                <Stack direction="row" spacing={1.5} sx={{ mt: 2 }}>
+                                    <Button
+                                        variant="contained"
+                                        size="small"
+                                        startIcon={<Edit />}
+                                        sx={{
+                                            bgcolor: "#2563eb",
+                                            "&:hover": { bgcolor: "#1e40af" },
+                                        }}
+                                        onClick={() => handleOpenReschedule(slot)}
+                                    >
+                                        Reschedule
+                                    </Button>
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        color="error"
+                                        startIcon={<Delete />}
+                                        onClick={() => handleOpenCancel(slot)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </Stack>
                             </Box>
-
-                            <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                    Phone
-                                </Typography>
-                                <Typography variant="body2">
-                                    <a href={`tel:${guest.phone}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                        {guest.customerId.phone}
-                                    </a>
-                                </Typography>
-                            </Box>
-
-                            <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                    Course
-                                </Typography>
-                                <Typography variant="body2">
-                                    {guest.course?.name || '-'}
-                                </Typography>
-                            </Box>
-                            {/* groupSize */}
-
-                            <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                    Group Size
-                                </Typography>
-                                <Typography variant="body2">
-                                    {guest.groupSize || '- -'}
-                                </Typography>
-                            </Box>
-
-                            <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                    Accept Rules
-                                </Typography>
-                                <Typography variant="body2">
-                                    {guest.acceptRules ? 'Yes' : 'No'}
-                                </Typography>
-                            </Box>
-                        </Stack>
-                    </Box>
-
-                    <Box sx={{ flex: 1, paddingRight: { xs: 0, md: 4 } }}>
-                        <Stack spacing={3}>
-
-                            <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                    Booking Date
-                                </Typography>
-                                <Typography variant="body2">
-                                    {moment(guest.startTime).format("DD-MM-YYYY")}
-                                </Typography>
-                            </Box>
-
-                            <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                    Slot Timing
-                                </Typography>
-                                <Typography variant="body2">
-                                    {moment(guest.startTime).format('HH:mm')} to {moment(guest.endTime).format('HH:mm')},
-                                </Typography>
-                            </Box>
-
-
-                            <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                    Amount
-                                </Typography>
-                                <Typography variant="body2">
-                                    {guest.amount || '- -'}
-                                </Typography>
-                            </Box>
-
-                            <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                    Payment Mode
-                                </Typography>
-                                <Typography variant="body2">
-                                    {guest.paymentMode || '- -'}
-                                </Typography>
-                            </Box>
-
-
-
-                            <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                    Acknowledge Policy
-                                </Typography>
-                                <Typography variant="body2">
-                                    {guest.acknowledgePolicy ? 'Yes' : 'No'}
-                                </Typography>
-                            </Box>
-                        </Stack>
-
-                    </Box>
-                </Stack>
-            </Card>
-        </Container>
+                        ))
+                    ) : (
+                        // <Typography color="text.secondary" sx={{ mt: 2 }}>
+                        //     No slots assigned yet.
+                        // </Typography> 
+                        <></>
+                    )}
+                </Card>
+            </Container>
+        </>
     );
 }
