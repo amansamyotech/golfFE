@@ -32,6 +32,17 @@ interface Guest {
     amount: number;
     paymentMode: string;
     caddyCart: boolean;
+    customerId: {
+        _id: string;
+        name: string;
+        email: string;
+        phone: string;
+        role: string;
+        startDate: string;
+    };
+    bookingStatus: 'pending' | 'confirmed' | 'completed' | 'canceled';
+    status: 'ACTIVE' | 'INACTIVE';
+    isDeleted?: boolean;
 }
 
 export default function GuestHistoryManagement() {
@@ -177,7 +188,7 @@ export default function GuestHistoryManagement() {
             headerName: 'Action',
             width: 100,
             sortable: false,
-            renderCell: (params: { row: Booking }) => (
+            renderCell: (params: { row: Guest }) => (
                 <>
                     <IconButton onClick={(e) => handleClick(e, params.row)}>
                         <MoreVert fontSize="small" />
@@ -206,8 +217,8 @@ export default function GuestHistoryManagement() {
 
     const fetchGuestData = async () => {
         try {
-            const response = await getBooking();
-            const filterData = response?.filter((member: Member) => member.customerId.role === "guest");
+            const response = await getBooking() as unknown as Guest[];
+            const filterData = response?.filter((member: Guest) => member?.customerId?.role === "guest");
             setGuests(filterData as Guest[]);
         } catch (error) {
             console.error('Error fetching members:', error);
@@ -224,7 +235,7 @@ export default function GuestHistoryManagement() {
         <>
             <Container>
                 <Stack direction="row" alignItems="center" mb={5} justifyContent="space-between">
-                    <Typography variant="h6">Guest History</Typography>
+                    <Typography variant="h6">Guest History Management</Typography>
                 </Stack>
 
                 <TableStyle>

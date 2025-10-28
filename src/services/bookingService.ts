@@ -2,11 +2,41 @@ import { api_urls } from "@/utils/apiRoutes";
 import { getData, postData, postFormData, putFormData, deleteData, putData } from "@/utils/apiHandler";
 import { handleApiResponse } from "@/utils/common";
 
+interface SlotDetails {
+    _id: string;
+    start: string;
+    end: string;
+    status: string;
+    course?: string;
+    isWeekend?: boolean;
+    slot?: any;
+}
 interface BookingPayload {
-    userId: string;
-    timeSlotId: string;
-    date: string;
-    status: 'confirmed' | 'cancelled' | 'pending';
+    _id?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    govId?: string;
+    groupSize?: any;
+    startDateTime?: string;
+    caddyCart?: any;
+    amount?: number | any;
+    paymentMode?: string;
+    acceptRules?: boolean | any;
+    acknowledgePolicy?: boolean | any;
+    startTime?: string;
+    specialInfo?: string;
+    customerId?: {
+        name?: string;
+        email?: string;
+        phone?: string;
+        govId?: string;
+        role?: string;
+        startTime?: string;
+    }
+    course: { _id: string; name: string };
+    selectedSlot?: { start: string; end: string; status?: string };
+    slot?: SlotDetails | any;
 }
 
 export const addBooking = async (payload: BookingPayload) => {
@@ -27,25 +57,25 @@ export const getBooking = async () => {
     return await handleApiResponse(response);
 };
 
-export const updateGuestBooking = async (id, payload: BookingPayload) => {
+export const updateGuestBooking = async (id: any, payload: BookingPayload) => {
     const url = `${api_urls.baseUrl}${api_urls.booking.updateGuestBooking}/${id}`;
     const response = await putFormData(url, payload);
     return await handleApiResponse(response, 'UPDATE');
 };
 
-export const cancelGuestBooking = async (id) => {
+export const cancelGuestBooking = async (id: any) => {
     const url = `${api_urls.baseUrl}${api_urls.booking.cancelGuestBooking}/${id}`;
     const response = await deleteData(url);
     return await handleApiResponse(response, 'DELETE');
 };
 
-export const assignSlot = async (id, payload: BookingPayload) => {
+export const assignSlot = async (id: any, payload: BookingPayload) => {
     const url = `${api_urls.baseUrl}${api_urls.booking.assignSlot}/${id}`;
     const response = await postData(url, payload);
     return await handleApiResponse(response);
 };
 
-export const getBookingByID = async (id) => {
+export const getBookingByID = async (id: any) => {
     const url = `${api_urls.baseUrl}${api_urls.booking.bookingById}/${id}`;
     const response = await getData(url);
     return await handleApiResponse(response);

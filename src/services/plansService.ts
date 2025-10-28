@@ -3,10 +3,12 @@ import { getData, deleteData, postFormData, putFormData, postData, putData } fro
 import { handleApiResponse } from "@/utils/common";
 
 interface PlanPayload {
-    name: string;
-    description: string;
-    price: number;
-    durationInMonths: number;
+    _id?: string;
+    title?: string;
+    description?: string;
+    price?: number | string;
+    numberOfDays?: number | string;
+    planImage?: string;
 }
 
 export const addPlan = async (payload: PlanPayload) => {

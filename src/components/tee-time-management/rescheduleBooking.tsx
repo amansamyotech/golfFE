@@ -53,7 +53,7 @@ export default function RescheduleBookingModal({
             if (!slot) return;
             const dateOnly = dayjs(slot.start).format("YYYY-MM-DD");
             try {
-                const response = await getIndividualSlotsByDate(dateOnly, slot?.course);
+                const response = await getIndividualSlotsByDate(dateOnly, slot?.course) as SlotDetails[];
                 setSlots(response || []);
             } catch (err) {
                 console.error("Error fetching slots:", err);

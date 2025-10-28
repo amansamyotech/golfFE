@@ -15,15 +15,24 @@ import { getAllCourses } from '@/services/courseService';
 import Select from '../form/Select';
 import { ChevronDownIcon } from '@/icons';
 import { Time } from "@internationalized/date";
-
-
 interface TimeSlotData {
+    _id?: string;
     start_date?: string;
-    course: { _id: string; name: string };
+    course?: { _id: string; name: string } | any;
     slot_time_hours?: number | string;
     slot_time_minutes?: number | string;
+    weekday_opening_time?: string | any;
+    weekday_closing_time?: string | any;
+    weekend_opening_time?: string | any;
+    weekend_closing_time?: string | any;
+    total_slot_time?: number | string;
     buffer_time?: number | string;
     status?: 'available' | 'booked';
+}
+
+interface Course {
+    _id: string;
+    name: string
 }
 interface AddTimeSlotProps {
     open: boolean;
@@ -33,7 +42,6 @@ interface AddTimeSlotProps {
 
 const validationSchema = Yup.object().shape({
     start_date: Yup.date().required('Start date is required'),
-    // end_date: Yup.date().required('End date is required'),
     course: Yup.string().required('Course is required'),
     slot_time_hours: Yup.number()
         .typeError('Slot time must be a number')
@@ -59,24 +67,13 @@ const validationSchema = Yup.object().shape({
         .required('Status is required'),
 });
 
-function formatTimeString(time: string) {
-    if (!time) return "";
-    const [h, m] = time.split(":");
-    return `${h.padStart(2, "0")}:${m.padStart(2, "0")}`;
-}
-
-
-
 const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) => {
-
-
     const [loading, setLoading] = useState(false);
     const [courses, setCourses] = useState([]);
 
     const formik = useFormik({
         initialValues: {
             start_date: data?.start_date ? data.start_date.split('T')[0] : '',
-            // end_date: data?.end_date ? data.end_date.split('T')[0] : '',
             slot_time_hours: data?.slot_time_hours || '',
             slot_time_minutes: data?.slot_time_minutes || '',
             buffer_time: data?.buffer_time || '',
@@ -85,17 +82,22 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
             weekend_opening_time: data?.weekend_opening_time || '',
             weekend_closing_time: data?.weekend_closing_time || '',
             status: data?.status || 'available',
+            course: data?.course || '',
+
         },
         enableReinitialize: true,
         validationSchema,
         onSubmit: async (values) => {
+
+
             const totalSlotTimeMinutes = Number(values.slot_time_hours) * 60 + Number(values.slot_time_minutes);
-            values.total_slot_time = totalSlotTimeMinutes;
+            await formik.setFieldValue('total_slot_time', totalSlotTimeMinutes);
+
 
             setLoading(true);
             try {
                 if (data) {
-                    await updateTimeSlot(data._id, values);
+                    await updateTimeSlot(data?._id, values);
                 } else {
                     await addTimeSlot(values);
                 }
@@ -111,7 +113,7 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
     });
 
     const fetchCourses = async () => {
-        const fetchedCourses = await getAllCourses();
+        const fetchedCourses = await getAllCourses() as Course[];
         const formattedCourses = fetchedCourses?.map((course) => ({
             value: course._id,
             label: course.name,
@@ -135,12 +137,20 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
 
                 <form onSubmit={formik.handleSubmit}>
                     <Grid >
-                        <Grid item xs={12}>
+                        <Grid>
                             <DatePicker
                                 id="start_date"
                                 label="Start Date"
                                 placeholder="Select a date"
-                                defaultDate={formik.values.start_date}
+                                // defaultDate={formik.values.start_date}
+                                // onChange={(date) => {
+                                //     formik.setFieldValue("start_date", date)
+                                // }}
+                                defaultDate={
+                                    formik.values.start_date
+                                        ? new Date(formik.values.start_date)
+                                        : undefined
+                                }
                                 onChange={(date) => formik.setFieldValue("start_date", date)}
                             />
                             {formik.touched.start_date && formik.errors.start_date && (
@@ -148,20 +158,7 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
                             )}
                         </Grid>
 
-                        {/* <Grid item xs={12}>
-                            <DatePicker
-                                id="end_date"
-                                label="End Date"
-                                placeholder="Select a date"
-                                defaultDate={formik.values.end_date}
-                                onChange={(date) => formik.setFieldValue("end_date", date)}
-                            />
-                            {formik.touched.end_date && formik.errors.end_date && (
-                                <div className="text-red-400 text-xs ">{formik.errors.end_date}</div>
-                            )}
-                        </Grid> */}
-
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Course</Label>
                             <div className="relative">
                                 <Select
@@ -176,12 +173,14 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
                                     <ChevronDownIcon />
                                 </span>
                                 {formik.touched.course && formik.errors.course && (
-                                    <div className="text-red-400 text-xs ">{formik.errors.course}</div>
+                                    <div className="text-red-400 text-xs ">
+                                        {formik.errors.course as string}
+                                    </div>
                                 )}
                             </div>
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Slot Time Hours</Label>
                             <Input
                                 id="slot_time_hours"
@@ -198,7 +197,7 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
                             )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Slot Time Minutes</Label>
                             <Input
                                 id="slot_time_minutes"
@@ -215,7 +214,7 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
                             )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Buffer Time (Minutes)</Label>
                             <Input
                                 id="buffer_time"
@@ -232,7 +231,7 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
                             )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label className="block text-sm font-medium text-gray-700 mb-2">
                                 Ground Opening Time (On Weekdays)
                             </Label>
@@ -258,13 +257,13 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
 
                                 {formik.touched.weekday_opening_time && formik.errors.weekday_opening_time && (
                                     <div className="text-red-500 text-xs mt-1">
-                                        {formik.errors.weekday_opening_time}
+                                        {formik.errors.weekday_opening_time as string}
                                     </div>
                                 )}
                             </div>
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label className="block text-sm font-medium text-gray-700 mb-2">
                                 Ground Closing Time (On Weekdays)
                             </Label>
@@ -289,13 +288,13 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
                                 />
                                 {formik.touched.weekday_closing_time && formik.errors.weekday_closing_time && (
                                     <div className="text-red-500 text-xs mt-1">
-                                        {formik.errors.weekday_closing_time}
+                                        {formik.errors.weekday_closing_time as string}
                                     </div>
                                 )}
                             </div>
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label className="block text-sm font-medium text-gray-700 mb-2">
                                 Ground Opening Time (On Weekends)
                             </Label>
@@ -321,13 +320,13 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
 
                                 {formik.touched.weekend_opening_time && formik.errors.weekend_opening_time && (
                                     <div className="text-red-500 text-xs mt-1">
-                                        {formik.errors.weekend_opening_time}
+                                        {formik.errors.weekend_opening_time as string}
                                     </div>
                                 )}
                             </div>
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label className="block text-sm font-medium text-gray-700 mb-2">
                                 Ground Closing Time (On Weekdays)
                             </Label>
@@ -352,7 +351,7 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
                                 />
                                 {formik.touched.weekend_closing_time && formik.errors.weekend_closing_time && (
                                     <div className="text-red-500 text-xs mt-1">
-                                        {formik.errors.weekend_closing_time}
+                                        {formik.errors.weekend_closing_time as string}
                                     </div>
                                 )}
                             </div>

@@ -33,6 +33,7 @@ interface EmployeeData {
     dateOfJoining?: string;
     workShift?: string;
     salary?: number | string;
+    profileImg ?: string;
 }
 
 interface AddEmployeeProps {
@@ -143,7 +144,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
 
             <form onSubmit={formik.handleSubmit}>
                 <Grid>
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Name</Label>
                         <Input
                             id="name"
@@ -160,7 +161,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         )}
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Email</Label>
                         <Input
                             id="email"
@@ -176,7 +177,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         )}
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Phone No</Label>
                         <Input
                             id="phone"
@@ -193,7 +194,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         )}
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Gender</Label>
                         <div className="relative">
                             <Select
@@ -213,7 +214,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         </div>
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Profile Image / Government ID</Label>
                         <FileInput onChange={handleFileChange} className="custom-class" />
                         {imagePreview && (
@@ -230,7 +231,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         )}
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Address</Label>
                         <TextArea
                             id="address"
@@ -246,7 +247,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         )}
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Job Title / Designation</Label>
                         <Input
                             id="jobTitle"
@@ -263,7 +264,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         )}
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Department</Label>
                         <Input
                             id="department"
@@ -280,7 +281,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         )}
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Employment Type</Label>
                         <div className="relative">
                             <Select
@@ -300,7 +301,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         </div>
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <DatePicker
                             id="dateOfJoining"
                             label="Date of Joining"
@@ -313,7 +314,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         )}
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Work Shift</Label>
                         <div className="relative">
                             <Select
@@ -333,10 +334,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                         </div>
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Salary</Label>
                         <Input
-                            fullWidth
                             name="salary"
                             type="number"
                             placeholder="Enter Salary"

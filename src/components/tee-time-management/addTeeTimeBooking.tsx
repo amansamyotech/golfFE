@@ -21,13 +21,30 @@ import { getById } from '@/services/customerService';
 interface Booking {
     _id: string;
     memberId?: string;
-    course?: string;
+    customerId?: {
+        _id?: string;
+        name?: string;
+        email?: string;
+        phone?: string;
+        role?: string;
+        startDate?: string;
+    };
+    name?: string;
+    email?: string;
+    phone?: string;
+    course?: {
+        _id?: string;
+        name?: string;
+    };
     startDateTime: string;
     endDateTime: string;
     groupSize?: number | string;
-    isCaddy?: boolean;
+    isCaddy?: boolean | string;
     specialInfo?: string;
-}
+    startTime?: string;
+    endTime?: string;
+    bookingType?: string;
+};
 
 interface TeeTimeBookingProps {
     open: boolean;
@@ -40,6 +57,8 @@ interface Member {
     name: string;
     startDate: string;
     expiryDate: string;
+    role: string;
+    status: string;
 }
 
 interface Course {
@@ -59,17 +78,12 @@ const validationSchema = Yup.object({
     isCaddy: Yup.boolean()
         .required('Caddy option is required'),
     specialInfo: Yup.string().max(500, 'Maximum 500 characters allowed'),
-    // selectedSlot: Yup.object()
-    //     .nullable()
-    //     .required('Please select a time slot'),
 });
 
 const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data }) => {
     const [members, setMembers] = useState([]);
     const [courses, setCourses] = useState([]);
     const [availableSlots, setAvailableSlots] = useState([]);
-    // const [selectedSlot, setSelectedSlot] = useState<any>(null);
-
 
     const options = {
         groupSizes: [
@@ -79,8 +93,8 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
             { value: '4', label: '4' },
         ],
         caddy: [
-            { value: true, label: 'Yes, Needs Caddy' },
-            { value: false, label: 'No Caddy Needed' },
+            { value: "true", label: 'Yes, Needs Caddy' },
+            { value: "false", label: 'No Caddy Needed' },
         ],
     };
 
@@ -89,10 +103,11 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
             memberId: data?.memberId || '',
             startDateTime: data?.startDateTime ? new Date(data.startDateTime) : null,
             endDateTime: data?.endDateTime ? new Date(data.endDateTime) : null,
-            course: data?.course || '',
-            isCaddy: data?.isCaddy || false,
+            // course: data?.course || '',
+            course: data?.course?._id || '',
+            // isCaddy: data?.isCaddy || "false",
+            isCaddy: data?.isCaddy === true ? "true" : "false",
             specialInfo: data?.specialInfo || '',
-            // selectedSlot: data?.selectedSlot || null,
         },
         enableReinitialize: true,
         validationSchema,
@@ -101,9 +116,10 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                 const formattedValues = {
                     ...values,
                     customerId: values.memberId,
-                    role: 'member'
+                    role: 'member',
+                    isCaddy: values.isCaddy === "true",
                 };
-                await addBooking(formattedValues);
+                await addBooking(formattedValues as any);
             } catch (error) {
                 console.error('Error saving booking:', error);
             } finally {
@@ -115,9 +131,9 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
 
     const fetchMembers = async () => {
         try {
-            const fetchedMembers = await getAllCustomer();
+            const fetchedMembers = await getAllCustomer() as Member[];
             const formattedMembers = fetchedMembers
-                .filter((member: Member) => member.role === "member")
+                .filter((member: Member) => member?.role === "member")
                 .map((member: Member) => ({
                     value: member._id,
                     label: `${member.name} | ${member.status}`,
@@ -130,7 +146,7 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
 
     const fetchCourses = async () => {
         try {
-            const fetchedCourses = await getAllCourses();
+            const fetchedCourses = await getAllCourses() as Course[];
             const formattedCourses = fetchedCourses.map((course: Course) => ({
                 value: course._id,
                 label: course.name,
@@ -145,9 +161,9 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
         formik.setFieldValue('memberId', memberId);
         if (memberId) {
             try {
-                const member = await getById(memberId);
-                formik.setFieldValue('startDateTime', member.startDate ? new Date(member.startDate) : null);
-                formik.setFieldValue('endDateTime', member.expiryDate ? new Date(member.expiryDate) : null);
+                const member = await getById(memberId) as Member;
+                formik.setFieldValue('startDateTime', member?.startDate ? new Date(member.startDate) : null);
+                formik.setFieldValue('endDateTime', member?.expiryDate ? new Date(member.expiryDate) : null);
             } catch (error) {
                 console.error('Error fetching member details:', error);
                 formik.setFieldValue('startDateTime', null);
@@ -170,34 +186,6 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
     }, [open, data]);
 
     const isMemberSelected = !!formik.values.memberId;
-
-    // const handleCourseChange = async (option) => {
-    //     if (option) {
-    //         formik.setFieldValue('course', option);
-
-    //         const startDate = formik.values.startDateTime
-    //             ? formik.values.startDateTime.toISOString().split('T')[0]
-    //             : null;
-    //         const endDate = formik.values.endDateTime
-    //             ? formik.values.endDateTime.toISOString().split('T')[0]
-    //             : null;
-
-    //         if (startDate) {
-    //             try {
-    //                 const slots = await getTimeSlotByStartAndCourse(startDate, endDate, option);
-    //                 setAvailableSlots(slots);
-    //             } catch (error) {
-    //                 console.error('Error fetching available slots:', error);
-    //                 setAvailableSlots([]);
-    //             }
-    //         } else {
-    //             setAvailableSlots([]);
-    //         }
-    //     } else {
-    //         formik.setFieldValue('course', '');
-    //         setAvailableSlots([]);
-    //     }
-    // };
 
     const handleFormClose = () => {
         setAvailableSlots([]);
@@ -225,7 +213,7 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
 
             <form onSubmit={formik.handleSubmit}>
                 <Grid>
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Member</Label>
                         <div className="relative">
                             <Select
@@ -245,7 +233,7 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                         </div>
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Start Date (MM-DD-YYYY)</Label>
                         <DatePicker
                             value={formik.values.startDateTime}
@@ -255,7 +243,6 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                                 textField: {
                                     fullWidth: true,
                                     error: Boolean(formik.touched.startDateTime && formik.errors.startDateTime),
-                                    helperText: formik.touched.startDateTime && formik.errors.startDateTime,
                                     readOnly: isMemberSelected,
                                     InputProps: {
                                         sx: { height: 42, backgroundColor: 'white', borderRadius: 2 },
@@ -265,7 +252,7 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                         />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>End Date (MM-DD-YYYY)</Label>
                         <DatePicker
                             value={formik.values.endDateTime}
@@ -275,7 +262,6 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                                 textField: {
                                     fullWidth: true,
                                     error: Boolean(formik.touched.endDateTime && formik.errors.endDateTime),
-                                    helperText: formik.touched.endDateTime && formik.errors.endDateTime,
                                     readOnly: isMemberSelected,
                                     InputProps: {
                                         sx: { height: 42, backgroundColor: 'white', borderRadius: 2 },
@@ -285,19 +271,17 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                         />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Course</Label>
                         <div className="relative">
                             <Select
                                 id="course"
                                 options={courses}
                                 placeholder="Select Course"
+                                // value={formik.values.course}
+                                // onChange={(option) => formik.setFieldValue('course', option)}
                                 value={formik.values.course}
                                 onChange={(option) => formik.setFieldValue('course', option)}
-                                // onChange={(option) =>
-                                //     handleCourseChange(option)
-                                // }
-                                className="dark:bg-dark-900"
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
                                 <ChevronDownIcon />
@@ -308,45 +292,7 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                         </div>
                     </Grid>
 
-                    {/* <div className="mt-4">
-                        <Label>Available Time Slots</Label>
-                        <div className="max-h-[400px] overflow-y-auto border rounded-lg p-2 space-y-4">
-                            {Object.keys(groupedSlots).map((date) => (
-                                <div key={date} className="border-b pb-2">
-
-                                    <div className="bg-gray-100 px-3 py-1 font-semibold text-sm sticky top-0">
-                                        {date}
-                                    </div>
-
-
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                        {groupedSlots[date].map((slot) => (
-                                            <div
-                                                key={slot._id}
-                                                onClick={() => {
-                                                    if (slot.status === "available") {
-                                                        formik.setFieldValue("selectedSlot", slot);
-                                                        setSelectedSlot(slot);
-                                                    }
-                                                }}
-                                                className={`px-3 py-1 rounded-md text-xs font-medium border cursor-pointer 
-                ${selectedSlot?._id === slot._id
-                                                        ? "bg-blue-200 border-blue-400"
-                                                        : slot.status === "available"
-                                                            ? "bg-green-100 text-green-800 border-green-300"
-                                                            : "bg-red-100 text-red-800 border-red-300"
-                                                    }`}
-                                            >
-                                                {slot.start.split(" ")[1]} - {slot.end.split(" ")[1]}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div> */}
-
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Need Caddy?</Label>
                         <div className="relative">
                             <Select
@@ -366,7 +312,7 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                         </div>
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Special Info</Label>
                         <TextArea
                             id="specialInfo"
@@ -382,7 +328,7 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                         )}
                     </Grid>
 
-                    <Grid item xs={12} className="flex justify-center mt-4 gap-4">
+                    <Grid className="flex justify-center mt-4 gap-4">
                         <Button type="submit" variant="contained" color="primary">
                             Save
                         </Button>

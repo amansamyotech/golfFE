@@ -32,6 +32,18 @@ interface Guest {
     course: { _id: string; name: string };
     groupSize: number;
     dateTime: string;
+    customerId: {
+        _id: string;
+        name: string;
+        email: string;
+        phone: string;
+        role: string;
+        startDate: string;
+    };
+    role: string;
+    slotIds: { start: string; end: string }[];
+    bookingStatus: string;
+    isDeleted?: boolean;
 }
 interface GuestBookingData {
     _id?: string;
@@ -167,7 +179,6 @@ export default function GuestManagement() {
 
                 const chipColor = statusColorMap[status] || 'default';
 
-                // Optional: Capitalize the label
                 const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : '-';
 
                 return (
@@ -219,7 +230,7 @@ export default function GuestManagement() {
             headerName: 'Action',
             width: 100,
             sortable: false,
-            renderCell: (params: { row: Booking }) => (
+            renderCell: (params: GridRenderCellParams<Guest>) => (
                 <>
                     <IconButton onClick={(e) => handleClick(e, params.row)}>
                         <MoreVert fontSize="small" />
@@ -279,8 +290,8 @@ export default function GuestManagement() {
 
     const fetchAllBookings = async () => {
         try {
-            const response = await getBooking();
-            const filterData = response?.filter((data: Guest) => data?.customerId?.role === "guest" && data.isDeleted !== true);
+            const response = await getBooking() as unknown as Guest[];
+            const filterData = response.filter((data: Guest) => data?.customerId?.role === "guest" && data?.isDeleted !== true);
             setGuests(filterData as Guest[]);
         } catch (error) {
             console.error('Error fetching data:', error);

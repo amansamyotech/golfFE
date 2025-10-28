@@ -1,6 +1,8 @@
 import React from "react";
 
 interface TextareaProps {
+  id?: string; // Optional ID
+  name?: string; // Optional name
   placeholder?: string; // Placeholder text
   rows?: number; // Number of rows
   value?: string; // Current value
@@ -9,6 +11,7 @@ interface TextareaProps {
   disabled?: boolean; // Disabled state
   error?: boolean; // Error state
   hint?: string; // Hint text to display
+  onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void; // Blur handler
 }
 
 const TextArea: React.FC<TextareaProps> = ({
@@ -49,9 +52,8 @@ const TextArea: React.FC<TextareaProps> = ({
       />
       {hint && (
         <p
-          className={`mt-2 text-sm ${
-            error ? "text-error-500" : "text-gray-500 dark:text-gray-400"
-          }`}
+          className={`mt-2 text-sm ${error ? "text-error-500" : "text-gray-500 dark:text-gray-400"
+            }`}
         >
           {hint}
         </p>

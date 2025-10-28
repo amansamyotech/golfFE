@@ -14,9 +14,7 @@ import Select from '../form/Select';
 import { ChevronDownIcon } from '@/icons';
 import FileInput from '../form/input/FileInput';
 import { getAllCourses } from '@/services/courseService';
-import { addGuest, updateGuest } from '@/services/guestService';
 import * as Yup from 'yup';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import DatePicker from '../form/date-picker';
 import Image from 'next/image';
 import TextArea from '../form/input/TextArea';
@@ -25,22 +23,63 @@ import { guestBooking } from '@/services/bookingService';
 import { updateGuestBooking } from '@/services/bookingService';
 
 interface GuestBookingData {
+    // _id?: string;
+    // name?: string;
+    // email?: string;
+    // phone?: string;
+    // govId?: string;
+    // groupSize: any;
+    // startDateTime?: string;
+    // caddyCart?: any;
+    // amount?: number | any;
+    // paymentMode?: string;
+    // acceptRules?: boolean | any;
+    // acknowledgePolicy?: boolean | any;
+    // startTime?: string;
+    // specialInfo?: string;
+    // customerId?: {
+    //     name?: string;
+    //     email?: string;
+    //     phone?: string;
+    //     govId?: string;
+    //     role?: string;
+    //     startTime?: string;
+    // }
+    // course: { _id: string; name: string };
+    // selectedSlot?: { start: string; end: string; status: string };
+    // slot: any;
+
     _id?: string;
     name?: string;
     email?: string;
     phone?: string;
     govId?: string;
-    course: { _id: string; name: string };
+    groupSize?: number | any;
     startDateTime?: string;
-    endDateTime?: string;
-    groupSize?: string;
-    caddyCart?: boolean;
-    amount?: number;
+    caddyCart?: any;
+    amount?: number | any;
     paymentMode?: string;
-    acceptRules?: boolean;
-    acknowledgePolicy?: boolean;
+    acceptRules?: boolean | any;
+    acknowledgePolicy?: boolean | any;
+    startTime?: string;
+    specialInfo?: string;
+    customerId?: {
+        _id?: string;
+        name?: string;
+        email?: string;
+        phone?: string;
+        role?: string;
+        startDate?: string;
+        govId?: string;
+    };
+    course: { _id: string; name: string };
+    selectedSlot?: { start: string; end: string; status?: string };
+    slot?: any;
 }
-
+interface Course {
+    _id: string;
+    name: string;
+}
 interface AddGuestBookingsProps {
     open: boolean;
     handleClose: () => void;
@@ -54,7 +93,6 @@ const validationSchema = Yup.object().shape({
     phone: Yup.string()
         .matches(/^\+?[0-9]{7,15}$/, 'Invalid phone number')
         .required('Phone number is required'),
-    // govId: Yup.mixed().required('Government ID is required'),
     govId: Yup.mixed().nullable(),
     course: Yup.string().required('Course is required'),
     bookingDate: Yup.date().required('Booking date is required'),
@@ -70,9 +108,6 @@ const validationSchema = Yup.object().shape({
         .oneOf([true], 'You must accept the rules'),
     acknowledgePolicy: Yup.boolean()
         .oneOf([true], 'You must acknowledge the policy'),
-    // selectedSlot: Yup.object()
-    //     .nullable()
-    //     .required('Please select a time slot'),
     selectedSlot: Yup.object().nullable()
 });
 
@@ -103,11 +138,9 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
         validationSchema,
         enableReinitialize: true,
         onSubmit: async (values) => {
-            
             setLoading(true);
             try {
                 const formData = new FormData();
-
                 formData.append('role', 'guest');
                 formData.append('name', values.name);
                 formData.append('email', values.email);
@@ -126,15 +159,13 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
 
                 // await guestBooking(formData);
                 if (data) {
-                    await updateGuestBooking(data._id, formData);
+                    await updateGuestBooking(data._id, formData as unknown as GuestBookingData);
                 } else {
-                    await guestBooking(formData);
+                    await guestBooking(formData as unknown as GuestBookingData);
                 }
             } catch (error) {
                 console.error('Error:', error);
             } finally {
-               
-                
                 setLoading(false);
                 formik.resetForm();
                 handleClose();
@@ -171,8 +202,8 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
             { value: '4', label: '4' },
         ],
         caddy: [
-            { value: true, label: 'Yes, Needs Caddy' },
-            { value: false, label: 'No Caddy Needed' },
+            { value: "true", label: 'Yes, Needs Caddy' },
+            { value: "false", label: 'No Caddy Needed' },
         ],
         payments: [
             { value: 'card', label: 'Card' },
@@ -182,7 +213,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
     };
 
     const fetchCourses = async () => {
-        const fetchedCourses = await getAllCourses();
+        const fetchedCourses = await getAllCourses() as any[];
         const formattedCourses = fetchedCourses.map((course: Course) => ({
             value: course._id,
             label: course.name,
@@ -194,38 +225,38 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
         fetchCourses();
     }, [open]);
 
-    useEffect(() => {
-        const bookingDateObj = formik.values.bookingDate
-            ? new Date(formik.values.bookingDate)
-            : null;
+    // useEffect(() => {
+    //     const bookingDateObj = formik.values.bookingDate
+    //         ? new Date(formik.values.bookingDate)
+    //         : null;
 
-        const isValidDate = bookingDateObj && !isNaN(bookingDateObj.getTime());
+    //     const isValidDate = bookingDateObj && !isNaN(bookingDateObj.getTime());
 
-        const startDate = isValidDate
-            ? bookingDateObj.toISOString().split('T')[0]
-            : null;
+    //     const startDate = isValidDate
+    //         ? bookingDateObj.toISOString().split('T')[0]
+    //         : null;
 
-        const endDate = startDate;
+    //     const endDate = startDate;
 
-        if (startDate && formik.values.course) {
-            const fetchSlots = async () => {
-                try {
-                    const slots = await getTimeSlotByStartAndCourse(
-                        startDate,
-                        endDate,
-                        formik.values.course.value || formik.values.course
-                    );
-                    setAvailableSlots(slots);
-                } catch (error) {
-                    console.error('Error fetching available slots:', error);
-                    setAvailableSlots([]);
-                }
-            };
-            fetchSlots();
-        } else {
-            setAvailableSlots([]);
-        }
-    }, [formik.values.bookingDate, formik.values.course]);
+    //     if (startDate && formik.values.course) {
+    //         const fetchSlots = async () => {
+    //             try {
+    //                 const slots = await getTimeSlotByStartAndCourse(
+    //                     startDate,
+    //                     endDate,
+    //                     formik.values.course.value || formik.values.course
+    //                 );
+    //                 setAvailableSlots(slots);
+    //             } catch (error) {
+    //                 console.error('Error fetching available slots:', error);
+    //                 setAvailableSlots([]);
+    //             }
+    //         };
+    //         fetchSlots();
+    //     } else {
+    //         setAvailableSlots([]);
+    //     }
+    // }, [formik.values.bookingDate, formik.values.course]);
 
 
 
@@ -253,10 +284,9 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
             <form onSubmit={formik.handleSubmit}>
                 {/* Personal Info */}
                 <h2 className="text-md font-semibold my-2">Personal Information</h2>
-                <Grid item xs={12}>
+                <Grid>
                     <Label>Name</Label>
                     <Input
-                        fullWidth
                         name="name"
                         placeholder="Full Name"
                         value={formik.values.name}
@@ -268,10 +298,9 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                     )}
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid>
                     <Label>Email</Label>
                     <Input
-                        fullWidth
                         name="email"
                         placeholder="Email"
                         type="email"
@@ -284,10 +313,9 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                     )}
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid>
                     <Label>Phone No</Label>
                     <Input
-                        fullWidth
                         name="phone"
                         placeholder="Phone Number"
                         value={formik.values.phone}
@@ -299,7 +327,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                     )}
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid>
                     <Label>Upload Goverment Id </Label>
                     <FileInput onChange={handleFileChange} className="custom-class" />
                     {imagePreview && (
@@ -320,24 +348,20 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
 
                 {/* Tee Time */}
                 <h2 className="text-md font-semibold my-2">Tee Time Details</h2>
-
-
-
-                <Grid item xs={12}>
+                <Grid>
                     <DatePicker
                         id="bookingDate"
                         label="Date"
                         placeholder="Select Booking Date"
                         defaultDate={formik.values.bookingDate}
                         onChange={(date) => formik.setFieldValue('bookingDate', date)}
-                    // onChange={(date) => formik.setFieldValue('bookingDate', new Date(date))}
                     />
                     {formik.touched.bookingDate && formik.errors.bookingDate && (
                         <div className="text-red-400 text-xs ">{formik.errors.bookingDate}</div>
                     )}
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid>
                     <Label>Course</Label>
                     <div className="relative">
                         <Select
@@ -346,7 +370,6 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                             placeholder="Select Course"
                             value={formik.values.course}
                             onChange={(option) => formik.setFieldValue('course', option)}
-                            // onChange={(option) => formik.setFieldValue('course', option.value)}
                             className="dark:bg-dark-900"
                         />
                         <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
@@ -358,38 +381,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                     </div>
                 </Grid>
 
-                {/* {availableSlots.length > 0 && (
-                    <div className="mt-4">
-                        <Label>Available Time Slots</Label>
-                        <div className="grid grid-cols-3 gap-4 mt-2">
-                            {availableSlots.map((slot, index) => (
-                                <div
-                                    key={index}
-                                    onClick={() => {
-                                        if (slot.status === 'available') {
-                                            formik.setFieldValue('selectedSlot', slot);
-                                            setSelectedSlot(slot);  // To highlight selected one
-                                        }
-                                    }}
-                                    className={`p-3 rounded-lg text-center cursor-pointer border ${selectedSlot?.start === slot.start
-                                        ? 'bg-blue-200 border-blue-400'
-                                        : slot.status === 'available'
-                                            ? 'bg-green-100 text-green-800 border-green-300'
-                                            : 'bg-red-100 text-red-800 border-red-300'
-                                        }`}
-                                >
-                                    <div className="font-semibold">
-                                        {slot.start.split(' ')[1]} - {slot.end.split(' ')[1]}
-                                    </div>
-                                    <div className="text-sm">{slot.status.toUpperCase()}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )} */}
-
-
-                <Grid item xs={12}>
+                <Grid>
                     <Label>Group Size</Label>
                     <div className="relative">
                         <Select
@@ -403,13 +395,13 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                         <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                             <ChevronDownIcon />
                         </span>
-                        {formik.touched.groupSize && formik.errors.groupSize && (
+                        {formik.touched.groupSize && typeof formik.errors.groupSize === 'string' && (
                             <div className="text-red-400 text-xs ">{formik.errors.groupSize}</div>
                         )}
                     </div>
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid>
                     <Label>Assign Caddy</Label>
                     <div className="relative">
                         <Select
@@ -418,19 +410,18 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                             placeholder="Assign Caddy"
                             value={formik.values.caddyCart}
                             onChange={(option) => formik.setFieldValue("caddyCart", option)}
-                            // onChange={(option) => formik.setFieldValue('caddyCart', option.value)}
                             className="dark:bg-dark-900"
                         />
                         <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                             <ChevronDownIcon />
                         </span>
-                        {formik.touched.caddyCart && formik.errors.caddyCart && (
+                        {formik.touched.caddyCart && typeof formik.errors.caddyCart === 'string' && (
                             <div className="text-red-400 text-xs ">{formik.errors.caddyCart}</div>
                         )}
                     </div>
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid>
                     <Label>Special Info</Label>
                     <TextArea
                         id="specialInfo"
@@ -448,23 +439,21 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
 
                 {/* Payment */}
                 <h2 className="text-md font-semibold my-2">Payment Info</h2>
-
-                <Grid item xs={12}>
+                <Grid>
                     <Label>Amount</Label>
                     <Input
-                        fullWidth
                         name="amount"
                         type="number"
                         placeholder="Amount"
                         value={formik.values.amount}
                         onChange={formik.handleChange}
                     />
-                    {formik.touched.amount && formik.errors.amount && (
+                    {formik.touched.amount && typeof formik.errors.amount === 'string' && (
                         <div className="text-red-400 text-xs ">{formik.errors.amount}</div>
                     )}
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid>
                     <Label>Payment Mode</Label>
                     <div className="relative">
                         <Select
@@ -495,7 +484,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                         />
                         Accept rules of conduct
                     </label>
-                    {formik.touched.acceptRules && formik.errors.acceptRules && (
+                    {formik.touched.acceptRules && typeof formik.errors.acceptRules === 'string' && (
                         <div className="text-red-400 text-xs">{formik.errors.acceptRules}</div>
                     )}
 
@@ -508,7 +497,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                         />
                         Acknowledge cancellation policy
                     </label>
-                    {formik.touched.acknowledgePolicy && formik.errors.acknowledgePolicy && (
+                    {formik.touched.acknowledgePolicy && typeof formik.errors.acknowledgePolicy === 'string' && (
                         <div className="text-red-400 text-xs">{formik.errors.acknowledgePolicy}</div>
                     )}
                 </div>
@@ -530,7 +519,6 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                     </Button>
                 </div>
             </form>
-
         </Modal>
     );
 };

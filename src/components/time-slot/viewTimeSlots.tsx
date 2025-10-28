@@ -14,7 +14,7 @@ const SlotManagementPage = () => {
         const fetchSlots = async () => {
             try {
                 setLoading(true);
-                const response = await getAllIndividualSlots();
+                const response = await getAllIndividualSlots() as [];
                 setSlots(response || []);
             } catch (err) {
                 setError('Failed to fetch slots');

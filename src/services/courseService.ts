@@ -3,10 +3,10 @@ import { getData, postData, putData, deleteData } from "@/utils/apiHandler";
 import { handleApiResponse } from "@/utils/common";
 
 interface CoursePayload {
-    _id: string;
+    id?: string;
     name?: string;
     courseNumber?: string;
-    holes?: number;
+    holes?: string | number;
     location?: string;
 }
 

@@ -1,3 +1,5 @@
+import Tournament from "@/app/(admin)/(others-pages)/tournament/page";
+
 export const api_urls = {
     baseUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}`,
     imageBaseUrl: `${process.env.NEXT_PUBLIC_API_IMG_URL}`,
@@ -68,5 +70,32 @@ export const api_urls = {
         getIndividualSlotsByDate: 'time-slot/by-date',
         getAllIndividualSlotsByTimeSlotId: 'time-slot/by-timeslot',
         getAllIndividualSlotsByCourseId: 'time-slot/by-course',
-    }
+    },
+
+    tournament: {
+        add: 'tournament/create',
+        getById: 'tournament/get',
+        getAll: 'tournament/get-all',
+        update: 'tournament/update',
+        delete: 'tournament/delete',
+        assignPlayer: 'tournament/addPlayerOnTournament',
+        changeStatus: 'tournament/update-status'
+    },
+
+    player: {
+        add: 'player/create',
+        getAll: 'player/get-all',
+        update: 'player/update',
+        delete: 'player/delete',
+        getByNumber: 'player/by-phone'
+    },
+
+    proshop: {
+        add: "products/create",
+        getAll: "products",
+        getById: "products",
+        update: "products/update",
+        updateStock: "products/update-stock",
+        delete: "products/delete",
+    },
 };

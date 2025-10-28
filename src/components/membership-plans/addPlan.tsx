@@ -51,9 +51,6 @@ const validationSchema = Yup.object().shape({
         .required('Number of days is required')
         .positive('Number of days must be greater than 0')
         .integer('Number of days must be an integer'),
-
-    // planImage: Yup.mixed()
-    //     .required('Image is required')
 });
 
 const AddPlans: React.FC<AddPlansProps> = ({ open, handleClose, data }) => {
@@ -66,7 +63,6 @@ const AddPlans: React.FC<AddPlansProps> = ({ open, handleClose, data }) => {
             description: data?.description || '',
             price: data?.price || '',
             numberOfDays: data?.numberOfDays || '',
-            // planImage: data?.planImage ? data.planImage.split('/').pop() : ''
         },
         enableReinitialize: true,
         validationSchema,
@@ -90,14 +86,6 @@ const AddPlans: React.FC<AddPlansProps> = ({ open, handleClose, data }) => {
         }
     });
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            formik.setFieldValue('planImage', file);
-            setImagePreview(URL.createObjectURL(file));
-        }
-    };
-
     useEffect(() => {
         if (data?.planImage) {
             const imgPreviewUrl = `${process.env.NEXT_PUBLIC_API_IMG_URL}${data?.planImage}`
@@ -117,7 +105,7 @@ const AddPlans: React.FC<AddPlansProps> = ({ open, handleClose, data }) => {
 
                 <form onSubmit={formik.handleSubmit}>
                     <Grid>
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Title</Label>
                             <Input
                                 id="title"
@@ -134,7 +122,7 @@ const AddPlans: React.FC<AddPlansProps> = ({ open, handleClose, data }) => {
                             )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Description</Label>
                             <TextArea
                                 id="description"
@@ -150,7 +138,7 @@ const AddPlans: React.FC<AddPlansProps> = ({ open, handleClose, data }) => {
                             )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Price</Label>
                             <Input
                                 id="price"
@@ -167,7 +155,7 @@ const AddPlans: React.FC<AddPlansProps> = ({ open, handleClose, data }) => {
                             )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Duration (In Number of Days)</Label>
                             <Input
                                 id="numberOfDays"

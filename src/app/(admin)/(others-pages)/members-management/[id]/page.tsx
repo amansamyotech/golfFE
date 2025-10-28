@@ -18,6 +18,9 @@ interface Member {
     plan?: { title: string };
     status: string;
     teeTime?: string;
+    preferredTeeTime?: string;
+    startDate: string;
+    expiryDate: string;
 }
 
 export default function MemberDetailPage() {

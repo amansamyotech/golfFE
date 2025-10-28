@@ -3,18 +3,19 @@ import { getData, postFormData, putFormData, deleteData } from "@/utils/apiHandl
 import { handleApiResponse } from "@/utils/common";
 
 export interface StaffPayload {
-    name: string;
-    email: string;
-    phone: string;
-    gender: string;
-    address: string;
-    jobTitle: string;
-    department: string;
-    employmentType: string;
-    dateOfJoining: string; // ISO date string
-    workShift: string;
-    salary: number;
-    staffProfileImg?: File | string; // can be File for upload or URL string
+    _id?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    gender?: string;
+    staffProfileImg?: string;
+    address?: string;
+    jobTitle?: string;
+    department?: string;
+    employmentType?: string;
+    dateOfJoining?: string;
+    workShift?: string;
+    salary?: number | string;
 }
 
 

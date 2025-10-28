@@ -15,7 +15,6 @@ import { addCourse, updateCourse } from '@/services/courseService';
 import * as Yup from 'yup';
 import { ChevronDownIcon } from '@/icons';
 import Select from '../form/Select';
-
 interface Course {
     _id?: string;
     name?: string;
@@ -102,14 +101,13 @@ const AddCourse: React.FC<AddCourseProps> = ({ open, handleClose, data }) => {
 
             <form onSubmit={formik.handleSubmit}>
                 <Grid >
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Course Name</Label>
                         <Input
                             id="name"
                             name="name"
                             type="text"
                             placeholder="Green Valley Golf Club"
-                            fullWidth
                             value={formik.values.name}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -119,14 +117,13 @@ const AddCourse: React.FC<AddCourseProps> = ({ open, handleClose, data }) => {
                         )}
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Course Number</Label>
                         <Input
                             id="courseNumber"
                             name="courseNumber"
                             type="text"
                             placeholder="A101"
-                            fullWidth
                             value={formik.values.courseNumber}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -136,7 +133,7 @@ const AddCourse: React.FC<AddCourseProps> = ({ open, handleClose, data }) => {
                         )}
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Capacity</Label>
                         <Select
                             id="capacity"
@@ -152,7 +149,7 @@ const AddCourse: React.FC<AddCourseProps> = ({ open, handleClose, data }) => {
                         )}
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Number of Holes</Label>
                         <div className="relative">
                             <Select
@@ -172,14 +169,13 @@ const AddCourse: React.FC<AddCourseProps> = ({ open, handleClose, data }) => {
                         </div>
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid>
                         <Label>Location</Label>
                         <Input
                             id="location"
                             name="location"
                             type="text"
                             placeholder="Los Angeles, CA"
-                            fullWidth
                             value={formik.values.location}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}

@@ -12,10 +12,8 @@ import {
     Divider,
     Stack,
     Button,
-    Grid,
     Collapse,
     IconButton,
-    CardContent,
     Chip
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon, ExpandMore, ExpandLess, Edit, Delete } from '@mui/icons-material';
@@ -23,6 +21,7 @@ import { useParams } from 'next/navigation';
 import { getBookingByID } from '@/services/bookingService';
 import RescheduleBookingModal from '@/components/tee-time-management/rescheduleBooking';
 import CancelBookingOftheDay from '@/components/tee-time-management/cancelBookingOfTheDay';
+import Grid from '@mui/material/Grid'
 
 interface Course {
     _id: string;
@@ -126,7 +125,6 @@ export default function GuestDetailPage() {
             <CancelBookingOftheDay open={openCancelModal} onClose={handleCloseCancel} slot={selectedSlot} bookingId={id} />
             <RescheduleBookingModal open={openRescheduleModal} onClose={handleCloseReschedule} slot={selectedSlot} bookingId={id} />
             <Container maxWidth="lg" sx={{ py: 4 }}>
-                {/* Member Details */}
                 <Card sx={{ p: 3, mb: 4, boxShadow: theme.shadows[4], borderRadius: 3 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography variant="h5" fontWeight={700}>
@@ -138,27 +136,25 @@ export default function GuestDetailPage() {
                     </Box>
                     <Divider sx={{ my: 2 }} />
 
-
                     <Grid container spacing={2}>
-                        <Grid item xs={12} md={6}>
-                            <Stack spacing={1}>
-                                <Typography><strong>Email:</strong> {guest.customerId.email}</Typography>
-                                <Typography><strong>Phone:</strong> {guest.customerId.phone}</Typography>
-                                <Typography><strong>Course:</strong> {guest.course.name}</Typography>
-                            </Stack>
-                        </Grid>
+                        {/* <Grid item xs={12} md={6}> */}
+                        <Stack spacing={1}>
+                            <Typography><strong>Email:</strong> {guest.customerId.email}</Typography>
+                            <Typography><strong>Phone:</strong> {guest.customerId.phone}</Typography>
+                            <Typography><strong>Course:</strong> {guest.course.name}</Typography>
+                        </Stack>
+                        {/* </Grid> */}
 
-                        <Grid item xs={12} md={6}>
-                            <Stack spacing={1}>
-                                <Typography><strong>Booking Type:</strong> {guest.bookingType}</Typography>
-                                <Typography><strong>Status:</strong> {guest.bookingStatus}</Typography>
-                                <Typography><strong>Special Info:</strong> {guest.specialInfo}</Typography>
-                            </Stack>
-                        </Grid>
+                        {/* <Grid item xs={12} md={6}> */}
+                        <Stack spacing={1}>
+                            <Typography><strong>Booking Type:</strong> {guest.bookingType}</Typography>
+                            <Typography><strong>Status:</strong> {guest.bookingStatus}</Typography>
+                            <Typography><strong>Special Info:</strong> {guest.specialInfo}</Typography>
+                        </Stack>
+                        {/* </Grid> */}
                     </Grid>
                 </Card>
 
-                {/* Slots Section */}
                 <Box>
                     <Typography variant="h6" mb={2}>Assigned Slots</Typography>
                     {
@@ -187,73 +183,73 @@ export default function GuestDetailPage() {
                                 <Collapse in={openMonth === month}>
                                     <Grid container spacing={2} sx={{ mt: 1, padding: 0 }}>
                                         {slots.map((slot) => (
-                                            <Grid item xs={12} sm={6} md={4} key={slot._id}>
-                                                <Card
-                                                    sx={{
-                                                        border: "1px solid #e5e7eb",
-                                                        borderRadius: 3,
-                                                        p: 2,
-                                                        backgroundColor: "#fff",
-                                                        transition: "0.2s",
-                                                        "&:hover": {
-                                                            borderColor: "#3b82f6",
-                                                            backgroundColor: "#f9fafb",
-                                                        },
-                                                    }}
-                                                >
-                                                    <Stack spacing={1}>
-                                                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                                            <Typography variant="subtitle1" fontWeight={600}>
-                                                                {new Date(slot.start).toLocaleDateString("en-US", {
-                                                                    weekday: "long",
-                                                                    month: "long",
-                                                                    day: "numeric",
-                                                                })}
-                                                            </Typography>
-
-                                                            <Chip
-                                                                label={slot.status.charAt(0).toUpperCase() + slot.status.slice(1)}
-                                                                size="small"
-                                                                sx={{
-                                                                    width: "fit-content",
-                                                                    bgcolor: slot.status === "booked" ? "#dcfce7" : "#fee2e2",
-                                                                    color: slot.status === "booked" ? "#16a34a" : "#dc2626",
-                                                                    fontWeight: 600,
-                                                                    mt: 1,
-                                                                    borderRadius: 1,
-                                                                }}
-                                                            />
-                                                        </Stack>
-
-                                                        <Typography variant="body2">
-                                                            <strong>Slot :</strong>{" "}
-                                                            {`${new Date(slot.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${new Date(slot.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                                            // <Grid item xs={12} sm={6} md={4} key={slot._id}>
+                                            <Card
+                                                sx={{
+                                                    border: "1px solid #e5e7eb",
+                                                    borderRadius: 3,
+                                                    p: 2,
+                                                    backgroundColor: "#fff",
+                                                    transition: "0.2s",
+                                                    "&:hover": {
+                                                        borderColor: "#3b82f6",
+                                                        backgroundColor: "#f9fafb",
+                                                    },
+                                                }}
+                                            >
+                                                <Stack spacing={1}>
+                                                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                                        <Typography variant="subtitle1" fontWeight={600}>
+                                                            {new Date(slot.start).toLocaleDateString("en-US", {
+                                                                weekday: "long",
+                                                                month: "long",
+                                                                day: "numeric",
+                                                            })}
                                                         </Typography>
 
-                                                        <Stack direction="row" spacing={1.5} sx={{ mt: 2 }}>
-                                                            <Button
-                                                                // variant="contained"
-                                                                variant="outlined"
-                                                                size="small"
-                                                                onClick={() => handleOpenReschedule(slot)}
-                                                                startIcon={<Edit />}
-
-                                                            >
-                                                                Reschedule
-                                                            </Button>
-                                                            <Button
-                                                                variant="outlined"
-                                                                size="small"
-                                                                color="error"
-                                                                onClick={() => handleOpenCancel(slot)}
-                                                                startIcon={<Delete />}
-                                                            >
-                                                                Cancel
-                                                            </Button>
-                                                        </Stack>
+                                                        <Chip
+                                                            label={slot.status.charAt(0).toUpperCase() + slot.status.slice(1)}
+                                                            size="small"
+                                                            sx={{
+                                                                width: "fit-content",
+                                                                bgcolor: slot.status === "booked" ? "#dcfce7" : "#fee2e2",
+                                                                color: slot.status === "booked" ? "#16a34a" : "#dc2626",
+                                                                fontWeight: 600,
+                                                                mt: 1,
+                                                                borderRadius: 1,
+                                                            }}
+                                                        />
                                                     </Stack>
-                                                </Card>
-                                            </Grid>
+
+                                                    <Typography variant="body2">
+                                                        <strong>Slot :</strong>{" "}
+                                                        {`${new Date(slot.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${new Date(slot.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                                                    </Typography>
+
+                                                    <Stack direction="row" spacing={1.5} sx={{ mt: 2 }}>
+                                                        <Button
+                                                            // variant="contained"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            onClick={() => handleOpenReschedule(slot)}
+                                                            startIcon={<Edit />}
+
+                                                        >
+                                                            Reschedule
+                                                        </Button>
+                                                        <Button
+                                                            variant="outlined"
+                                                            size="small"
+                                                            color="error"
+                                                            onClick={() => handleOpenCancel(slot)}
+                                                            startIcon={<Delete />}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                    </Stack>
+                                                </Stack>
+                                            </Card>
+                                            // </Grid>
                                         ))}
                                     </Grid>
                                 </Collapse>
@@ -289,5 +285,5 @@ export default function GuestDetailPage() {
                                                 </Card>
                                             </Grid>
                                         ))}
-                                    </Grid>
-                                </Collapse> */}
+ </Grid>
+  </Collapse> */}

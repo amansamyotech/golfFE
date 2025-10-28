@@ -9,19 +9,16 @@ import {
     Divider,
     Stack,
     Button,
-    Grid,
-    Collapse,
-    IconButton,
-    CardContent,
-    Chip
+    Chip,
+    // Grid
 } from '@mui/material';
-import { ArrowBack as ArrowBackIcon, ExpandMore, ExpandLess, Edit, Delete } from '@mui/icons-material';
+import { ArrowBack as ArrowBackIcon, Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'next/navigation';
 import { getBookingByID } from '@/services/bookingService';
 import RescheduleBookingModal from '@/components/tee-time-management/rescheduleBooking';
-import CancelBookingOftheDay from '@/components/tee-time-management/cancelBookingOfTheDay';
 import CancelBookingOfGuest from '@/components/guest/cancelBookingOfGuest';
 import moment from 'moment';
+import Grid from "@mui/material/Grid";
 
 interface Guest {
     _id: string;
@@ -35,6 +32,19 @@ interface Guest {
     specialInfo: string;
     createdAt: string;
     updatedAt: string;
+    groupSize: number;
+    paymentMode: string;
+}
+interface Course {
+    _id: string;
+    name: string;
+}
+
+interface Customer {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
 }
 interface Slot {
     _id: string;
@@ -135,29 +145,24 @@ export default function GuestDetailPage() {
                     <Divider sx={{ my: 2 }} />
 
                     <Grid container spacing={2} sx={{ mb: 2 }}>
-                        <Grid item xs={12} md={6}>
-                            <Stack spacing={1.5}>
-                                <Typography><strong>Email:</strong> {guest?.customerId?.email}</Typography>
-                                <Typography><strong>Course Name:</strong> {guest?.course?.name}</Typography>
-                                <Typography><strong>Booking Type:</strong> {guest?.bookingType}</Typography>
-                                <Typography><strong>Amount:</strong> {guest?.amount}</Typography>
-                            </Stack>
-                        </Grid>
+                        <Stack spacing={1.5}>
+                            <Typography><strong>Email:</strong> {guest?.customerId?.email}</Typography>
+                            <Typography><strong>Course Name:</strong> {guest?.course?.name}</Typography>
+                            <Typography><strong>Booking Type:</strong> {guest?.bookingType}</Typography>
+                            <Typography><strong>Amount:</strong> {guest?.amount}</Typography>
+                        </Stack>
 
-                        <Grid item xs={12} md={6}>
-                            <Stack spacing={1.5}>
-                                <Typography><strong>Phone:</strong> {guest?.customerId?.phone}</Typography>
-                                <Typography>
-                                    <strong>Booking Date:</strong> {moment().format('DD MMM YYYY')}
-                                </Typography>
-                                <Typography><strong>Group Size:</strong> {guest?.groupSize}</Typography>
-                                <Typography><strong>Payment Mode:</strong> {guest?.paymentMode}</Typography>
-                            </Stack>
-                        </Grid>
+                        <Stack spacing={1.5}>
+                            <Typography><strong>Phone:</strong> {guest?.customerId?.phone}</Typography>
+                            <Typography>
+                                <strong>Booking Date:</strong> {moment().format('DD MMM YYYY')}
+                            </Typography>
+                            <Typography><strong>Group Size:</strong> {guest?.groupSize}</Typography>
+                            <Typography><strong>Payment Mode:</strong> {guest?.paymentMode}</Typography>
+                        </Stack>
                     </Grid>
 
                     <Divider sx={{ my: 2 }} />
-                   
 
                     {guest.slotIds && guest.slotIds.length > 0 ? (
                         guest.slotIds.map((slot) => (
@@ -185,36 +190,31 @@ export default function GuestDetailPage() {
                                 </Stack>
 
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12} md={4}>
-                                        <Typography>
-                                            <strong>Date:</strong>{" "}
-                                            {new Date(slot.start).toLocaleDateString("en-GB", {
-                                                weekday: "long",
-                                                day: "2-digit",
-                                                month: "short",
-                                                year: "numeric",
-                                            })}
-                                        </Typography>
-                                    </Grid>
+                                    <Typography>
+                                        <strong>Date:</strong>{" "}
+                                        {new Date(slot.start).toLocaleDateString("en-GB", {
+                                            weekday: "long",
+                                            day: "2-digit",
+                                            month: "short",
+                                            year: "numeric",
+                                        })}
+                                    </Typography>
 
-                                    <Grid item xs={12} md={4}>
-                                        <Typography>
-                                            <strong>Time:</strong>{" "}
-                                            {`${new Date(slot.start).toLocaleTimeString([], {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })} - ${new Date(slot.end).toLocaleTimeString([], {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })}`}
-                                        </Typography>
-                                    </Grid>
+                                    <Typography>
+                                        <strong>Time:</strong>{" "}
+                                        {`${new Date(slot.start).toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })} - ${new Date(slot.end).toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}`}
+                                    </Typography>
 
-                                    <Grid item xs={12} md={4}>
-                                        <Typography>
-                                            <strong>Course:</strong> {guest.course?.name || "N/A"}
-                                        </Typography>
-                                    </Grid>
+                                    <Typography>
+                                        <strong>Course:</strong> {guest?.course?.name || "N/A"}
+                                    </Typography>
+
                                 </Grid>
 
                                 <Stack direction="row" spacing={1.5} sx={{ mt: 2 }}>
@@ -243,9 +243,6 @@ export default function GuestDetailPage() {
                             </Box>
                         ))
                     ) : (
-                        // <Typography color="text.secondary" sx={{ mt: 2 }}>
-                        //     No slots assigned yet.
-                        // </Typography> 
                         <></>
                     )}
                 </Card>

@@ -11,7 +11,7 @@ import {
     Box
 } from '@mui/material';
 import { Add, Delete, MoreVert, Edit, Visibility } from '@mui/icons-material';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import TableStyle from '@/components/ui/table-style';
 import DeleteCourse from '@/components/course/deleteCourse';
 import { getAllCourses } from '@/services/courseService';
@@ -21,13 +21,15 @@ import { getBooking } from '@/services/bookingService';
 import Link from 'next/link';
 import AssignSlotModalWithTabs from '@/components/tee-time-management/assignSlotOptionModal';
 
-type Booking = {
+interface Booking {
     _id: string;
-    memberId?: {
+    customerId?: {
         _id?: string;
         name?: string;
         email?: string;
         phone?: string;
+        role?: string;
+        startDate?: string;
     };
     name?: string;
     email?: string;
@@ -40,8 +42,10 @@ type Booking = {
     groupSize?: number | string;
     isCaddy?: boolean;
     specialInfo?: string;
+    startTime?: string;
+    endTime?: string;
+    bookingType?: string;
 };
-
 
 export default function TeeTimeManagement() {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
@@ -73,7 +77,7 @@ export default function TeeTimeManagement() {
             field: 'name',
             headerName: 'Contact Info',
             flex: 1,
-            renderCell: (params: GridRenderCellParams) => (
+            renderCell: (params: GridRenderCellParams<Booking>) => (
                 <Box display="flex" flexDirection="column">
                     <Typography variant="body2">{params.row.customerId.name}</Typography>
                     <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
@@ -113,9 +117,9 @@ export default function TeeTimeManagement() {
         {
             field: 'bookingType', headerName: 'Booking Type', flex: 1,
             renderCell: (params: any) => {
-                const value = params.value || ''; 
+                const value = params.value || '';
                 const formattedValue =
-                    value.charAt(0).toUpperCase() + value.slice(1).toLowerCase(); // Capitalize first letter
+                    value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
                 return formattedValue;
             },
 
@@ -161,7 +165,6 @@ export default function TeeTimeManagement() {
             width: 120,
             sortable: false,
             renderCell: (params: { row: Booking }) => {
-                // const isConfirmed = params.row.bookingStatus === 'confirmed';
                 return (
                     <Button
                         variant="contained"
@@ -175,8 +178,6 @@ export default function TeeTimeManagement() {
                     </Button>
                 );
             }
-
-
         },
         {
             field: 'bookedSlot',
@@ -279,7 +280,7 @@ export default function TeeTimeManagement() {
 
     const fetchAllBookings = async () => {
         try {
-            const response = await getBooking();
+            const response = await getBooking() as Booking[];
             const filterData = response?.filter((data: Booking) => data?.customerId?.role === "member")
             setBookings(filterData as Booking[]);
         } catch (error) {

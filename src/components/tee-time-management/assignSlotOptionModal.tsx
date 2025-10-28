@@ -240,12 +240,8 @@ export default function AssignSlotModalWithTabs({
             const res = await getAllIndividualSlots();
             const hasSlots = Array.isArray(res) && res.length > 0;
             onSlotsLoaded?.(hasSlots);
-
-            const response = await getIndividualSlotsByCourseId(data?.course?._id);
+            const response = await getIndividualSlotsByCourseId(data?.course?._id) as any[];
             setSlots(response || []);
-
-
-
         } catch (err) {
             console.error("Error fetching slots:", err);
         } finally {
@@ -301,7 +297,7 @@ export default function AssignSlotModalWithTabs({
                     </IconButton>
 
                     <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2, textAlign: "center" }}>
-                        Available Slots
+                        Available Slots 
                     </Typography>
 
                     <Tabs value={tab} onChange={handleTabChange} variant="fullWidth">

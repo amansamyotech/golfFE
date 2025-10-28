@@ -3,13 +3,27 @@ import { getData, deleteData, postData, putData } from "@/utils/apiHandler";
 import { handleApiResponse } from "@/utils/common";
 
 export interface TimeSlotPayload {
-    start_date: string; // ISO date string
-    end_date: string;   // ISO date string
-    slot_time_minutes: number;
-    buffer_time_minutes: number;
-    ground_opening_time: string; // e.g., "08:00"
-    ground_closing_time: string; // e.g., "20:00"
-    status: 'available' | 'booked';
+    // start_date: string;
+    // end_date: string;
+    // slot_time_minutes: number;
+    // buffer_time_minutes: number;
+    // ground_opening_time: string;
+    // ground_closing_time: string;
+    // status: 'available' | 'booked';
+    // total_slot_time?: number | string;
+
+    _id?: string;
+    start_date?: string;
+    course?: { _id: string; name: string } | any;
+    slot_time_hours?: number | string;
+    slot_time_minutes?: number | string;
+    weekday_opening_time?: string | any;
+    weekday_closing_time?: string | any;
+    weekend_opening_time?: string | any;
+    weekend_closing_time?: string | any;
+    total_slot_time?: number | string;
+    buffer_time?: number | string;
+    status?: 'available' | 'booked';
 }
 
 export const addTimeSlot = async (payload: TimeSlotPayload) => {
@@ -63,10 +77,7 @@ export const getIndividualSlotsByTimeSlotId = async (id: string) => {
 }
 
 export const getIndividualSlotsByCourseId = async (id: string) => {
-    console.log("Fetching slots for course ID:", id);
-
     const url = `${api_urls.baseUrl}${api_urls.timeslot.getAllIndividualSlotsByCourseId}/${id}`;
-    console.log("url:", url);
     const response = await getData(url);
     return await handleApiResponse(response);
 }

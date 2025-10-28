@@ -57,7 +57,7 @@ export const deleteData = async <T = unknown>(url: string, config: AxiosRequestC
 
 export const postFormData = async <T = unknown>(
     url: string,
-    formData: FormData,
+    formData: FormData | any,
     config: AxiosRequestConfig = {}
 ): Promise<T> => {
     const res = await api.post<T>(url, formData, {
@@ -72,7 +72,7 @@ export const postFormData = async <T = unknown>(
 // --- PUT WITH FORM DATA ---
 export const putFormData = async <T = unknown>(
     url: string,
-    formData: FormData,
+    formData: FormData | any,
     config: AxiosRequestConfig = {}
 ): Promise<T> => {
     const res = await api.put<T>(url, formData, {

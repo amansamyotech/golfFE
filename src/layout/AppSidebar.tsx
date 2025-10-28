@@ -28,6 +28,7 @@ type NavItem = {
   icon: React.ReactNode;
   path?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  pro?: boolean;
 };
 
 const navItems: NavItem[] = [
@@ -79,17 +80,17 @@ const navItems: NavItem[] = [
       // { name: "Leaderboards", path: "/basic-tables2", pro: false },
       // { name: "Past Events", path: "/basic-tables3", pro: false }
 
-      { name: "Events", path: "/basic-tables", pro: false },
-      { name: "Register Players", path: "/basic-tables1", pro: false },
-      { name: "Leaderboards", path: "/basic-tables2", pro: false },
+      { name: "Events", path: "/tournament", pro: false },
+      { name: "Register Players", path: "/players", pro: false },
+      // { name: "Leaderboards", path: "/basic-tables2", pro: false },
     ],
   },
   {
     name: "Pro Shop",
     icon: <Product />,
     subItems: [
-      { name: "Inventory List", path: "/blank", pro: false },
-      { name: "Rentals", path: "/error-404", pro: false },
+      { name: "Inventory List", path: "/pro-shop", pro: false },
+      { name: "Rentals", path: "/pro-shop-rental", pro: false },
       { name: "Sales Reports", path: "/xyz", pro: false },
     ],
   },

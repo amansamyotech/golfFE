@@ -29,6 +29,7 @@ interface SlotDetails {
     status: string;
     course?: string;
     isWeekend?: boolean;
+    slot?: any;
 }
 
 interface SlotWrapper {
@@ -41,7 +42,7 @@ interface SlotWrapper {
 type ConfirmationBookingModalProps = {
     open: boolean;
     onClose: () => void;
-    slot: SlotWrapper | SlotDetails | null;
+    slot: SlotWrapper | SlotDetails | null | any;
 };
 
 export default function ConfirmationBookingModal({
@@ -59,7 +60,7 @@ export default function ConfirmationBookingModal({
 
     const handleConfirm = async () => {
         try {
-            const response = await assignSlot(slot._id, slot);
+            const response = await assignSlot(slot?._id, slot);
         } catch (err) {
             console.error("Error fetching slots:", err);
         } finally {

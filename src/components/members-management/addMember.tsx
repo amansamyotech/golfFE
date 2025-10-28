@@ -149,7 +149,7 @@ const AddMember = ({
     };
 
     const fetchPlans = async () => {
-        const fetchedPlans = await getAllPlan();
+        const fetchedPlans = await getAllPlan() as Plan[];
         const formattedPlans = fetchedPlans.map((plan: Plan) => ({
             value: plan._id,
             label: plan.title,
@@ -185,7 +185,7 @@ const AddMember = ({
 
                 <form onSubmit={formik.handleSubmit}>
                     <Grid >
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Name</Label>
                             <Input
                                 id="name"
@@ -202,7 +202,7 @@ const AddMember = ({
                             )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Email</Label>
                             <Input
                                 id="email"
@@ -219,7 +219,7 @@ const AddMember = ({
                             )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Phone No</Label>
                             <Input
                                 id="phone"
@@ -236,7 +236,7 @@ const AddMember = ({
                             )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <DatePicker
                                 id="dob"
                                 label="Date of Birth"
@@ -251,7 +251,7 @@ const AddMember = ({
                             )}
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Gender</Label>
                             <div className="relative">
                                 <Select
@@ -271,7 +271,7 @@ const AddMember = ({
                             </div>
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Upload Goverment Id</Label>
 
                             <FileInput onChange={handleFileChange} className="custom-class" />
@@ -289,8 +289,7 @@ const AddMember = ({
                             )}
                         </Grid>
 
-
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Select Membership Plan</Label>
                             <div className="relative">
                                 <Select
@@ -310,7 +309,7 @@ const AddMember = ({
                             </div>
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid>
                             <DatePicker
                                 id="startDate"
                                 label="Start Date"
@@ -323,9 +322,7 @@ const AddMember = ({
                             )}
                         </Grid>
 
-
-
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Select Preferred Tee Time</Label>
                             <div className="relative">
                                 <Select
@@ -345,9 +342,7 @@ const AddMember = ({
                             </div>
                         </Grid>
 
-
-
-                        <Grid item xs={12}>
+                        <Grid>
                             <Label>Profile Type</Label>
                             <div className="relative">
                                 <Select

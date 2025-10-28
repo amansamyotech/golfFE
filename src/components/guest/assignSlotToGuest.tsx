@@ -170,7 +170,7 @@ export default function AssignSlotToGuest({
             const hasSlots = Array.isArray(res) && res.length > 0;
             onSlotsLoaded?.(hasSlots);
 
-            const response = await getIndividualSlotsByCourseId(data?.course?._id);
+            const response = await getIndividualSlotsByCourseId(data?.course?._id) as any[];
             setSlots(response || []);
 
 

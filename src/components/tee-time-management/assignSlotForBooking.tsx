@@ -14,7 +14,7 @@ const AssignSlotForBooking = ({ timeSlotId }: any) => {
             try {
                 setLoading(true);
                 // const response = await getAllIndividualSlots();
-                const response = await getIndividualSlotsByTimeSlotId(timeSlotId);
+                const response = await getIndividualSlotsByTimeSlotId(timeSlotId) as any[];
                 setSlots(response || []);
             } catch (err) {
                 setError('Failed to fetch slots');

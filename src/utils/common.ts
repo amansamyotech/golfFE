@@ -37,7 +37,7 @@
 import { toast } from 'react-toastify';
 
 interface ApiResponse<T = unknown> {
-  status: number;
+  status?: number;
   message?: string;
   data?: T;
 }

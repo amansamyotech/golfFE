@@ -14,24 +14,18 @@ import {
     DialogTitle,
     DialogContent
 } from '@mui/material';
-import { Add, MoreVert, Edit, Delete } from '@mui/icons-material';
+import { Add } from '@mui/icons-material';
 import AddTimeSlot from '@/components/time-slot/addTimeSlot';
 import { DataGrid } from '@mui/x-data-grid';
 import TableStyle from '@/components/ui/table-style';
-import { getAllCourses } from '@/services/courseService';
 import { getTimeSlot } from '@/services/timeslotService';
 import moment from 'moment';
-import { GridRenderCellParams } from '@mui/x-data-grid';
-import SlotManagementPage from '@/components/time-slot/viewTimeSlots';
 import CloseIcon from '@mui/icons-material/Close';
 import AssignSlotForBooking from '@/components/tee-time-management/assignSlotForBooking';
 
-
 export default function TimeSlot() {
-
     const [open, setOpen] = useState(false);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-    const [courses, setCourses] = useState([]);
     const [timeSlot, setTimeSlot] = useState([]);
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [rowData, setRowData] = useState(null);
@@ -46,30 +40,8 @@ export default function TimeSlot() {
         setOpen(false);
     };
 
-    const handleClosePopover = () => {
-        setAnchorEl(null);
-    };
-
-    const handleOpenEdit = () => {
-        setOpen(true);
-        handleClosePopover();
-    };
-
-    const handleDelete = () => {
-        // setOpenDelete(true);
-    };
-
-    const handleClick = (event: React.MouseEvent<HTMLElement>, row: Member) => {
-        setAnchorEl(event.currentTarget);
-        setRowData(row);
-    };
-
-    // const handleViewSlots = () => {
-    //     setOpenView(true);
-    // }
-
     const handleViewSlots = (rowId: string) => {
-        setSelectedTimeSlotId(rowId); // store the selected _id
+        setSelectedTimeSlotId(rowId);
         setOpenView(true);
     };
 
@@ -156,7 +128,7 @@ export default function TimeSlot() {
 
     const fetchTimeSlot = async () => {
         try {
-            const response = await getTimeSlot();
+            const response = await getTimeSlot() as any[];
             setTimeSlot(response);
         } catch (error) {
             console.error('Error fetching slot:', error);

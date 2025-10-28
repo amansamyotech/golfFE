@@ -48,24 +48,24 @@ const Calendar: React.FC = () => {
     try {
       const response = await getBooking();
 
-      const formattedEvents = response?.map((booking: any) => {
-        const startISO = new Date(booking.startTime).toISOString();
-        const endISO = booking.endTime ? new Date(booking.endTime).toISOString() : null;
+      // const formattedEvents = response?.map((booking: any) => {
+      //   const startISO = new Date(booking.startTime).toISOString();
+      //   const endISO = booking.endTime ? new Date(booking.endTime).toISOString() : null;
 
-        return {
-          id: booking._id,
-          title: `${booking.customerId?.name || "Guest"}`,
-          start: booking.startTime,
-          end: booking.endTime,
-          extendedProps: {
-            calendar: booking.customerId?.role === "member" ? "Member" : "Guest",
-            bookedBy: booking.customerId?.name,
-            course: booking.course?.name,
-            notes: booking.specialInfo,
-          },
-        };
-      });
-      setEvents(formattedEvents);
+      //   return {
+      //     id: booking._id,
+      //     title: `${booking.customerId?.name || "Guest"}`,
+      //     start: booking.startTime,
+      //     end: booking.endTime,
+      //     extendedProps: {
+      //       calendar: booking.customerId?.role === "member" ? "Member" : "Guest",
+      //       bookedBy: booking.customerId?.name,
+      //       course: booking.course?.name,
+      //       notes: booking.specialInfo,
+      //     },
+      //   };
+      // });
+      setEvents([]);
     } catch (error) {
       console.error('Error fetching data:', error);
     }

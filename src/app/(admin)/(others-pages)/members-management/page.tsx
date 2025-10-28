@@ -23,8 +23,6 @@ import { getAllCustomer } from '@/services/customerService';
 import Link from 'next/link';
 import { GridRenderCellParams } from '@mui/x-data-grid';
 import moment from 'moment';
-
-// Define Member interface
 interface Member {
     _id: string;
     name: string;
@@ -32,6 +30,7 @@ interface Member {
     plan?: { _id: string; title: string } | null;
     course?: { _id: string; name: string } | null;
     status: boolean | string;
+    role?: string;
 }
 
 // Define MemberData interface (copied from AddMember for mapping)
@@ -67,8 +66,6 @@ export default function Member() {
         ...row,
         sNo: paginationModel.page * paginationModel.pageSize + index + 1,
     }));
-
-
 
     const columns = [
         { field: 'sNo', headerName: 'S.No', width: 80 },
@@ -139,7 +136,6 @@ export default function Member() {
                 );
             },
         },
-
         {
             field: 'action',
             headerName: 'Action',
@@ -214,8 +210,8 @@ export default function Member() {
 
     const fetchMembers = async () => {
         try {
-            const response = await getAllCustomer();
-            const filterData = response?.filter((member: Member) => member.role === "member")
+            const response = await getAllCustomer() as unknown as Member[];
+            const filterData = response?.filter((member: Member) => member?.role === "member")
             setMembers(filterData as Member[]);
         } catch (error) {
             console.error('Error fetching members:', error);
