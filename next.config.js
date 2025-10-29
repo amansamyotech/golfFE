@@ -57,10 +57,10 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 });
 
 const nextConfig = {
-  reactStrictMode: false, 
-  compress: true,         
+  reactStrictMode: false,
+  compress: true,
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'golfcrm.samyotech.in'], 
   },
   webpack(config) {
     config.module.rules.push({

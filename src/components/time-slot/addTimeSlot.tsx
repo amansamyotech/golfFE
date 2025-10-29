@@ -40,32 +40,72 @@ interface AddTimeSlotProps {
     data?: TimeSlotData;
 }
 
+// const validationSchema = Yup.object().shape({
+//     start_date: Yup.date().required('Start date is required'),
+//     course: Yup.string().required('Course is required'),
+//     slot_time_hours: Yup.number()
+//         .typeError('Slot time must be a number')
+//         .required('Slot time is required')
+//         .positive('Must be greater than 0')
+//         .integer('Must be an integer'),
+//     slot_time_minutes: Yup.number()
+//         .typeError('Slot time must be a number')
+//         .required('Slot time is required')
+//         // .positive('Must be greater than 0')
+//         .integer('Must be an integer'),
+//     buffer_time: Yup.number()
+//         .typeError('Buffer time must be a number')
+//         .required('Buffer time is required')
+//         .positive('Must be greater than 0')
+//         .integer('Must be an integer'),
+//     weekday_opening_time: Yup.string().required('Weekday opening time is required'),
+//     weekday_closing_time: Yup.string().required('Weekday closing time is required'),
+//     weekend_opening_time: Yup.string().required('Weekend opening time is required'),
+//     weekend_closing_time: Yup.string().required('Weekend closing time is required'),
+//     status: Yup.string()
+//         .oneOf(['available', 'booked'], 'Invalid status')
+//         .required('Status is required'),
+// });
+
 const validationSchema = Yup.object().shape({
-    start_date: Yup.date().required('Start date is required'),
-    course: Yup.string().required('Course is required'),
-    slot_time_hours: Yup.number()
-        .typeError('Slot time must be a number')
-        .required('Slot time is required')
-        .positive('Must be greater than 0')
-        .integer('Must be an integer'),
-    slot_time_minutes: Yup.number()
-        .typeError('Slot time must be a number')
-        .required('Slot time is required')
-        // .positive('Must be greater than 0')
-        .integer('Must be an integer'),
-    buffer_time: Yup.number()
-        .typeError('Buffer time must be a number')
-        .required('Buffer time is required')
-        .positive('Must be greater than 0')
-        .integer('Must be an integer'),
-    weekday_opening_time: Yup.string().required('Weekday opening time is required'),
-    weekday_closing_time: Yup.string().required('Weekday closing time is required'),
-    weekend_opening_time: Yup.string().required('Weekend opening time is required'),
-    weekend_closing_time: Yup.string().required('Weekend closing time is required'),
-    status: Yup.string()
-        .oneOf(['available', 'booked'], 'Invalid status')
-        .required('Status is required'),
-});
+  start_date: Yup.date().required('Start date is required'),
+  course: Yup.string().required('Course is required'),
+
+  slot_time_hours: Yup.number()
+    .typeError('Slot time must be a number')
+    .required('Slot time is required')
+    .min(0, 'Hours cannot be negative')
+    .integer('Must be an integer'),
+
+  slot_time_minutes: Yup.number()
+    .typeError('Slot time must be a number')
+    .required('Slot time is required')
+    .min(0, 'Minutes cannot be negative')
+    .max(59, 'Minutes must be less than 60')
+    .integer('Must be an integer'),
+
+  buffer_time: Yup.number()
+    .typeError('Buffer time must be a number')
+    .required('Buffer time is required')
+    .positive('Must be greater than 0')
+    .integer('Must be an integer'),
+
+  weekday_opening_time: Yup.string().required('Weekday opening time is required'),
+  weekday_closing_time: Yup.string().required('Weekday closing time is required'),
+  weekend_opening_time: Yup.string().required('Weekend opening time is required'),
+  weekend_closing_time: Yup.string().required('Weekend closing time is required'),
+
+  status: Yup.string()
+    .oneOf(['available', 'booked'], 'Invalid status')
+    
+    .required('Status is required'),
+})
+  // 👇 Simple combined validation at the end
+  .test('total-slot-time', 'Total slot time must be greater than 0', function (values) {
+    const totalMinutes = (values.slot_time_hours || 0) * 60 + (values.slot_time_minutes || 0);
+    return totalMinutes > 0;
+  });
+
 
 const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) => {
     const [loading, setLoading] = useState(false);

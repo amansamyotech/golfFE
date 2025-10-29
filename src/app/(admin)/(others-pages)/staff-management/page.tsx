@@ -54,6 +54,26 @@ export default function StaffManagement() {
 
     const columns: GridColDef[] = [
         { field: 'sNo', headerName: 'S.No', width: 80 },
+        // {
+        //     field: 'profileImg',
+        //     headerName: 'Image',
+        //     width: 80,
+        //     sortable: false,
+        //     renderCell: (params: { row: StaffMember }) => {
+        //         const imgSrc = params.row.profileImg
+        //             ? `${process.env.NEXT_PUBLIC_API_IMG_URL}${params.row.profileImg}`
+        //             : defaultImage;
+        //         return (
+        //             <Image
+        //                 src={imgSrc}
+        //                 alt={params.row.title}
+        //                 width={40}
+        //                 height={40}
+        //                 style={{ borderRadius: 4, objectFit: 'cover' }}
+        //             />
+        //         );
+        //     },
+        // },
         {
             field: 'profileImg',
             headerName: 'Image',
@@ -63,15 +83,13 @@ export default function StaffManagement() {
                 const imgSrc = params.row.profileImg
                     ? `${process.env.NEXT_PUBLIC_API_IMG_URL}${params.row.profileImg}`
                     : defaultImage;
+
+                console.log('Image URL for row:', imgSrc);
+
                 return (
-                    // <img
-                    //     src={imgSrc}
-                    //     alt={params.row.title}
-                    //     style={{ width: 40, height: 40, borderRadius: 4, objectFit: 'cover' }}
-                    // />
                     <Image
                         src={imgSrc}
-                        alt={params.row.title}
+                        alt={params.row.name || 'Profile'}
                         width={40}
                         height={40}
                         style={{ borderRadius: 4, objectFit: 'cover' }}
@@ -184,7 +202,6 @@ export default function StaffManagement() {
                             paginationModel={paginationModel}
                             onPaginationModelChange={setPaginationModel}
                             pageSizeOptions={[5, 10]}
-                            checkboxSelection
                             getRowId={(row) => row._id}
                             sx={{
                                 border: 0,
