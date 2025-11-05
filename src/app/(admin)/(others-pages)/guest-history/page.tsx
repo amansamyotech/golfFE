@@ -72,11 +72,27 @@ export default function GuestHistoryManagement() {
 
     const columns = [
         { field: 'sNo', headerName: 'S.No', width: 80 },
+        // {
+        //     field: 'name', headerName: 'Name', flex: 1,
+        //     renderCell: (params: GridRenderCellParams) => (
+        //         params.row.customerId?.name
+        //     ),
+        // },
         {
-            field: 'name', headerName: 'Name', flex: 1,
+            field: 'name',
+            headerName: 'Name',
+            flex: 1,
             renderCell: (params: GridRenderCellParams) => (
-                params.row.customerId?.name
-
+                <Link
+                    href={`/guest-bookings/${params.row._id}`}
+                    style={{
+                        color: "#1976d2",
+                        textDecoration: "underline",
+                        cursor: "pointer"
+                    }}
+                >
+                    {params?.row?.customerId?.name}
+                </Link>
             ),
         },
         {
@@ -106,18 +122,17 @@ export default function GuestHistoryManagement() {
             headerName: 'Payment Amount',
             flex: 1,
             renderCell: (params: GridRenderCellParams) => (
-                `Rs ${params.row.amount}/-`
+                `Rs ${params.row.customerId.totalAmount}/-`
             ),
         },
-
-        {
-            field: 'paymentMode',
-            headerName: 'Payment Mode',
-            flex: 1,
-            renderCell: (params: GridRenderCellParams) => (
-                params.row.paymentMode
-            ),
-        },
+        // {
+        //     field: 'paymentMode',
+        //     headerName: 'Payment Mode',
+        //     flex: 1,
+        //     renderCell: (params: GridRenderCellParams) => (
+        //         params.row.paymentMode
+        //     ),
+        // },
         {
             field: 'bookingStatus',
             headerName: 'Booking Status',
@@ -160,6 +175,10 @@ export default function GuestHistoryManagement() {
             headerName: 'Status',
             width: 120,
             renderCell: (params: GridRenderCellParams) => {
+                // const value = params.value;
+                // const isActive = value == 'ACTIVE' ? 'ACTIVE' : 'INACTIVE';
+                // const label = isActive ? 'ACTIVE' : 'INACTIVE';
+
                 const isActive =
                     typeof params.value === 'boolean'
                         ? params.value
@@ -182,37 +201,38 @@ export default function GuestHistoryManagement() {
                     />
                 );
             },
-        },
-        {
-            field: 'action',
-            headerName: 'Action',
-            width: 100,
-            sortable: false,
-            renderCell: (params: { row: Guest }) => (
-                <>
-                    <IconButton onClick={(e) => handleClick(e, params.row)}>
-                        <MoreVert fontSize="small" />
-                    </IconButton>
-                    <Popover
-                        open={Boolean(anchorEl) && rowData?._id === params.row._id}
-                        anchorEl={anchorEl}
-                        onClose={handleClosePopover}
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                    >
-                        {/* <MenuItem onClick={() => handleOpenEdit(params.row)}>
-                            <Edit fontSize="small" style={{ marginRight: 8 }} /> Edit
-                        </MenuItem> */}
-                        <MenuItem
-                            component={Link}
-                            href={params?.row?._id ? `/guest-bookings/${params.row._id}` : "#"}
-                            sx={{ color: "blue" }}
-                        >
-                            <Visibility fontSize="small" style={{ marginRight: 8 }} /> View
-                        </MenuItem>
-                    </Popover>
-                </>
-            )
         }
+
+        // {
+        //     field: 'action',
+        //     headerName: 'Action',
+        //     width: 100,
+        //     sortable: false,
+        //     renderCell: (params: { row: Guest }) => (
+        //         <>
+        //             <IconButton onClick={(e) => handleClick(e, params.row)}>
+        //                 <MoreVert fontSize="small" />
+        //             </IconButton>
+        //             <Popover
+        //                 open={Boolean(anchorEl) && rowData?._id === params.row._id}
+        //                 anchorEl={anchorEl}
+        //                 onClose={handleClosePopover}
+        //                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        //             >
+        //                 {/* <MenuItem onClick={() => handleOpenEdit(params.row)}>
+        //                     <Edit fontSize="small" style={{ marginRight: 8 }} /> Edit
+        //                 </MenuItem> */}
+        //                 <MenuItem
+        //                     component={Link}
+        //                     href={params?.row?._id ? `/guest-bookings/${params.row._id}` : "#"}
+        //                     sx={{ color: "blue" }}
+        //                 >
+        //                     <Visibility fontSize="small" style={{ marginRight: 8 }} /> View
+        //                 </MenuItem>
+        //             </Popover>
+        //         </>
+        //     )
+        // }
     ];
 
     const fetchGuestData = async () => {
@@ -239,7 +259,7 @@ export default function GuestHistoryManagement() {
                 </Stack>
 
                 <TableStyle>
-                    <Card sx={{ height: '100vh' }}>
+                    <Card sx={{height: '400px'}}>
                         <DataGrid
                             rows={rows}
                             columns={columns}

@@ -149,7 +149,7 @@ export default function GuestDetailPage() {
                             <Typography><strong>Email:</strong> {guest?.customerId?.email}</Typography>
                             <Typography><strong>Course Name:</strong> {guest?.course?.name}</Typography>
                             <Typography><strong>Booking Type:</strong> {guest?.bookingType}</Typography>
-                            <Typography><strong>Amount:</strong> {guest?.amount}</Typography>
+                            <Typography><strong>Caddy:</strong> {guest?.caddyCart ? 'Selected ' : 'Not Selected'} </Typography>
                         </Stack>
 
                         <Stack spacing={1.5}>
@@ -158,7 +158,9 @@ export default function GuestDetailPage() {
                                 <strong>Booking Date:</strong> {moment().format('DD MMM YYYY')}
                             </Typography>
                             <Typography><strong>Group Size:</strong> {guest?.groupSize}</Typography>
-                            <Typography><strong>Payment Mode:</strong> {guest?.paymentMode}</Typography>
+                            {
+                                guest?.caddyId ? <Typography><strong>Caddy Name:</strong> {guest?.caddyId?.name}</Typography> : <></>
+                            }
                         </Stack>
                     </Grid>
 

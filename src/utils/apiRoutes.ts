@@ -1,4 +1,6 @@
 import Tournament from "@/app/(admin)/(others-pages)/tournament/page";
+import { getById } from "@/services/customerService";
+import { useDateInput } from "@heroui/react";
 
 export const api_urls = {
     baseUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}`,
@@ -46,6 +48,9 @@ export const api_urls = {
         getAll: 'staff/get-all',
         update: 'staff/update',
         delete: 'staff/delete',
+        getById: 'staff',
+        updateShift: 'staff/update-workingshift-status',
+        usedateStatus: 'staff/update-status'
     },
 
     booking: {
@@ -58,6 +63,7 @@ export const api_urls = {
         updateBookingAssignSlot: "booking/update-assign-slot",
         cancelBookingAssignSlot: "booking/cancel-assign-slot",
         cancelBookingOfGuest: "booking/cancel-booking-guest",
+        assignCaddy: "booking/assign-caddy"
     },
 
     timeslot: {
@@ -98,4 +104,26 @@ export const api_urls = {
         updateStock: "products/update-stock",
         delete: "products/delete",
     },
+
+    rental: {
+        create: "rental/create",
+        getAll: "rental/get-all",
+        getById: "rental/get",
+        update: "rental/update",
+        return: "rental/return",
+        cancel: "rental/cancel",
+        getByStatus: "rental/status",
+    },
+
+    user: {
+        login: "auth/login",
+    },
+
+    payment: {
+        create: "payment/create",
+        getAll: "payment/get-all",
+        getById: "payment",
+        update: "payment/update",
+        delete: "payment/delete",   
+    }
 };

@@ -87,7 +87,7 @@ const validationSchema = Yup.object().shape({
   buffer_time: Yup.number()
     .typeError('Buffer time must be a number')
     .required('Buffer time is required')
-    .positive('Must be greater than 0')
+    .min(0, 'Minutes cannot be negative')
     .integer('Must be an integer'),
 
   weekday_opening_time: Yup.string().required('Weekday opening time is required'),
@@ -182,6 +182,7 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
                                 id="start_date"
                                 label="Start Date"
                                 placeholder="Select a date"
+                                minDate='today'
                                 // defaultDate={formik.values.start_date}
                                 // onChange={(date) => {
                                 //     formik.setFieldValue("start_date", date)

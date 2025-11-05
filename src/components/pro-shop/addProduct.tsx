@@ -26,7 +26,7 @@ const validationSchema = Yup.object().shape({
     category: Yup.string().required("Category is required"),
     price: Yup.number().required("Price is required").min(0, "Price must be positive"),
     costPrice: Yup.number().min(0, "Cost price must be positive"),
-    stock: Yup.number().required("Stock is required").min(0, "Stock must be positive"),
+    totalStock: Yup.number().required("Stock is required").min(0, "Stock must be positive"),
     rentalRate: Yup.number().min(0, "Rental rate must be positive"),
     description: Yup.string().max(300, "Description too long"),
     productImage: Yup.mixed().nullable(),
@@ -50,7 +50,7 @@ const AddProduct = ({ open, handleClose, data }) => {
             category: data?.category || "",
             price: data?.price || "",
             costPrice: data?.costPrice || "",
-            stock: data?.stock || "",
+            totalStock: data?.totalStock || "",
             rentalRate: data?.rentalRate || "",
             description: data?.description || "",
             productImage: data?.productImage || "",
@@ -177,14 +177,14 @@ const AddProduct = ({ open, handleClose, data }) => {
                             <Label>Stock</Label>
                             <Input
                                 type="number"
-                                name="stock"
-                                value={formik.values.stock}
+                                name="totalStock"
+                                value={formik.values.totalStock}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                                 placeholder="Stock quantity"
                             />
-                            {formik.touched.stock && formik.errors.stock && (
-                                <div className="text-red-500 text-xs">{formik.errors.stock as string}</div>
+                            {formik.touched.totalStock && formik.errors.totalStock && (
+                                <div className="text-red-500 text-xs">{formik.errors.totalStock as string}</div>
                             )}
                         </Grid>
 

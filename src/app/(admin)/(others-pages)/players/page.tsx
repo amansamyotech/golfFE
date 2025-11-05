@@ -49,6 +49,7 @@ export default function Players() {
 
     const handleCloseAdd = () => {
         setOpen(false);
+        setRowData(null);
     };
 
     const handleClosePopover = () => {
@@ -238,6 +239,7 @@ export default function Players() {
         fetchTournament();
     }, [open, openDelete]);
 
+
     return (
         <>
             <AddPlayers open={open} handleClose={handleCloseAdd} data={rowData} />
@@ -251,7 +253,7 @@ export default function Players() {
                 </Stack>
 
                 <TableStyle>
-                    <Card sx={{ height: '100vh' }}>
+                    <Card sx={{height: '400px'}}>
                         <DataGrid
                             rows={rows}
                             columns={columns}

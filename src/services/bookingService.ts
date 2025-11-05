@@ -119,6 +119,20 @@ export const cancelBookingOfGuest = async (
     return await handleApiResponse(response, 'DELETE');
 };
 
+export const assignCaddy = async (
+    bookingId: string,
+    caddyId: string
+) => {
+    const url = `${api_urls.baseUrl}${api_urls.booking.assignCaddy}/${bookingId}`;
+    const payload = {
+        caddyId,
+    }
+    const response = await putData(url, payload);
+    return await handleApiResponse(response);
+};
+
+
+
 
 
 

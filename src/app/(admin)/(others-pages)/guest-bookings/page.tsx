@@ -25,6 +25,8 @@ import Link from 'next/link';
 import { GridRenderCellParams } from '@mui/x-data-grid';
 import { getBooking } from '@/services/bookingService';
 import AssignSlotToGuest from '@/components/guest/assignSlotToGuest';
+import AssignCaddy from '@/components/tee-time-management/assignCaddy';
+import AddPayment from '@/components/payment/addPayment';
 interface Guest {
     _id: string;
     name: string;
@@ -72,7 +74,10 @@ export default function GuestManagement() {
     const [guests, setGuests] = useState<Guest[]>([]);
     const [openAssignSlot, setOpenAssignSlot] = useState(false);
     const [slotsAvailable, setSlotsAvailable] = useState<boolean | null>(null);
+    const [openAssignCaddy, setOpenAssignCaddy] = useState(false);
+    const [openPayment, setOpenPayment] = useState(false);
 
+    
     const paginatedRows = guests.slice(
         paginationModel.page * paginationModel.pageSize,
         (paginationModel.page + 1) * paginationModel.pageSize
@@ -96,6 +101,27 @@ export default function GuestManagement() {
         setOpenAssignSlot(false);
     }
 
+
+    const handleOpenAssignCaddy = (row: any) => {
+        setSelectedId(row._id);
+        setOpenAssignCaddy(true);
+    }
+
+    const handleCloseAssignCaddy = () => {
+        setSelectedId(null);
+        setOpenAssignCaddy(false);
+    }
+
+    const handleOpenPayment = (row: any) => {
+        setRowData(row);
+        setOpenPayment(true);
+    }
+
+    const handleClosePayment = () => {
+        setRowData(null);
+        setOpenPayment(false);
+    }
+
     const columns = [
         { field: 'sNo', headerName: 'S.No', flex: 0.5, sortable: false },
         {
@@ -111,7 +137,6 @@ export default function GuestManagement() {
                 </Box>
             ),
         },
-        { field: 'courseName', headerName: 'Course Name', flex: 1 },
         {
             field: 'startDate', headerName: 'Booking Date', flex: 1, renderCell: (params) => {
                 const dateValue = params.row.customerId?.startDate;
@@ -226,6 +251,55 @@ export default function GuestManagement() {
             },
         },
         {
+            field: 'assignCaddy',
+            headerName: 'Assign Caddy',
+            width: 120,
+            sortable: false,
+            renderCell: (params) => {
+                const canAssignCaddy = params.row.caddyCart === true;
+                const isCaddyAssign = params.row.caddyId ? true : false
+
+                return (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleOpenAssignCaddy(params.row)}
+                        disabled={!canAssignCaddy || isCaddyAssign}
+                        sx={{
+                            textTransform: 'none',
+                            opacity: !canAssignCaddy ? 0.6 : 1,
+                            cursor: !canAssignCaddy ? 'not-allowed' : 'pointer',
+                        }}
+                    >
+                        {/* Assign Caddy */}
+                        {canAssignCaddy ? 'Assign Caddy' : 'Not Selected'}
+                    </Button>
+                );
+            },
+        },
+        {
+            field: 'paymentAction',
+            headerName: 'Make Payment',
+            width: 120,
+            sortable: false,
+            renderCell: (params) => {
+                return (
+                    <Button
+                
+                        variant="contained"
+                        color='success'
+                        size="small"
+                        style={{ textTransform: 'none', width: '100%' }}
+                        disabled={params.row.customerId?.paymentStatus === 'paid'}
+                        onClick={() => handleOpenPayment(params.row)}
+                    >
+                        Pay Now
+                    </Button>
+                );
+            },
+        },
+        {
             field: 'action',
             headerName: 'Action',
             width: 100,
@@ -300,10 +374,12 @@ export default function GuestManagement() {
 
     useEffect(() => {
         fetchAllBookings();
-    }, [open, openDelete, openAssignSlot]);
+    }, [open, openDelete, openAssignSlot, openPayment]);
 
     return (
         <>
+            <AddPayment open={openPayment} handleClose={handleClosePayment} data={rowData} />
+            <AssignCaddy open={openAssignCaddy} handleClose={handleCloseAssignCaddy} id={selectedId} />
             <AssignSlotToGuest open={openAssignSlot} onClose={handleCloseAssignSlots} data={rowData} onSlotsLoaded={setSlotsAvailable} />
             <AddGuestBookings open={open} handleClose={handleCloseAdd} data={rowData} />
             <DeleteBooking open={openDelete} handleClose={handleCloseDelete} id={selectedId} />
@@ -315,7 +391,7 @@ export default function GuestManagement() {
                     </Button>
                 </Stack>
                 <TableStyle>
-                    <Card sx={{ height: '100vh' }}>
+                    <Card sx={{height: '400px'}}>
                         <DataGrid
                             rows={rows}
                             columns={columns}

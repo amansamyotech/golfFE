@@ -39,7 +39,7 @@ interface Booking {
     startDateTime: string;
     endDateTime: string;
     groupSize?: number | string;
-    isCaddy?: boolean | string;
+    caddyCart?: boolean | string;
     specialInfo?: string;
     startTime?: string;
     endTime?: string;
@@ -75,7 +75,7 @@ const validationSchema = Yup.object({
         .min(Yup.ref('startDateTime'), 'End Date cannot be before Start Date'),
     course: Yup.string().
         required('Course is required'),
-    isCaddy: Yup.boolean()
+    caddyCart: Yup.boolean()
         .required('Caddy option is required'),
     specialInfo: Yup.string().max(500, 'Maximum 500 characters allowed'),
 });
@@ -105,8 +105,7 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
             endDateTime: data?.endDateTime ? new Date(data.endDateTime) : null,
             // course: data?.course || '',
             course: data?.course?._id || '',
-            // isCaddy: data?.isCaddy || "false",
-            isCaddy: data?.isCaddy === true ? "true" : "false",
+            caddyCart: data?.caddyCart === true ? "true" : "false",
             specialInfo: data?.specialInfo || '',
         },
         enableReinitialize: true,
@@ -117,7 +116,7 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                     ...values,
                     customerId: values.memberId,
                     role: 'member',
-                    isCaddy: values.isCaddy === "true",
+                    caddyCart: values.caddyCart === "true",
                 };
                 await addBooking(formattedValues as any);
             } catch (error) {
@@ -133,7 +132,7 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
         try {
             const fetchedMembers = await getAllCustomer() as Member[];
             const formattedMembers = fetchedMembers
-                .filter((member: Member) => member?.role === "member")
+                .filter((member: Member) => member?.role === "member" && member?.status === "INACTIVE")
                 .map((member: Member) => ({
                     value: member._id,
                     label: `${member.name} | ${member.status}`,
@@ -296,18 +295,18 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
                         <Label>Need Caddy?</Label>
                         <div className="relative">
                             <Select
-                                id="isCaddy"
+                                id="caddyCart"
                                 options={options.caddy}
                                 placeholder="Select Caddy Option"
-                                value={formik.values.isCaddy}
-                                onChange={(option) => formik.setFieldValue('isCaddy', option)}
+                                value={formik.values.caddyCart}
+                                onChange={(option) => formik.setFieldValue('caddyCart', option)}
                                 className="dark:bg-dark-900"
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
                                 <ChevronDownIcon />
                             </span>
-                            {formik.touched.isCaddy && formik.errors.isCaddy && (
-                                <div className="text-red-400 text-xs">{formik.errors.isCaddy}</div>
+                            {formik.touched.caddyCart && formik.errors.caddyCart && (
+                                <div className="text-red-400 text-xs">{formik.errors.caddyCart}</div>
                             )}
                         </div>
                     </Grid>

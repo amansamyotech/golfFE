@@ -146,6 +146,8 @@ type PropsType = {
   label?: string;
   placeholder?: string;
   disabled?: boolean;
+  minDate?: string | Date;
+  maxDate?: string | Date;
 };
 
 export default function DatePicker({
@@ -155,7 +157,9 @@ export default function DatePicker({
   label,
   defaultDate,
   placeholder,
-  disabled
+  disabled,
+  minDate,
+  maxDate,
 }: PropsType) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const fpInstance = useRef<flatpickr.Instance | null>(null);
@@ -168,6 +172,9 @@ export default function DatePicker({
         monthSelectorType: "static",
         dateFormat: "Y-m-d",
         defaultDate,
+        // minDate: "today",
+        minDate,
+        maxDate,
 
         onChange: (selectedDates, _dateStr, instance) => {
           const date = selectedDates[0];

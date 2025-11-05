@@ -21,16 +21,17 @@ export default function AuthLayout({
               {/* <!-- ===== Common Grid Shape Start ===== --> */}
               <GridShape />
               <div className="flex flex-col items-center max-w-xs">
-                <Link href="/" className="block mb-4">
-                  <Image
-                    width={231}
-                    height={48}
-                    src="./images/logo/auth-logo.svg"
-                    alt="Logo"
-                  />
-                </Link>
+                {/* <Link href="/" className="block mb-4"> */}
+                <Image
+                  width={231}
+                  height={48}
+                  src="./images/logo/auth-logo.svg"
+                  alt="Logo"
+                />
+                {/* </Link> */}
                 <p className="text-center text-gray-400 dark:text-white/60">
-                  Free and Open-Source Tailwind CSS Admin Dashboard Template
+                  {/* Free and Open-Source Tailwind CSS Admin Dashboard Template */}
+                  Smart and easy way to manage your golf club and members.
                 </p>
               </div>
             </div>

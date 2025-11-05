@@ -19,11 +19,11 @@ import { toast } from "react-toastify";
 import { getAllProducts } from "@/services/productService";
 import { getAllCustomer } from "@/services/customerService";
 import DatePicker from "../form/date-picker";
-import { createRental, updateRental } from "@/services/rentalProductService";
+import { createRental } from "@/services/rentalProductService";
 
 const validationSchema = Yup.object().shape({
   productId: Yup.string().required("Product is required"),
-  // customerId: Yup.string().required("Customer is required"),
+  customerId: Yup.string().required("Customer is required"),
   quantity: Yup.number()
     .required("Quantity is required")
     .min(1, "Must rent at least one item"),
@@ -47,7 +47,6 @@ interface Customer {
 }
 
 const AddRental = ({ open, handleClose, data }) => {
-
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -55,7 +54,7 @@ const AddRental = ({ open, handleClose, data }) => {
 
   const formik = useFormik({
     initialValues: {
-      productId: data?.productId?._id || "",
+      productId: data?.productId || "",
       customerId: data?.customerId || "",
       quantity: data?.quantity || 1,
       rentedDate: data?.rentedDate ? new Date(data.rentedDate).toISOString().split("T")[0] : "",
@@ -68,18 +67,14 @@ const AddRental = ({ open, handleClose, data }) => {
     onSubmit: async (values) => {
       setLoading(true);
       try {
-        if (data) {
-          await updateRental(data?._id, values);
-        } else {
-          await createRental(values);
-        }
+        await createRental(values);
+        formik.resetForm();
+        handleClose();
       } catch (error) {
         console.error(error);
         toast.error("Failed to save rental");
       } finally {
         setLoading(false);
-        formik.resetForm();
-        handleClose();
       }
     },
   });
@@ -174,29 +169,24 @@ const AddRental = ({ open, handleClose, data }) => {
             )}
           </Grid>
 
-          {
-            data ?
-              <>
-              </> :
-              <Grid>
-                <Label>Customer</Label>
-                <div className="relative">
-                  <Select
-                    id="customerId"
-                    options={customers}
-                    placeholder="Select Customer"
-                    value={formik.values.customerId}
-                    onChange={(option) => formik.setFieldValue("customerId", option)}
-                  />
-                  <span className="absolute text-gray-500 right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <ChevronDownIcon />
-                  </span>
-                </div>
-                {formik.touched.customerId && formik.errors.customerId && (
-                  <div className="text-red-500 text-xs">{formik.errors.customerId as string}</div>
-                )}
-              </Grid>
-          }
+          <Grid>
+            <Label>Customer</Label>
+            <div className="relative">
+              <Select
+                id="customerId"
+                options={customers}
+                placeholder="Select Customer"
+                value={formik.values.customerId}
+                onChange={(option) => formik.setFieldValue("customerId", option)}
+              />
+              <span className="absolute text-gray-500 right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <ChevronDownIcon />
+              </span>
+            </div>
+            {formik.touched.customerId && formik.errors.customerId && (
+              <div className="text-red-500 text-xs">{formik.errors.customerId as string}</div>
+            )}
+          </Grid>
 
           <Grid>
             <Label>Quantity</Label>
@@ -218,7 +208,6 @@ const AddRental = ({ open, handleClose, data }) => {
               id="rentedDate"
               label="Rented Date"
               placeholder="Select a rented date"
-              minDate='today'
               defaultDate={formik.values.rentedDate}
               onChange={(date) => {
                 formik.setFieldValue('rentedDate', date)
@@ -234,7 +223,6 @@ const AddRental = ({ open, handleClose, data }) => {
               id="returnDate"
               label="Return Date"
               placeholder="Select a return date"
-              minDate='today'
               defaultDate={formik.values.returnDate}
               onChange={(date) => {
                 formik.setFieldValue('returnDate', date)

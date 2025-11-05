@@ -9,9 +9,10 @@ import {
     Card,
     IconButton,
     MenuItem,
-    Popover
+    Popover,
+    Chip
 } from '@mui/material';
-import { Add, Delete, MoreVert, Edit } from '@mui/icons-material';
+import { Add, Delete, MoreVert, Edit, Schedule, CheckCircle } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
 import TableStyle from '@/components/ui/table-style';
 import AddEmployee from '@/components/staff-management/addStaff';
@@ -20,6 +21,9 @@ import { getAllStaff } from '@/services/staffService';
 import moment from 'moment';
 import Image from 'next/image';
 import { GridColDef } from '@mui/x-data-grid';
+import Link from 'next/link';
+import WorkingShiftChanger from '@/components/staff-management/changeShift';
+import ChangeAvailability from '@/components/staff-management/changeStatus';
 
 interface StaffMember {
     _id: string;
@@ -40,6 +44,8 @@ export default function StaffManagement() {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [rowData, setRowData] = useState<StaffMember | null>(null);
     const [openDelete, setOpenDelete] = useState(false);
+    const [openWorkingShift, setWorkingShiftModal] = useState(false);
+    const [openStatusChange, setOpenStatusChange] = useState(false);
     const [staff, setStaffMembers] = useState<StaffMember[]>([]);
 
     const paginatedRows = staff.slice(
@@ -52,28 +58,9 @@ export default function StaffManagement() {
         sNo: paginationModel.page * paginationModel.pageSize + index + 1,
     }));
 
+
     const columns: GridColDef[] = [
         { field: 'sNo', headerName: 'S.No', width: 80 },
-        // {
-        //     field: 'profileImg',
-        //     headerName: 'Image',
-        //     width: 80,
-        //     sortable: false,
-        //     renderCell: (params: { row: StaffMember }) => {
-        //         const imgSrc = params.row.profileImg
-        //             ? `${process.env.NEXT_PUBLIC_API_IMG_URL}${params.row.profileImg}`
-        //             : defaultImage;
-        //         return (
-        //             <Image
-        //                 src={imgSrc}
-        //                 alt={params.row.title}
-        //                 width={40}
-        //                 height={40}
-        //                 style={{ borderRadius: 4, objectFit: 'cover' }}
-        //             />
-        //         );
-        //     },
-        // },
         {
             field: 'profileImg',
             headerName: 'Image',
@@ -83,8 +70,6 @@ export default function StaffManagement() {
                 const imgSrc = params.row.profileImg
                     ? `${process.env.NEXT_PUBLIC_API_IMG_URL}${params.row.profileImg}`
                     : defaultImage;
-
-                console.log('Image URL for row:', imgSrc);
 
                 return (
                     <Image
@@ -97,11 +82,65 @@ export default function StaffManagement() {
                 );
             },
         },
-        { field: 'name', headerName: 'Name', flex: 1 },
+        {
+            field: 'name',
+            headerName: 'Name',
+            flex: 1,
+            renderCell: (params) => (
+                <Link
+                    href={`/staff-management/${params.row._id}`}
+                    style={{
+                        color: "#1976d2",
+                        textDecoration: "underline",
+                        cursor: "pointer"
+                    }}
+                >
+                    {params?.row?.name}
+                </Link>
+            ),
+        },
+
         { field: 'email', headerName: 'Email', flex: 1 },
         { field: 'jobTitle', headerName: 'Job Title', flex: 1 },
         { field: 'department', headerName: 'Department', flex: 1 },
-        { field: 'dateOfJoining', headerName: 'Date Of Joining', flex: 1, renderCell: (params) => moment(params.value).format('YYYY-MM-DD') },
+        { field: 'workShift', headerName: 'Shift', flex: 1 },
+        {
+            field: 'availabilityStatus',
+            headerName: 'Status',
+            flex: 1,
+            width: 100,
+            renderCell: (params) => {
+                const status = params.value;
+
+                const statusColorMap = {
+                    available: 'success',
+                    assigned: 'info',
+                    onleave: 'error',
+                    inactive: "warring"
+                };
+
+                const chipColor = statusColorMap[status] || 'default';
+
+                const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : '-';
+
+                return (
+                    <Chip
+                        label={label}
+                        color={chipColor}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                            width: '100%',
+                            borderRadius: '5px',
+                            textTransform: 'capitalize',
+                            fontSize: '13px',
+                            padding: '0px',
+                            margin: '0px'
+                        }}
+                    />
+                );
+            },
+        },
         {
             field: 'action',
             headerName: 'Action',
@@ -121,6 +160,20 @@ export default function StaffManagement() {
                         >
                             <MenuItem onClick={handleOpenEdit}>
                                 <Edit fontSize="small" style={{ marginRight: 8 }} /> Edit
+                            </MenuItem>
+
+                            <MenuItem
+                                onClick={() => handleOpenWorkingShift(params.row)}
+                                sx={{ color: 'blue' }}
+                            >
+                                <Schedule fontSize="small" style={{ marginRight: 8 }} /> Change Shift
+                            </MenuItem>
+
+                            <MenuItem
+                                onClick={() => handleOpenAvailabilityModal(params.row)}
+                                sx={{ color: 'green' }}
+                            >
+                                <CheckCircle fontSize="small" style={{ marginRight: 8 }} /> Change Availability
                             </MenuItem>
                             <MenuItem onClick={handleDelete} sx={{ color: 'red' }}>
                                 <Delete fontSize="small" style={{ marginRight: 8 }} /> Delete
@@ -156,12 +209,35 @@ export default function StaffManagement() {
         setRowData(null);
     };
 
+
+    const handleOpenWorkingShift = (row: any) => {
+        setRowData(row);
+        setWorkingShiftModal(true);
+    };
+
+    const handleCloseWorkingShift = () => {
+        setWorkingShiftModal(false);
+        setRowData(null);
+        handleClosePopover();
+    };
+
     const handleDelete = () => {
         setOpenDelete(true);
     };
 
     const handleCloseDelete = () => {
         setOpenDelete(false);
+        setRowData(null);
+        handleClosePopover();
+    };
+
+    const handleOpenAvailabilityModal = (row: any) => {
+        setRowData(row);
+        setOpenStatusChange(true);
+    };
+
+    const handleCloseAvailabilityModal = () => {
+        setOpenStatusChange(false);
         setRowData(null);
         handleClosePopover();
     };
@@ -177,7 +253,7 @@ export default function StaffManagement() {
 
     useEffect(() => {
         fetchStaff();
-    }, [open, openDelete]);
+    }, [open, openDelete, openWorkingShift, openStatusChange]);
 
 
 
@@ -185,6 +261,9 @@ export default function StaffManagement() {
         <>
             <AddEmployee open={open} handleClose={handleCloseAdd} data={rowData ?? undefined} />
             <DeleteStaff open={openDelete} handleClose={handleCloseDelete} id={rowData?._id || ''} />
+            <WorkingShiftChanger open={openWorkingShift} handleClose={handleCloseWorkingShift} id={rowData?._id || ''} currentStatus={rowData?.workShift} />
+            <ChangeAvailability open={openStatusChange} handleClose={handleCloseAvailabilityModal} id={rowData?._id || ''} currentStatus={rowData?.availabilityStatus} />
+
             <Container>
                 <Stack direction="row" alignItems="center" mb={5} justifyContent="space-between">
                     <Typography variant="h6">Staff Management</Typography>
@@ -194,7 +273,7 @@ export default function StaffManagement() {
                 </Stack>
 
                 <TableStyle>
-                    <Card sx={{ height: '100vh' }}>
+                    <Card sx={{height: '400px'}}>
                         <DataGrid
                             rows={rows}
                             columns={columns}

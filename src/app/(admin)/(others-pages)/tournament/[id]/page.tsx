@@ -126,7 +126,6 @@ export default function TournamentDetailPage() {
             </Card>
 
             <Box>
-                <Typography variant="h6" mb={2}>Players</Typography>
                 {rows.length === 0 ? (
                     <Box
                         sx={{
@@ -141,22 +140,17 @@ export default function TournamentDetailPage() {
                         </Typography>
                     </Box>
                 ) : (
-                    // <DataGrid
-                    //     pageSize={5}
-                    //     rowsPerPageOptions={[5]}
-                    //     disableSelectionOnClick
-                    //     columns={columns}
-                    //     rows={rows}
-                    // />
-
-                    <DataGrid
-                        paginationModel={paginationModel}
-                        onPaginationModelChange={setPaginationModel}
-                        pageSizeOptions={[5]}
-                        disableRowSelectionOnClick
-                        columns={columns}
-                        rows={rows}
-                    />
+                    <>
+                        <Typography variant="h6" mb={2}>Players</Typography>
+                        <DataGrid
+                            paginationModel={paginationModel}
+                            onPaginationModelChange={setPaginationModel}
+                            pageSizeOptions={[5]}
+                            disableRowSelectionOnClick
+                            columns={columns}
+                            rows={rows}
+                        />
+                    </>
                 )}
             </Box>
         </Container>

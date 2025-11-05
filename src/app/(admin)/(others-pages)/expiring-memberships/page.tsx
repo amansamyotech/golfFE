@@ -131,7 +131,7 @@ export default function ExpiringMemberships() {
                 </Stack>
 
                 <TableStyle>
-                    <Card sx={{ height: '100vh' }}>
+                    <Card sx={{height: '400px'}}>
                         <DataGrid
                             rows={rows}
                             columns={columns}

@@ -16,7 +16,12 @@ import {
     Box,
     Chip
 } from '@mui/material';
-import { Add, Edit, Delete, MoreVert, Visibility } from '@mui/icons-material';
+import {
+    Add, Edit, Delete, MoreVert, Visibility, Undo,
+    KeyboardReturn,
+    Cancel,
+} from '@mui/icons-material';
+
 import AddTimeSlot from '@/components/time-slot/addTimeSlot';
 import { DataGrid } from '@mui/x-data-grid';
 import TableStyle from '@/components/ui/table-style';
@@ -34,16 +39,21 @@ import DeletePlayer from '@/components/players/deletePlayers';
 import AddProduct from '@/components/pro-shop/addProduct';
 import { getAllProducts } from '@/services/productService';
 import DeleteProduct from '@/components/pro-shop/deleteProduct';
+import AddRental from '@/components/pro-shop-rental/addRental';
+import { getAllRentals } from '@/services/rentalProductService';
+import ConfirmReturnDialog from '@/components/pro-shop-rental/returnRental';
+import CancelRental from '@/components/pro-shop-rental/cancelRental';
 
 export default function ProductShopRental() {
     const [open, setOpen] = useState(false);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
     const [courses, setCourses] = useState([]);
-    const [player, setPlayer] = useState([]);
+    const [rentalData, setRentalData] = useState([]);
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [rowData, setRowData] = useState(null);
     const [openView, setOpenView] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
+    const [openReturn, setOpenReturn] = useState(false);
     const [selectedTimeSlotId, setSelectedTimeSlotId] = useState<string | null>(null);
 
     const handleOpenAdd = () => {
@@ -52,6 +62,16 @@ export default function ProductShopRental() {
 
     const handleCloseAdd = () => {
         setOpen(false);
+        setRowData(null);
+    };
+
+    const handleOpenReturn = () => {
+        setOpenReturn(true);
+    };
+
+    const handleCloseReturn = () => {
+        setOpenReturn(false);
+        setRowData(null);
     };
 
     const handleClosePopover = () => {
@@ -87,7 +107,7 @@ export default function ProductShopRental() {
         handleClosePopover();
     };
 
-    const paginatedRows = player.slice(
+    const paginatedRows = rentalData.slice(
         paginationModel.page * paginationModel.pageSize,
         (paginationModel.page + 1) * paginationModel.pageSize
     );
@@ -99,85 +119,90 @@ export default function ProductShopRental() {
 
     const columns = [
         { field: "sNo", headerName: "S.No", width: 80, sortable: false },
+
         {
-            field: 'productImage',
-            headerName: 'Product Image',
+            field: "productName",
+            headerName: "Product Name",
+            flex: 1.5,
+            renderCell: (params) => params.row.productId?.name || "-",
+        },
+        {
+            field: "customerName",
+            headerName: "Customer Name",
+            flex: 1.5,
+            renderCell: (params) => params.row.customerId?.name || "-",
+        },
+        {
+            field: "rentalRate",
+            headerName: "Rate (₹/day)",
             flex: 1,
+            renderCell: (params) =>
+                `₹${params.row.productId?.rentalRate?.toLocaleString() || "0"}`,
+        },
+        {
+            field: "quantity",
+            headerName: "Qty",
+            flex: 0.6,
+            renderCell: (params) => params.row.quantity || "-",
+        },
+        {
+            field: "totalAmount",
+            headerName: "Total (₹)",
+            flex: 1,
+            renderCell: (params) =>
+                `₹${params.row.totalAmount?.toLocaleString() || "0"}`,
+        },
+        {
+            field: "rentedDate",
+            headerName: "Rented On",
+            flex: 1,
+            renderCell: (params) =>
+                new Date(params.row.rentedDate).toLocaleDateString() || "-",
+        },
+        {
+            field: "returnDate",
+            headerName: "Return On",
+            flex: 1,
+            renderCell: (params) =>
+                new Date(params.row.returnDate).toLocaleDateString() || "-",
+        },
+
+
+        {
+            field: 'status',
+            headerName: 'Status',
+            flex: 1,
+            width: 100,
             renderCell: (params) => {
-                const imageUrl = params.value
-                    ? `${process.env.NEXT_PUBLIC_API_IMG_URL}${params.value}`
-                    : '/default-avatar.png';
+                const status = params.value;
+
+                const statusColorMap = {
+                    rented: 'info',
+                    returned: 'success',
+                    cancelled: 'error',
+                };
+
+                const chipColor = statusColorMap[status] || 'default';
+
+                const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : '-';
 
                 return (
-                    <img
-                        src={imageUrl}
-                        alt="Profile"
-                        style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: '50%',
-                            objectFit: 'cover'
+                    <Chip
+                        label={label}
+                        color={chipColor}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                            width: '100%',
+                            borderRadius: '5px',
+                            textTransform: 'capitalize',
+                            fontSize: '13px',
+                            padding: '0px',
+                            margin: '0px'
                         }}
                     />
                 );
-            }
-        },
-        {
-            field: "name",
-            headerName: "Product Name",
-            flex: 1.5,
-            renderCell: (params) => (
-                <Box display="flex" alignItems="center" height="100%">
-                    <Typography variant="body2">
-                        {params.row.name || "-"}
-                    </Typography>
-                </Box>
-            ),
-        },
-
-        {
-            field: "category",
-            headerName: "Category",
-            flex: 1,
-            renderCell: (params) => params.row.category || "-",
-        },
-
-        {
-            field: "price",
-            headerName: "Price (₹)",
-            flex: 1,
-            renderCell: (params) => `₹${params.row.price?.toLocaleString() || "0"}`,
-        },
-
-        {
-            field: "costPrice",
-            headerName: "Cost Price (₹)",
-            flex: 1,
-            renderCell: (params) => `₹${params.row.costPrice?.toLocaleString() || "0"}`,
-        },
-
-        {
-            field: "rentalRate",
-            headerName: "Rental Rate (₹)",
-            flex: 1,
-            renderCell: (params) => `₹${params.row.rentalRate?.toLocaleString() || "0"}`,
-        },
-
-        {
-            field: "stock",
-            headerName: "Stock",
-            flex: 1,
-            renderCell: (params) => (
-                <Box display="flex" alignItems="center" height="100%">
-                    <Typography
-                        variant="body2"
-                        color={params.row.stock > 0 ? "success.main" : "error.main"}
-                        sx={{ lineHeight: 1 }}
-                    >
-                        {params.row.stock}
-                    </Typography>
-                </Box>
-            ),
+            },
         },
         {
             field: "action",
@@ -189,7 +214,6 @@ export default function ProductShopRental() {
                     <IconButton onClick={(e) => handleClick(e, params.row)}>
                         <MoreVert fontSize="small" />
                     </IconButton>
-
                     <Popover
                         open={Boolean(anchorEl) && rowData?._id === params.row._id}
                         anchorEl={anchorEl}
@@ -199,31 +223,39 @@ export default function ProductShopRental() {
                         <MenuItem onClick={handleOpenEdit}>
                             <Edit fontSize="small" sx={{ mr: 1 }} /> Edit
                         </MenuItem>
-                        <MenuItem onClick={handleDelete} sx={{ color: "red" }}>
+                        {/* <MenuItem onClick={handleDelete} sx={{ color: "red" }}>
                             <Delete fontSize="small" sx={{ mr: 1 }} /> Delete
+                        </MenuItem> */}
+                        <MenuItem onClick={handleOpenReturn}>
+                            <Undo fontSize="small" sx={{ mr: 1 }} /> Return
+                        </MenuItem>
+                        <MenuItem onClick={handleDelete} sx={{ color: "red" }}>
+                            <Cancel fontSize="small" sx={{ mr: 1 }} /> Cancle
                         </MenuItem>
                     </Popover>
                 </>
             ),
         },
     ];
-    const fetchProductsData = async () => {
+
+    const fetchRentalsData = async () => {
         try {
-            const response = await getAllProducts() as any[];
-            setPlayer(response);
+            const response = await getAllRentals() as any[];
+            setRentalData(response);
         } catch (error) {
             console.error('Error fetching tournament:', error);
         }
     };
 
     useEffect(() => {
-        fetchProductsData();
-    }, [open, openDelete]);
+        fetchRentalsData();
+    }, [open, openDelete, openReturn]);
 
     return (
         <>
-            <AddProduct open={open} handleClose={handleCloseAdd} data={rowData} />
-            <DeleteProduct open={openDelete} handleClose={handleCloseDelete} id={rowData?._id || ''} />
+            <ConfirmReturnDialog open={openReturn} handleClose={handleCloseReturn} data={rowData} />
+            <AddRental open={open} handleClose={handleCloseAdd} data={rowData} />
+            <CancelRental open={openDelete} handleClose={handleCloseDelete} id={rowData?._id || ''} />
             <Container>
                 <Stack direction="row" alignItems="center" mb={5} justifyContent="space-between">
                     <Typography variant="h6">Product Rental Management</Typography>
@@ -233,7 +265,7 @@ export default function ProductShopRental() {
                 </Stack>
 
                 <TableStyle>
-                    <Card sx={{ height: '100vh' }}>
+                    <Card sx={{height: '400px'}}>
                         <DataGrid
                             rows={rows}
                             columns={columns}

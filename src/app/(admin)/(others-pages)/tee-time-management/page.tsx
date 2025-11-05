@@ -8,7 +8,10 @@ import {
     Typography,
     Card,
     Chip,
-    Box
+    Box,
+    IconButton,
+    Popover,
+    MenuItem,
 } from '@mui/material';
 import { Add, Delete, MoreVert, Edit, Visibility } from '@mui/icons-material';
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
@@ -20,6 +23,8 @@ import moment from "moment";
 import { getBooking } from '@/services/bookingService';
 import Link from 'next/link';
 import AssignSlotModalWithTabs from '@/components/tee-time-management/assignSlotOptionModal';
+import AssignCaddy from '@/components/tee-time-management/assignCaddy';
+import AddPayment from '@/components/payment/addPayment';
 
 interface Booking {
     _id: string;
@@ -56,6 +61,8 @@ export default function TeeTimeManagement() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [openAssignSlot, setOpenAssignSlot] = useState(false);
     const [slotsAvailable, setSlotsAvailable] = useState<boolean | null>(null);
+    const [openAssignCaddy, setOpenAssignCaddy] = useState(false);
+    const [openPayment, setOpenPayment] = useState(false);
 
     const paginatedRows = bookings.slice(
         paginationModel.page * paginationModel.pageSize,
@@ -71,6 +78,16 @@ export default function TeeTimeManagement() {
         slotTiming: row.startTime ? `${moment(row.startTime).format('HH:mm')} to ${moment(row.endTime).format('HH:mm')}` : '- -',
     }));
 
+    const handleOpenPayment = (row: any) => {
+        setRowData(row);
+        setOpenPayment(true);
+    }
+
+    const handleClosePayment = () => {
+        setRowData(null);
+        setOpenPayment(false);
+    }
+
     const columns = [
         { field: 'sNo', headerName: 'S.No', width: 80, sortable: false },
         {
@@ -78,15 +95,33 @@ export default function TeeTimeManagement() {
             headerName: 'Contact Info',
             flex: 1,
             renderCell: (params: GridRenderCellParams<Booking>) => (
+                <Link
+                    href={`/tee-time-management/${params.row._id}`}
+                    style={{
+                        color: "#1976d2",
+                        textDecoration: "underline",
+                        cursor: "pointer"
+                    }}
+                >
+                    {params?.row?.customerId?.name}
+                </Link>
+            ),
+        },
+
+        {
+            field: 'email',
+            headerName: 'Contact Info',
+            flex: 1,
+            renderCell: (params: GridRenderCellParams<Booking>) => (
                 <Box display="flex" flexDirection="column">
-                    <Typography variant="body2">{params.row.customerId.name}</Typography>
+                    <Typography variant="body2">{params.row.customerId.email}</Typography>
                     <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
                         {params.row.customerId.phone}
                     </Typography>
                 </Box>
             ),
         },
-        { field: 'courseName', headerName: 'Course Name', flex: 1 },
+        // { field: 'courseName', headerName: 'Course Name', flex: 1 },
         {
             field: 'startDate', headerName: 'Booking Date', flex: 1, renderCell: (params) => {
                 const dateValue = params.row.customerId?.startDate;
@@ -180,55 +215,75 @@ export default function TeeTimeManagement() {
             }
         },
         {
-            field: 'bookedSlot',
-            headerName: 'Booked Slot',
+            field: 'assignCaddy',
+            headerName: 'Assign Caddy',
             width: 120,
             sortable: false,
-            renderCell: (params: { row: Booking }) => (
-                <Link href={`/tee-time-management/${params.row._id}`} passHref>
+            renderCell: (params) => {
+                const canAssignCaddy = params.row.caddyCart === true;
+                const isCaddyAssign = params.row.caddyId ? true : false
+
+                return (
                     <Button
                         variant="contained"
                         color="primary"
                         size="small"
-                        sx={{ textTransform: "none" }}
+                        onClick={() => handleOpenAssignCaddy(params.row)}
+                        disabled={!canAssignCaddy || isCaddyAssign}
+                        sx={{
+                            textTransform: 'none',
+                            opacity: !canAssignCaddy ? 0.6 : 1,
+                            cursor: !canAssignCaddy ? 'not-allowed' : 'pointer',
+                        }}
                     >
-                        Booked Slot
+                        {canAssignCaddy ? 'Assign Caddy' : 'Not Selected'}
                     </Button>
-
-                </Link>
-
-            )
+                );
+            },
         },
         // {
-        //     field: 'action',
-        //     headerName: 'Action',
-        //     width: 80,
+        //     field: 'bookedSlot',
+        //     headerName: 'View',
+        //     width: 120,
         //     sortable: false,
         //     renderCell: (params: { row: Booking }) => (
-        //         <>
-        //             <IconButton onClick={(e) => handleClick(e, params.row)}>
-        //                 <MoreVert fontSize="small" />
-        //             </IconButton>
-        //             <Popover
-        //                 open={Boolean(anchorEl) && rowData?._id === params.row._id}
-        //                 anchorEl={anchorEl}
-        //                 onClose={handleClosePopover}
-        //                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        //         <Link href={`/tee-time-management/${params.row._id}`} passHref>
+        //             <Button
+        //                 variant="contained"
+        //                 color="primary"
+        //                 size="small"
+        //                 sx={{ textTransform: "none" }}
         //             >
-        //                 <MenuItem onClick={() => handleOpenEdit(params.row)}>
-        //                     <Edit fontSize="small" style={{ marginRight: 8 }} /> Edit
-        //                 </MenuItem>
-        //                 <MenuItem
-        //                     component={Link}
-        //                     href={params?.row?._id ? `/tee-time-management/${params.row._id}` : "#"}
-        //                     sx={{ color: "blue" }}
-        //                 >
-        //                     <Visibility fontSize="small" style={{ marginRight: 8 }} /> View
-        //                 </MenuItem>
-        //             </Popover>
-        //         </>
+        //                 View Booking
+        //             </Button>
+
+        //         </Link>
+
         //     )
         // },
+
+
+        {
+            field: 'paymentAction',
+            headerName: 'Make Payment',
+            width: 120,
+            sortable: false,
+            renderCell: (params) => {
+                return (
+                    <Button
+
+                        variant="contained"
+                        color='success'
+                        size="small"
+                        style={{ textTransform: 'none', width: '100%' }}
+                        disabled={params.row.customerId?.paymentStatus === 'paid'}
+                        onClick={() => handleOpenPayment(params.row)}
+                    >
+                        Pay Now
+                    </Button>
+                );
+            },
+        }
     ];
 
     const handleClick = (event: React.MouseEvent<HTMLElement>, row: Booking) => {
@@ -266,6 +321,16 @@ export default function TeeTimeManagement() {
         handleClosePopover();
     };
 
+    const handleOpenAssignCaddy = (row: any) => {
+        setRowData(row);
+        setOpenAssignCaddy(true);
+    }
+
+    const handleCloseAssignCaddy = () => {
+        setRowData(null);
+        setOpenAssignCaddy(false);
+    }
+
     const fetchCourses = async () => {
         try {
             await getAllCourses();
@@ -290,7 +355,7 @@ export default function TeeTimeManagement() {
 
     useEffect(() => {
         fetchAllBookings();
-    }, [open, openAssignSlot]);
+    }, [open, openAssignSlot, openPayment]);
 
     const handleOpenAssignSlots = (row: Booking) => {
         setRowData(row);
@@ -303,6 +368,8 @@ export default function TeeTimeManagement() {
 
     return (
         <>
+            <AddPayment open={openPayment} handleClose={handleClosePayment} data={rowData} />
+            <AssignCaddy open={openAssignCaddy} handleClose={handleCloseAssignCaddy} id={rowData?._id} />
             <TeeTimeBooking open={open} handleClose={handleCloseAdd} data={rowData} />
             <DeleteCourse open={openDelete} handleClose={handleCloseDelete} id={rowData?._id || ''} />
             <Container>
@@ -314,7 +381,7 @@ export default function TeeTimeManagement() {
                 </Stack>
 
                 <TableStyle>
-                    <Card sx={{ height: '100vh' }}>
+                    <Card sx={{height: '400px'}}>
                         <DataGrid
                             rows={rows}
                             columns={columns}

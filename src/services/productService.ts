@@ -41,3 +41,9 @@ export const deleteProduct = async (id) => {
     const response = await deleteData(url);
     return await handleApiResponse(response, 'DELETE');
 };
+
+
+
+
+
+

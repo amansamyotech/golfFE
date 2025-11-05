@@ -52,6 +52,7 @@ export default function ProductShop() {
 
     const handleCloseAdd = () => {
         setOpen(false);
+        setRowData(null);
     };
 
     const handleClosePopover = () => {
@@ -97,142 +98,9 @@ export default function ProductShop() {
         sNo: paginationModel.page * paginationModel.pageSize + index + 1,
     }));
 
-
-    // const columns = [
-    //     { field: 'sNo', headerName: 'S.No', width: 80, sortable: false },
-    //     {
-    //         field: 'profileImage',
-    //         headerName: 'Profile Image',
-    //         flex: 1,
-    //         renderCell: (params) => {
-    //             const imageUrl = params.value
-    //                 ? `${process.env.NEXT_PUBLIC_API_IMG_URL}${params.value}`
-    //                 : '/default-avatar.png';
-
-    //             return (
-    //                 <img
-    //                     src={imageUrl}
-    //                     alt="Profile"
-    //                     style={{
-    //                         width: 40,
-    //                         height: 40,
-    //                         borderRadius: '50%',
-    //                         objectFit: 'cover'
-    //                     }}
-    //                 />
-    //             );
-    //         }
-    //     },
-    //     {
-    //         field: 'name',
-    //         headerName: 'Name',
-    //         flex: 1,
-    //         renderCell: (params) => params.row.name
-    //     },
-    //     {
-    //         field: 'email',
-    //         headerName: 'Contact Details',
-    //         flex: 1.5,
-    //         renderCell: (params) => (
-    //             <Box display="flex" flexDirection="column">
-    //                 <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
-    //                     {params.row.phone}
-    //                 </Typography>
-    //                 <Typography variant="body2">{params.row.email}</Typography>
-    //             </Box>
-    //         ),
-    //     },
-    //     {
-    //         field: 'gender',
-    //         headerName: 'Gender',
-    //         flex: 1,
-    //         renderCell: (params) => params.row.course?.name
-    //     },
-    //     {
-    //         field: 'age',
-    //         headerName: 'Age',
-    //         flex: 1,
-    //         renderCell: (params) => params.row.age
-    //     },
-    //     {
-    //         field: 'status',
-    //         headerName: 'Status',
-    //         flex: 1,
-    //         width: 100,
-    //         renderCell: (params) => {
-    //             const status = params.value;
-
-    //             const statusColorMap = {
-    //                 registered: 'warning',
-    //                 enrolled: 'info',
-    //                 active: 'success',
-    //                 inactive: 'error'
-    //             };
-
-    //             const chipColor = statusColorMap[status] || 'default';
-
-    //             const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : '-';
-
-    //             return (
-    //                 <Chip
-    //                     label={label}
-    //                     color={chipColor}
-    //                     size="small"
-    //                     variant="outlined"
-    //                     sx={{
-    //                         width: '100%',
-    //                         borderRadius: '5px',
-    //                         textTransform: 'capitalize',
-    //                         fontSize: '13px',
-    //                         padding: '0px',
-    //                         margin: '0px'
-    //                     }}
-    //                 />
-    //             );
-    //         },
-    //     },
-    //     {
-    //         field: 'action',
-    //         headerName: 'Action',
-    //         width: 80,
-    //         sortable: false,
-    //         renderCell: (params: any) => {
-    //             return (
-    //                 <>
-    //                     <IconButton onClick={(e) => handleClick(e, params.row)}>
-    //                         <MoreVert fontSize="small" />
-    //                     </IconButton>
-    //                     <Popover
-    //                         open={Boolean(anchorEl) && rowData?._id === params.row._id}
-    //                         anchorEl={anchorEl}
-    //                         onClose={handleClosePopover}
-    //                         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-    //                     >
-    //                         {/* <MenuItem
-    //                             component={Link}
-    //                             href={params?.row?._id ? `/members-management/${params.row._id}` : "#"}
-    //                             sx={{ color: "blue" }}
-    //                         >
-    //                             <Visibility fontSize="small" style={{ marginRight: 8 }} /> View
-    //                         </MenuItem> */}
-    //                         <MenuItem onClick={handleOpenEdit}>
-    //                             <Edit fontSize="small" style={{ marginRight: 8 }} /> Edit
-    //                         </MenuItem>
-    //                         <MenuItem onClick={handleDelete} sx={{ color: 'red' }}>
-    //                             <Delete fontSize="small" style={{ marginRight: 8 }} /> Delete
-    //                         </MenuItem>
-    //                     </Popover>
-    //                 </>
-    //             );
-    //         }
-    //     }
-    // ];
-
-
-
     const columns = [
         { field: "sNo", headerName: "S.No", width: 80, sortable: false },
-         {
+        {
             field: 'productImage',
             headerName: 'Product Image',
             flex: 1,
@@ -295,6 +163,22 @@ export default function ProductShop() {
             flex: 1,
             renderCell: (params) => `₹${params.row.rentalRate?.toLocaleString() || "0"}`,
         },
+        // {
+        //     field: "stock",
+        //     headerName: "Stock",
+        //     flex: 1,
+        //     renderCell: (params) => (
+        //         <Box display="flex" alignItems="center" height="100%">
+        //             <Typography
+        //                 variant="body2"
+        //                 color={params.row.stock > 0 ? "success.main" : "error.main"}
+        //                 sx={{ lineHeight: 1 }}
+        //             >
+        //                 {params.row.stock}/   {params.row.totalStock}
+        //             </Typography>
+        //         </Box>
+        //     ),
+        // },
 
         {
             field: "stock",
@@ -304,14 +188,22 @@ export default function ProductShop() {
                 <Box display="flex" alignItems="center" height="100%">
                     <Typography
                         variant="body2"
-                        color={params.row.stock > 0 ? "success.main" : "error.main"}
-                        sx={{ lineHeight: 1 }}
+                        sx={{ lineHeight: 1, color: params.row.stock > 0 ? "success.main" : "error.main" }}
                     >
                         {params.row.stock}
+                    </Typography>
+                    <Typography variant="body2" sx={{ lineHeight: 1, mx: 0.5 }}>
+                        /
+                    </Typography>
+                    <Typography variant="body2" sx={{ lineHeight: 1 }}>
+                        {params.row.totalStock}
                     </Typography>
                 </Box>
             ),
         },
+
+
+
         // {
         //     field: "status",
         //     headerName: "Status",
@@ -362,6 +254,13 @@ export default function ProductShop() {
                         <MenuItem onClick={handleOpenEdit}>
                             <Edit fontSize="small" sx={{ mr: 1 }} /> Edit
                         </MenuItem>
+                        <MenuItem
+                            component={Link}
+                            href={params?.row?._id ? `/pro-shop/${params.row._id}` : "#"}
+                            sx={{ color: "blue" }}
+                        >
+                            <Visibility fontSize="small" style={{ marginRight: 8 }} /> View
+                        </MenuItem>
                         <MenuItem onClick={handleDelete} sx={{ color: "red" }}>
                             <Delete fontSize="small" sx={{ mr: 1 }} /> Delete
                         </MenuItem>
@@ -396,7 +295,7 @@ export default function ProductShop() {
                 </Stack>
 
                 <TableStyle>
-                    <Card sx={{ height: '100vh' }}>
+                    <Card sx={{height: '400px'}}>
                         <DataGrid
                             rows={rows}
                             columns={columns}

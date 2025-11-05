@@ -33,7 +33,7 @@ interface EmployeeData {
     dateOfJoining?: string;
     workShift?: string;
     salary?: number | string;
-    profileImg ?: string;
+    profileImg?: string;
 }
 
 interface AddEmployeeProps {
@@ -75,6 +75,14 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
         { value: "morning", label: "Morning" },
         { value: "afternoon", label: "Afternoon" },
         { value: "evening", label: "Evening" },
+    ];
+
+    const employeeDepartment = [
+        { value: "caddy", label: "Caddy" },
+        { value: "management", label: "Management" },
+        { value: "cleaning", label: "Cleaning" },
+        { value: "security", label: "Security" },
+        { value: "reception", label: "Reception" },
     ];
 
     const formik = useFormik({
@@ -266,19 +274,22 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
 
                     <Grid>
                         <Label>Department</Label>
-                        <Input
-                            id="department"
-                            name="department"
-                            type="text"
-                            placeholder="Management Department"
-                            className="w-full"
-                            value={formik.values.department}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                        />
-                        {formik.touched.department && formik.errors.department && (
-                            <div className="text-red-400 text-xs ">{formik.errors.department}</div>
-                        )}
+                        <div className="relative">
+                            <Select
+                                id="department"
+                                options={employeeDepartment}
+                                placeholder="Management Department"
+                                value={formik.values.department}
+                                onChange={(option) => formik.setFieldValue("department", option)}
+                                className="dark:bg-dark-900"
+                            />
+                            <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                                <ChevronDownIcon />
+                            </span>
+                            {formik.touched.department && formik.errors.department && (
+                                <div className="text-red-400 text-xs ">{formik.errors.department}</div>
+                            )}
+                        </div>
                     </Grid>
 
                     <Grid>
@@ -306,6 +317,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ open, handleClose, data }) =>
                             id="dateOfJoining"
                             label="Date of Joining"
                             placeholder="Select a Date of Joining"
+                            minDate="today"
                             defaultDate={formik.values.dateOfJoining}
                             onChange={(date) => formik.setFieldValue('dateOfJoining', date)}
                         />

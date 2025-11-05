@@ -22,6 +22,7 @@ import { getBookingByID } from '@/services/bookingService';
 import RescheduleBookingModal from '@/components/tee-time-management/rescheduleBooking';
 import CancelBookingOftheDay from '@/components/tee-time-management/cancelBookingOfTheDay';
 import Grid from '@mui/material/Grid'
+import moment from 'moment';
 
 interface Course {
     _id: string;
@@ -140,16 +141,27 @@ export default function GuestDetailPage() {
                         {/* <Grid item xs={12} md={6}> */}
                         <Stack spacing={1}>
                             <Typography><strong>Email:</strong> {guest.customerId.email}</Typography>
-                            <Typography><strong>Phone:</strong> {guest.customerId.phone}</Typography>
+                            <Typography>
+                                <strong>Start Date:</strong> {moment(guest?.customerId?.startDate).format('DD MMM YYYY')}
+                            </Typography>
+                            <Typography><strong>Booking Type:</strong> {guest.bookingType}</Typography>
                             <Typography><strong>Course:</strong> {guest.course.name}</Typography>
+                            <Typography><strong>Caddy:</strong> {guest?.caddyCart ? 'Selected ' : 'Not Selected'} </Typography>
+
                         </Stack>
                         {/* </Grid> */}
 
                         {/* <Grid item xs={12} md={6}> */}
                         <Stack spacing={1}>
-                            <Typography><strong>Booking Type:</strong> {guest.bookingType}</Typography>
+                            <Typography><strong>Phone:</strong> {guest.customerId.phone}</Typography>
+                            <Typography>
+                                <strong>Epiry Date:</strong> {moment(guest?.customerId?.expiryDate).format('DD MMM YYYY')}
+                            </Typography>
                             <Typography><strong>Status:</strong> {guest.bookingStatus}</Typography>
                             <Typography><strong>Special Info:</strong> {guest.specialInfo}</Typography>
+                            {
+                                guest?.caddyId ? <Typography><strong>Caddy Name:</strong> {guest?.caddyId?.name}</Typography> : <></>
+                            }
                         </Stack>
                         {/* </Grid> */}
                     </Grid>

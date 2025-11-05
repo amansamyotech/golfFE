@@ -143,6 +143,7 @@ const AddTournament = ({ open, handleClose, data }) => {
                                 id="startDate"
                                 label="Start Date"
                                 placeholder="Select Start Date"
+                                minDate='today'
                                 defaultDate={formik.values.startDate}
                                 // onChange={(date) => {
                                 //     formik.setFieldValue('startDate', date)
@@ -164,6 +165,7 @@ const AddTournament = ({ open, handleClose, data }) => {
                                 id="endDate"
                                 label="End Date"
                                 placeholder="Select End Date"
+                                minDate='today'
                                 defaultDate={formik.values.endDate}
                                 // onChange={(date) => {
                                 //     formik.setFieldValue('endDate', date)

@@ -39,9 +39,21 @@ const navItems: NavItem[] = [
     pro: false
   },
   {
+    icon: <HorizontaLDots />,
+    name: "Course Configuration",
+    path: "/course-configuration",
+    pro: false
+  },
+  {
     icon: <TableIcon />,
     name: "Time Slot Management",
     path: "/time-slot",
+    pro: false
+  },
+  {
+    icon: <Paymnets />,
+    name: "Billing & Payments",
+    path: "/payment-management",
     pro: false
   },
   {
@@ -72,6 +84,16 @@ const navItems: NavItem[] = [
     ],
   },
   {
+    name: "Staff Management",
+    icon: <Persons />,
+    subItems: [
+      { name: "Staff List", path: "/staff-management", pro: false },
+      // { name: "Shift Scheduling", path: "/xyz10", pro: false },
+      // { name: "Staff Directory", path: "/xyz8", pro: false },
+      // { name: "Attendance", path: "/xyz11", pro: false },
+    ],
+  },
+  {
     name: "Tournament",
     icon: <TableIcon />,
     subItems: [
@@ -94,16 +116,16 @@ const navItems: NavItem[] = [
       { name: "Sales Reports", path: "/xyz", pro: false },
     ],
   },
-  {
-    name: "Billing & Payments",
-    icon: <Paymnets />,
-    subItems: [
-      { name: "Daily Transactions", path: "/xyz", pro: false },
-      { name: "Generate Invoices", path: "/xyz1", pro: false },
-      { name: "Online Payment", path: "/xyz2", pro: false },
-      { name: "Refunds", path: "/xyz3", pro: false },
-    ],
-  },
+  // {
+  //   name: "Billing & Payments",
+  //   icon: <Paymnets />,
+  //   subItems: [
+  //     { name: "Daily Transactions", path: "/xyz", pro: false },
+  //     { name: "Generate Invoices", path: "/xyz1", pro: false },
+  //     { name: "Online Payment", path: "/xyz2", pro: false },
+  //     { name: "Refunds", path: "/xyz3", pro: false },
+  //   ],
+  // },
   {
     name: "Reports",
     icon: <PageIcon />,
@@ -114,36 +136,27 @@ const navItems: NavItem[] = [
       { name: "Custom Reports", path: "/xyz7", pro: false },
     ],
   },
-  {
-    name: "Staff Management",
-    icon: <Persons />,
-    subItems: [
-      { name: "Add/Assign Caddy", path: "/staff-management", pro: false },
-      { name: "Staff Directory", path: "/xyz8", pro: false },
-      { name: "Shift Scheduling", path: "/xyz10", pro: false },
-      { name: "Attendance", path: "/xyz11", pro: false },
-    ],
-  },
-  {
-    name: "Communication Center",
-    icon: <Comnucation />,
-    subItems: [
-      { name: "Send Notifications", path: "/xyz12", pro: false },
-      { name: "Email Members", path: "/xyz13", pro: false },
-      { name: "Event Announcements", path: "/xyz14", pro: false },
 
-    ],
-  },
-  {
-    name: "Settings",
-    icon: <Settings />,
-    subItems: [
-      { name: "Course Configuration", path: "/course-configuration", pro: false },
-      { name: "User Roles & Permissions", path: "/xyz16", pro: false },
-      { name: "Integrations (Stripe, Maps)", path: "/xyz17", pro: false },
-      { name: "Backup & Restore", path: "/xyz18", pro: false },
-    ],
-  },
+  // {
+  //   name: "Communication Center",
+  //   icon: <Comnucation />,
+  //   subItems: [
+  //     { name: "Send Notifications", path: "/xyz12", pro: false },
+  //     { name: "Email Members", path: "/xyz13", pro: false },
+  //     { name: "Event Announcements", path: "/xyz14", pro: false },
+
+  //   ],
+  // },
+  // {
+  //   name: "Settings",
+  //   icon: <Settings />,
+  //   subItems: [
+  //     { name: "Course Configuration", path: "/course-configuration", pro: false },
+  //     { name: "User Roles & Permissions", path: "/xyz16", pro: false },
+  //     // { name: "Integrations (Stripe, Maps)", path: "/xyz17", pro: false },
+  //     // { name: "Backup & Restore", path: "/xyz18", pro: false },
+  //   ],
+  // },
 ];
 
 const othersItems: NavItem[] = [

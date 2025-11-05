@@ -23,32 +23,6 @@ import { guestBooking } from '@/services/bookingService';
 import { updateGuestBooking } from '@/services/bookingService';
 
 interface GuestBookingData {
-    // _id?: string;
-    // name?: string;
-    // email?: string;
-    // phone?: string;
-    // govId?: string;
-    // groupSize: any;
-    // startDateTime?: string;
-    // caddyCart?: any;
-    // amount?: number | any;
-    // paymentMode?: string;
-    // acceptRules?: boolean | any;
-    // acknowledgePolicy?: boolean | any;
-    // startTime?: string;
-    // specialInfo?: string;
-    // customerId?: {
-    //     name?: string;
-    //     email?: string;
-    //     phone?: string;
-    //     govId?: string;
-    //     role?: string;
-    //     startTime?: string;
-    // }
-    // course: { _id: string; name: string };
-    // selectedSlot?: { start: string; end: string; status: string };
-    // slot: any;
-
     _id?: string;
     name?: string;
     email?: string;
@@ -56,7 +30,7 @@ interface GuestBookingData {
     govId?: string;
     groupSize?: number | any;
     startDateTime?: string;
-    caddyCart?: any;
+    caddyCart?: any | string | boolean;
     amount?: number | any;
     paymentMode?: string;
     acceptRules?: boolean | any;
@@ -97,13 +71,13 @@ const validationSchema = Yup.object().shape({
     course: Yup.string().required('Course is required'),
     bookingDate: Yup.date().required('Booking date is required'),
     groupSize: Yup.string().required('Group size is required'),
-    caddyCart: Yup.boolean().required('Caddy/Cart selection is required'),
+    caddyCart: Yup.boolean().required('Caddy selection is required'),
     specialInfo: Yup.string(),
     amount: Yup.number()
         .typeError('Amount must be a number')
         .required('Amount is required')
         .min(0, 'Amount must be positive'),
-    paymentMode: Yup.string().required('Payment mode is required'),
+    // paymentMode: Yup.string().required('Payment mode is required'),
     acceptRules: Yup.boolean()
         .oneOf([true], 'You must accept the rules'),
     acknowledgePolicy: Yup.boolean()
@@ -127,10 +101,10 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
             course: data?.course._id || '',
             bookingDate: data?.startTime || '',
             groupSize: data?.groupSize || '',
-            caddyCart: data?.caddyCart || false,
+            caddyCart:  data?.caddyCart === true ? "true" : "false",
             specialInfo: data?.specialInfo || '',
             amount: data?.amount || '',
-            paymentMode: data?.paymentMode || '',
+            // paymentMode: data?.paymentMode || '',
             acceptRules: data?.acceptRules || false,
             acknowledgePolicy: data?.acknowledgePolicy || false,
             selectedSlot: data?.selectedSlot || null,
@@ -140,6 +114,8 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
         onSubmit: async (values) => {
             setLoading(true);
             try {
+                const formateCaddyFeild =  values.caddyCart === 'true';
+
                 const formData = new FormData();
                 formData.append('role', 'guest');
                 formData.append('name', values.name);
@@ -149,10 +125,10 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                 formData.append('course', values.course);
                 formData.append('bookingDate', Array.isArray(values.bookingDate) ? values.bookingDate[0] : values.bookingDate);
                 formData.append('groupSize', values.groupSize);
-                formData.append('caddyCart', values.caddyCart);
+                formData.append('caddyCart', formateCaddyFeild);
                 formData.append('specialInfo', values.specialInfo);
                 formData.append('amount', values.amount);
-                formData.append('paymentMode', values.paymentMode);
+                // formData.append('paymentMode', values.paymentMode);
                 formData.append('acceptRules', values.acceptRules);
                 formData.append('acknowledgePolicy', values.acknowledgePolicy);
                 formData.append('selectedSlot', JSON.stringify(values.selectedSlot));
@@ -353,6 +329,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                         id="bookingDate"
                         label="Date"
                         placeholder="Select Booking Date"
+                        minDate='today'
                         defaultDate={formik.values.bookingDate}
                         onChange={(date) => formik.setFieldValue('bookingDate', date)}
                     />
@@ -453,7 +430,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                     )}
                 </Grid>
 
-                <Grid>
+                {/* <Grid>
                     <Label>Payment Mode</Label>
                     <div className="relative">
                         <Select
@@ -471,7 +448,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                             <div className="text-red-400 text-xs ">{formik.errors.paymentMode}</div>
                         )}
                     </div>
-                </Grid>
+                </Grid> */}
 
                 {/* Terms */}
                 <div className="mt-4">

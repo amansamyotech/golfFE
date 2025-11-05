@@ -241,6 +241,7 @@ const AddMember = ({
                                 id="dob"
                                 label="Date of Birth"
                                 placeholder="Select a date"
+                                maxDate="today"
                                 defaultDate={formik.values.dob}
                                 onChange={(date) => {
                                     formik.setFieldValue('dob', date)
@@ -313,6 +314,7 @@ const AddMember = ({
                             <DatePicker
                                 id="startDate"
                                 label="Start Date"
+                                minDate='today'
                                 placeholder="Select a date"
                                 defaultDate={formik.values.startDate}
                                 onChange={(date) => formik.setFieldValue("startDate", date)}

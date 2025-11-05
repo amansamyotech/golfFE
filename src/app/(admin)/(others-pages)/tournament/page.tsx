@@ -51,6 +51,7 @@ export default function Tournament() {
 
     const handleCloseAdd = () => {
         setOpen(false);
+        setRowData(null);
     };
 
     const handleOpenStatusChange = () => {
@@ -323,7 +324,7 @@ export default function Tournament() {
                 </Stack>
 
                 <TableStyle>
-                    <Card sx={{ height: '100vh' }}>
+                    <Card sx={{height: '400px'}}>
                         <DataGrid
                             rows={rows}
                             columns={columns}
