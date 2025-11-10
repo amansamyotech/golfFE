@@ -12,8 +12,6 @@ import { toast } from "react-toastify";
 import { Button } from "@mui/material";
 import * as Yup from "yup";
 
-
-
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
@@ -38,25 +36,33 @@ export default function SignInForm() {
     setLoading(true);
 
     try {
-      // ✅ Validate input before submitting
       await schema.validate({ email, password }, { abortEarly: false });
 
       const payload = { email, password };
       const response = await loginUser(payload) as any;
-      
-      if (response?.status === 200) {
-      toast.success(response.message);
+     
+
+      const resStatus = Number(response?.status);
+      const resMsg = response?.message || "Something went wrong.";
+
+      if (resStatus === 201) {
+        toast.success(resMsg);
+        if (response?.data?.role === 'Admin') {
+          localStorage.setItem('token', response.additionalData);
+          localStorage.setItem('user', JSON.stringify(response.data));
+          router.push("/");
+        }
+      }
+      else if ([400, 401, 404, 409].includes(resStatus)) {
+        toast.error(resMsg);
+      }
+      else {
+        toast.error("Unexpected response from server.");
       }
 
-      if (response?.data?.role === 'Admin') {
-        localStorage.setItem('token', response.additionalData);
-        localStorage.setItem('user', response.data);
-        router.push("/");
-      }
     } catch (err: any) {
       console.error(err);
       if (err.name === "ValidationError") {
-        // ✅ Collect all field-specific errors
         const fieldErrors: Record<string, string> = {};
         err.inner.forEach((validationErr: any) => {
           if (validationErr.path) {

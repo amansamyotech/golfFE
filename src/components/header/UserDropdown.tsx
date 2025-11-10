@@ -20,6 +20,7 @@ export default function UserDropdown() {
   }
   function handleSignOut() {
     localStorage.removeItem("token"); 
+    localStorage.removeItem("user"); 
     closeDropdown();
     router.push("/signin");
   }
