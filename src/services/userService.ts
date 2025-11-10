@@ -5,5 +5,13 @@ import { handleApiResponse } from "@/utils/common";
 export const loginUser = async (payload) => {
     const url = api_urls.baseUrl + api_urls.user.login;
     const response = await postData(url, payload);
-    return response;
+    return handleApiResponse(response);
+    // return response;
+};
+
+export const getUserProfile = async (id) => {
+    const url = `${api_urls.baseUrl}${api_urls.user.getProfile}/${id}`;
+    const response = await getData(url);
+    // return response;
+    return handleApiResponse(response);
 };

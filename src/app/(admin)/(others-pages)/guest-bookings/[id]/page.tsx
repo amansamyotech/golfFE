@@ -34,6 +34,10 @@ interface Guest {
     updatedAt: string;
     groupSize: number;
     paymentMode: string;
+    caddyId?: {
+        _id: string;
+        name: string;
+    }
 }
 interface Course {
     _id: string;

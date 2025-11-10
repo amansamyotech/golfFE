@@ -15,6 +15,7 @@ import { ChevronDownIcon } from '@/icons';
 import * as Yup from 'yup';
 import { addPayment } from '@/services/paymentService';
 import { log } from 'node:console';
+import { makeRentalPayment } from '@/services/rentalProductService';
 
 const validationSchema = Yup.object().shape({
     paidAmount: Yup.number()
@@ -23,9 +24,7 @@ const validationSchema = Yup.object().shape({
     paymentMode: Yup.string().required('Payment mode is required'),
 });
 
-const AddPayment = ({ open, handleClose, data }) => {
-
-
+const AddPaymentRental = ({ open, handleClose, data }) => {
     const [loading, setLoading] = useState(false);
 
     const formik = useFormik({
@@ -39,8 +38,6 @@ const AddPayment = ({ open, handleClose, data }) => {
         enableReinitialize: true,
         onSubmit: async (values) => {
             const payload = {
-                customerId: data?.customerId?._id,
-                bookingId: data?._id,
                 totalAmount: values.totalAmount,
                 discount: values.discount,
                 paidAmount: values.paidAmount,
@@ -49,7 +46,8 @@ const AddPayment = ({ open, handleClose, data }) => {
 
             setLoading(true);
             try {
-                await addPayment(payload);
+                await makeRentalPayment(data?._id, payload);
+
             } catch (err) {
                 console.error(err);
             } finally {
@@ -81,7 +79,7 @@ const AddPayment = ({ open, handleClose, data }) => {
                     <Grid>
                         <Grid>
                             <Label>Customer Name</Label>
-                            <Input value={data?.name || ''} disabled className="w-full" />
+                            <Input value={data?.customerId?.name || ''} disabled className="w-full" />
                         </Grid>
 
                         <Grid>
@@ -175,5 +173,5 @@ const AddPayment = ({ open, handleClose, data }) => {
         </Modal>
     );
 };
-export default AddPayment;
+export default AddPaymentRental;
 

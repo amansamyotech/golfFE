@@ -22,6 +22,7 @@ import {
   Comnucation,
   Settings,
 } from "../icons/index";
+import logo from "../../public/images/logo/logo_GolfCrm.png";
 
 type NavItem = {
   name: string;
@@ -113,7 +114,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Inventory List", path: "/pro-shop", pro: false },
       { name: "Rentals", path: "/pro-shop-rental", pro: false },
-      { name: "Sales Reports", path: "/xyz", pro: false },
+      { name: "Sales Reports", path: "/rental-sales-report", pro: false },
     ],
   },
   // {
@@ -130,10 +131,11 @@ const navItems: NavItem[] = [
     name: "Reports",
     icon: <PageIcon />,
     subItems: [
-      { name: "Daily Summary", path: "/xyz4", pro: false },
-      { name: "Course Utilization", path: "/xyz5", pro: false },
-      { name: "Staff Activity", path: "/xyz6", pro: false },
+      { name: "Daily Summary", path: "/daily-report", pro: false },
       { name: "Custom Reports", path: "/xyz7", pro: false },
+      // { name: "Course Utilization", path: "/xyz5", pro: false },
+      // { name: "Staff Activity", path: "/xyz6", pro: false },
+
     ],
   },
 
@@ -390,7 +392,7 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex  ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+        className={`py-2 flex  ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
           }`}
       >
         <Link href="/">
@@ -398,14 +400,16 @@ const AppSidebar: React.FC = () => {
             <>
               <Image
                 className="dark:hidden"
-                src="/images/logo/logo.svg"
+                //src="/images/logo/logo.svg"
+                src={logo}
                 alt="Logo"
-                width={150}
-                height={40}
+                width={180}
+              // height={10}
               />
               <Image
                 className="hidden dark:block"
                 src="/images/logo/logo-dark.svg"
+                //src={logo}
                 alt="Logo"
                 width={150}
                 height={40}
@@ -432,7 +436,7 @@ const AppSidebar: React.FC = () => {
                   }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
+                  " "
                 ) : (
                   <HorizontaLDots />
                 )}

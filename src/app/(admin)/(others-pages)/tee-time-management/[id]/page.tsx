@@ -39,6 +39,12 @@ interface Customer {
     name: string;
     email: string;
     phone: string;
+    startDate: string;
+    expiryDate: string;
+    plan: {
+        _id: string;
+        title: string;
+    };
 }
 interface Guest {
     _id: string;
@@ -52,6 +58,10 @@ interface Guest {
     specialInfo: string;
     createdAt: string;
     updatedAt: string;
+    caddyId?: {
+        _id: string,
+        name: string
+    };
 }
 
 export default function GuestDetailPage() {
@@ -157,8 +167,8 @@ export default function GuestDetailPage() {
                             <Typography>
                                 <strong>Epiry Date:</strong> {moment(guest?.customerId?.expiryDate).format('DD MMM YYYY')}
                             </Typography>
-                            <Typography><strong>Status:</strong> {guest.bookingStatus}</Typography>
                             <Typography><strong>Special Info:</strong> {guest.specialInfo}</Typography>
+                            <Typography><strong>Membership Plan:</strong> {guest.customerId?.plan?.title}</Typography>
                             {
                                 guest?.caddyId ? <Typography><strong>Caddy Name:</strong> {guest?.caddyId?.name}</Typography> : <></>
                             }

@@ -92,7 +92,7 @@ export default function TeeTimeManagement() {
         { field: 'sNo', headerName: 'S.No', width: 80, sortable: false },
         {
             field: 'name',
-            headerName: 'Contact Info',
+            headerName: 'Name',
             flex: 1,
             renderCell: (params: GridRenderCellParams<Booking>) => (
                 <Link
@@ -108,20 +108,20 @@ export default function TeeTimeManagement() {
             ),
         },
 
-        {
-            field: 'email',
-            headerName: 'Contact Info',
-            flex: 1,
-            renderCell: (params: GridRenderCellParams<Booking>) => (
-                <Box display="flex" flexDirection="column">
-                    <Typography variant="body2">{params.row.customerId.email}</Typography>
-                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
-                        {params.row.customerId.phone}
-                    </Typography>
-                </Box>
-            ),
-        },
-        // { field: 'courseName', headerName: 'Course Name', flex: 1 },
+        // {
+        //     field: 'email',
+        //     headerName: 'Contact Info',
+        //     flex: 1,
+        //     renderCell: (params: GridRenderCellParams<Booking>) => (
+        //         <Box display="flex" flexDirection="column">
+        //             <Typography variant="body2">{params.row.customerId.email}</Typography>
+        //             <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+        //                 {params.row.customerId.phone}
+        //             </Typography>
+        //         </Box>
+        //     ),
+        // },
+
         {
             field: 'startDate', headerName: 'Booking Date', flex: 1, renderCell: (params) => {
                 const dateValue = params.row.customerId?.startDate;
@@ -276,7 +276,8 @@ export default function TeeTimeManagement() {
                         color='success'
                         size="small"
                         style={{ textTransform: 'none', width: '100%' }}
-                        disabled={params.row.customerId?.paymentStatus === 'paid'}
+                        disabled={params.row.paymentStatus === 'paid'}
+                        //disabled={params.row.paymentStatus === 'pending' || params.row.paymentStatus === 'paid'}
                         onClick={() => handleOpenPayment(params.row)}
                     >
                         Pay Now
@@ -381,7 +382,7 @@ export default function TeeTimeManagement() {
                 </Stack>
 
                 <TableStyle>
-                    <Card sx={{height: '400px'}}>
+                    <Card sx={{ height: '400px' }}>
                         <DataGrid
                             rows={rows}
                             columns={columns}

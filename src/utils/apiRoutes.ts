@@ -1,6 +1,8 @@
 import Tournament from "@/app/(admin)/(others-pages)/tournament/page";
 import { getById } from "@/services/customerService";
+import { dailySalesReport, monthlySalesReport } from "@/services/reportService";
 import { useDateInput } from "@heroui/react";
+import { report } from "process";
 
 export const api_urls = {
     baseUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}`,
@@ -113,10 +115,12 @@ export const api_urls = {
         return: "rental/return",
         cancel: "rental/cancel",
         getByStatus: "rental/status",
+        makePayment: "rental/make-payment"
     },
 
     user: {
         login: "auth/login",
+        getProfile: "auth/profile"
     },
 
     payment: {
@@ -124,6 +128,14 @@ export const api_urls = {
         getAll: "payment/get-all",
         getById: "payment",
         update: "payment/update",
-        delete: "payment/delete",   
+        delete: "payment/delete",
+    },
+
+    report: {
+        monthlySales: "reports/monthly-sales",
+        dailySales: "reports/daily-sales",
+
+        dailySalesRental: "reports/daily-sales-rental",
+        monthlySalesRental: "reports/monthly-sales-rental",
     }
 };

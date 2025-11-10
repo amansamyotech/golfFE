@@ -43,6 +43,7 @@ import AddRental from '@/components/pro-shop-rental/addRental';
 import { getAllRentals } from '@/services/rentalProductService';
 import ConfirmReturnDialog from '@/components/pro-shop-rental/returnRental';
 import CancelRental from '@/components/pro-shop-rental/cancelRental';
+import AddPaymentRental from '@/components/pro-shop-rental/paymentRental';
 
 export default function ProductShopRental() {
     const [open, setOpen] = useState(false);
@@ -55,6 +56,7 @@ export default function ProductShopRental() {
     const [openDelete, setOpenDelete] = useState(false);
     const [openReturn, setOpenReturn] = useState(false);
     const [selectedTimeSlotId, setSelectedTimeSlotId] = useState<string | null>(null);
+    const [openPayment, setOpenPayment] = useState(false);
 
     const handleOpenAdd = () => {
         setOpen(true);
@@ -107,6 +109,16 @@ export default function ProductShopRental() {
         handleClosePopover();
     };
 
+    const handleOpenPayment = (row: any) => {
+        setRowData(row);
+        setOpenPayment(true);
+    }
+
+    const handleClosePayment = () => {
+        setRowData(null);
+        setOpenPayment(false);
+    }
+
     const paginatedRows = rentalData.slice(
         paginationModel.page * paginationModel.pageSize,
         (paginationModel.page + 1) * paginationModel.pageSize
@@ -119,25 +131,40 @@ export default function ProductShopRental() {
 
     const columns = [
         { field: "sNo", headerName: "S.No", width: 80, sortable: false },
+        // {
+        //     field: "productName",
+        //     headerName: "Product Name",
+        //     flex: 1.5,
+        //     renderCell: (params) => params.row.productId?.name || "-",
+        // },
 
         {
-            field: "productName",
-            headerName: "Product Name",
+            field: "productInfo",
+            headerName: "Product & Rate",
             flex: 1.5,
-            renderCell: (params) => params.row.productId?.name || "-",
+            renderCell: (params) => {
+                const name = params.row.productId?.name || "-";
+                const rate = params.row.productId?.rentalRate
+                    ? `₹${params.row.productId.rentalRate}/day`
+                    : "₹0/day";
+
+                return (
+                    <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", py: 0.5 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {name}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                            {rate}
+                        </Typography>
+                    </Box>
+                );
+            },
         },
         {
             field: "customerName",
             headerName: "Customer Name",
             flex: 1.5,
             renderCell: (params) => params.row.customerId?.name || "-",
-        },
-        {
-            field: "rentalRate",
-            headerName: "Rate (₹/day)",
-            flex: 1,
-            renderCell: (params) =>
-                `₹${params.row.productId?.rentalRate?.toLocaleString() || "0"}`,
         },
         {
             field: "quantity",
@@ -166,8 +193,6 @@ export default function ProductShopRental() {
             renderCell: (params) =>
                 new Date(params.row.returnDate).toLocaleDateString() || "-",
         },
-
-
         {
             field: 'status',
             headerName: 'Status',
@@ -201,6 +226,27 @@ export default function ProductShopRental() {
                             margin: '0px'
                         }}
                     />
+                );
+            },
+        },
+        {
+            field: 'paymentAction',
+            headerName: 'Make Payment',
+            width: 100,
+            sortable: false,
+            renderCell: (params) => {
+                return (
+                    <Button
+
+                        variant="contained"
+                        color='success'
+                        size="small"
+                        style={{ textTransform: 'none', width: '50%' }}
+                        disabled={params.row.paymentStatus === 'paid'}
+                        onClick={() => handleOpenPayment(params.row)}
+                    >
+                        Pay Now
+                    </Button>
                 );
             },
         },
@@ -249,10 +295,11 @@ export default function ProductShopRental() {
 
     useEffect(() => {
         fetchRentalsData();
-    }, [open, openDelete, openReturn]);
+    }, [open, openDelete, openReturn, openPayment]);
 
     return (
         <>
+            <AddPaymentRental open={openPayment} handleClose={handleClosePayment} data={rowData} />
             <ConfirmReturnDialog open={openReturn} handleClose={handleCloseReturn} data={rowData} />
             <AddRental open={open} handleClose={handleCloseAdd} data={rowData} />
             <CancelRental open={openDelete} handleClose={handleCloseDelete} id={rowData?._id || ''} />
@@ -265,7 +312,7 @@ export default function ProductShopRental() {
                 </Stack>
 
                 <TableStyle>
-                    <Card sx={{height: '400px'}}>
+                    <Card sx={{ height: '400px' }}>
                         <DataGrid
                             rows={rows}
                             columns={columns}

@@ -34,6 +34,8 @@ interface StaffMember {
     department: string;
     dateOfJoining: string;
     title: string;
+    workShift: string;
+    availabilityStatus: string;
 }
 
 const defaultImage = 'https://via.placeholder.com/40';

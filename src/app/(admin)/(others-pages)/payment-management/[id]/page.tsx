@@ -141,7 +141,7 @@ export default function PaymentSlipPage() {
         </Typography>
 
         <Grid container spacing={4}>
-          <Grid item xs={12} sm={6}>
+          <Grid>
             <Typography variant="subtitle1">Customer Details</Typography>
             <Divider sx={{ my: 1 }} />
             <Typography><b>Name:</b> {data.customerId?.name}</Typography>
@@ -149,7 +149,7 @@ export default function PaymentSlipPage() {
             <Typography><b>Email:</b> {data.customerId?.email}</Typography>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid>
             <Typography variant="subtitle1">Booking Details</Typography>
             <Divider sx={{ my: 1 }} />
             <Typography><b>Booking Date:</b> {moment(data.customerId?.startDate).format("DD/MM/YYYY")}</Typography>

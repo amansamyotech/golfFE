@@ -101,7 +101,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
             course: data?.course._id || '',
             bookingDate: data?.startTime || '',
             groupSize: data?.groupSize || '',
-            caddyCart:  data?.caddyCart === true ? "true" : "false",
+            caddyCart: data?.caddyCart === true ? "true" : "false",
             specialInfo: data?.specialInfo || '',
             amount: data?.amount || '',
             // paymentMode: data?.paymentMode || '',
@@ -114,7 +114,7 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
         onSubmit: async (values) => {
             setLoading(true);
             try {
-                const formateCaddyFeild =  values.caddyCart === 'true';
+                const formateCaddyFeild = values.caddyCart === 'true';
 
                 const formData = new FormData();
                 formData.append('role', 'guest');
@@ -125,7 +125,8 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
                 formData.append('course', values.course);
                 formData.append('bookingDate', Array.isArray(values.bookingDate) ? values.bookingDate[0] : values.bookingDate);
                 formData.append('groupSize', values.groupSize);
-                formData.append('caddyCart', formateCaddyFeild);
+                // formData.append('caddyCart', formateCaddyFeild);
+                formData.append('caddyCart', formateCaddyFeild.toString());
                 formData.append('specialInfo', values.specialInfo);
                 formData.append('amount', values.amount);
                 // formData.append('paymentMode', values.paymentMode);
@@ -200,41 +201,6 @@ const AddGuestBookings: React.FC<AddGuestBookingsProps> = ({ open, handleClose, 
     useEffect(() => {
         fetchCourses();
     }, [open]);
-
-    // useEffect(() => {
-    //     const bookingDateObj = formik.values.bookingDate
-    //         ? new Date(formik.values.bookingDate)
-    //         : null;
-
-    //     const isValidDate = bookingDateObj && !isNaN(bookingDateObj.getTime());
-
-    //     const startDate = isValidDate
-    //         ? bookingDateObj.toISOString().split('T')[0]
-    //         : null;
-
-    //     const endDate = startDate;
-
-    //     if (startDate && formik.values.course) {
-    //         const fetchSlots = async () => {
-    //             try {
-    //                 const slots = await getTimeSlotByStartAndCourse(
-    //                     startDate,
-    //                     endDate,
-    //                     formik.values.course.value || formik.values.course
-    //                 );
-    //                 setAvailableSlots(slots);
-    //             } catch (error) {
-    //                 console.error('Error fetching available slots:', error);
-    //                 setAvailableSlots([]);
-    //             }
-    //         };
-    //         fetchSlots();
-    //     } else {
-    //         setAvailableSlots([]);
-    //     }
-    // }, [formik.values.bookingDate, formik.values.course]);
-
-
 
     const handleFormClose = () => {
         setAvailableSlots([]);

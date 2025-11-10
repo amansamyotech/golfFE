@@ -115,10 +115,19 @@ const AddRental = ({ open, handleClose, data }) => {
       const end = new Date(formik.values.returnDate);
 
       // const diffInDays = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
+      // const diffInDays = Math.max(
+      //   1,
+      //   Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1
+      // );
+
       const diffInDays = Math.max(
         1,
-        Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1
+        Math.ceil(
+          (new Date(end as any).getTime() - new Date(start as any).getTime()) /
+          (1000 * 60 * 60 * 24)
+        ) + 1
       );
+
       const total = selectedProduct.rentalRate * formik.values.quantity * diffInDays;
       formik.setFieldValue("totalAmount", total);
     } else if (selectedProduct && formik.values.quantity) {

@@ -77,7 +77,7 @@ export default function GuestManagement() {
     const [openAssignCaddy, setOpenAssignCaddy] = useState(false);
     const [openPayment, setOpenPayment] = useState(false);
 
-    
+
     const paginatedRows = guests.slice(
         paginationModel.page * paginationModel.pageSize,
         (paginationModel.page + 1) * paginationModel.pageSize
@@ -175,23 +175,29 @@ export default function GuestManagement() {
                 const endTime = moment(slot.end, 'YYYY-MM-DD HH:mm').format('hh:mm A');
 
                 return (
+
                     <Box
                         display="flex"
+                        flexDirection="column"
                         justifyContent="center"
                         alignItems="center"
                         width="100%"
                         height="100%"
                     >
                         <Typography variant="body2" sx={{ textAlign: 'center' }}>
-                            {`${startTime} - ${endTime}`}
+                            {`${startTime} -`}
                         </Typography>
+                        <Typography variant="body2" sx={{ textAlign: 'center' }}>
+                            {`${endTime}`}
+                        </Typography>
+                        {/* ${endTime} */}
                     </Box>);
             },
         },
         {
             field: 'bookingStatus',
             headerName: 'Booking Status',
-            flex: 1,
+            flex: 1.1,
             width: 100,
             renderCell: (params) => {
                 const status = params.value;
@@ -286,12 +292,12 @@ export default function GuestManagement() {
             renderCell: (params) => {
                 return (
                     <Button
-                
+
                         variant="contained"
                         color='success'
                         size="small"
                         style={{ textTransform: 'none', width: '100%' }}
-                        disabled={params.row.customerId?.paymentStatus === 'paid'}
+                        disabled={params.row.paymentStatus === 'paid'}
                         onClick={() => handleOpenPayment(params.row)}
                     >
                         Pay Now
@@ -391,7 +397,7 @@ export default function GuestManagement() {
                     </Button>
                 </Stack>
                 <TableStyle>
-                    <Card sx={{height: '400px'}}>
+                    <Card sx={{ height: '400px' }}>
                         <DataGrid
                             rows={rows}
                             columns={columns}

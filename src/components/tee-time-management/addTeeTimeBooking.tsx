@@ -55,6 +55,7 @@ interface TeeTimeBookingProps {
 interface Member {
     _id: string;
     name: string;
+    phone: string;
     startDate: string;
     expiryDate: string;
     role: string;
@@ -132,10 +133,10 @@ const TeeTimeBooking: React.FC<TeeTimeBookingProps> = ({ open, handleClose, data
         try {
             const fetchedMembers = await getAllCustomer() as Member[];
             const formattedMembers = fetchedMembers
-                .filter((member: Member) => member?.role === "member" && member?.status === "INACTIVE")
+                .filter((member: Member) => member?.role === "member")
                 .map((member: Member) => ({
                     value: member._id,
-                    label: `${member.name} | ${member.status}`,
+                    label: `${member.name} | ${member.phone}`,
                 }));
             setMembers(formattedMembers);
         } catch (error) {

@@ -49,3 +49,9 @@ export const getRentalsByStatus = async (status) => {
     const response = await getData(url);
     return await handleApiResponse(response);
 };
+
+export const makeRentalPayment = async (id, payload) => {
+    const url = `${api_urls.baseUrl + api_urls.rental.makePayment}/${id}`;
+    const response = await putData(url, payload);
+    return await handleApiResponse(response);
+}

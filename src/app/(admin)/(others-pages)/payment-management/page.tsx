@@ -63,7 +63,7 @@ export default function Payment() {
         { field: 'sNo', headerName: 'S.No', flex: 0.5 },
         {
             field: 'name', headerName: 'Name', flex: 1, renderCell: (params) => (
-                <Typography variant="body2">{params.row.customerId.name}</Typography>
+                <Typography variant="body2">{params.row.customerId?.name}</Typography>
             )
         },
         {
@@ -72,9 +72,9 @@ export default function Payment() {
             flex: 1.5,
             renderCell: (params) => (
                 <Box display="flex" flexDirection="column">
-                    <Typography variant="body2">{params.row.customerId.email}</Typography>
+                    <Typography variant="body2">{params.row.customerId?.email}</Typography>
                     <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
-                        {params.row.customerId.phone}
+                        {params.row.customerId?.phone}
                     </Typography>
                 </Box>
             ),
@@ -83,7 +83,7 @@ export default function Payment() {
         {
             field: 'role', flex: 1, headerName: 'Role',
             renderCell: (params) => (
-                <Typography variant="body2">{params.row.customerId.role}</Typography>
+                <Typography variant="body2">{params.row.customerId?.role}</Typography>
             )
         },
         {
@@ -115,7 +115,7 @@ export default function Payment() {
             headerName: 'Payment Status',
             flex: 1,
             renderCell: (params) => {
-                const status = params.row.customerId.paymentStatus;
+                const status = params.row.bookingId?.paymentStatus;
                 const statusColorMap = {
                     pending: 'error',
                     partial: 'warning',

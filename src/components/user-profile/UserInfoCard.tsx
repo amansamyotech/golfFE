@@ -5,12 +5,31 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import { getUserProfile } from "@/services/userService";
+import { useEffect, useState } from "react";
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
+  const [user, setUserData] = useState([]);
+
   const handleSave = () => {
     closeModal();
   };
+
+  // const fetchUserData = async () => {
+  //   try {
+  //     const response = await getUserProfile() as any[];
+  //     setUserData(response)
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchUserData();
+  // }, []);
+
+
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">

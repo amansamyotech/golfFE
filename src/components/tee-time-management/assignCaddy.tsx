@@ -25,7 +25,7 @@ export default function AssignCaddy({ open, handleClose, id, }) {
 
     const fetchData = async () => {
         try {
-            const res = await getAllStaff();
+            const res = await getAllStaff() as any[];
             const availableStaff = res.filter((s) => s.availabilityStatus === "available" && s.department === 'caddy') || [];
             setStaffList(
                 availableStaff.map((s) => ({
