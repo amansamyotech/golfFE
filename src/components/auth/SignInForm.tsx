@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { Button } from "@mui/material";
 import * as Yup from "yup";
 
+
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
@@ -22,6 +23,7 @@ export default function SignInForm() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const router = useRouter();
 
+
   // ✅ Define Yup schema
   const schema = Yup.object().shape({
     email: Yup.string()
@@ -29,6 +31,55 @@ export default function SignInForm() {
       .required("Email is required"),
     password: Yup.string().required("Password is required"),
   });
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setError("");
+  //   setLoading(true);
+
+  //   try {
+  //     await schema.validate({ email, password }, { abortEarly: false });
+
+  //     const payload = { email, password };
+  //     const response = await loginUser(payload) as any;
+  //     const resStatus = Number(response?.status);
+  //     const resMsg = response?.data?.message || "Something went wrong.";
+
+  //     if (resStatus === 201) {
+  //       toast.success(resMsg);
+  //       if (response?.data?.data?.role === 'Admin') {
+  //         localStorage.setItem('token', response.data.additionalData);
+  //         localStorage.setItem('user', JSON.stringify(response?.data?.data));
+  //         router.push("/");
+  //       }
+  //     }
+  //     else if (resStatus === 404) {
+  //       toast.error("User not found");
+  //     }
+  //     else if (resStatus === 401) {
+  //       toast.error("User is unauthraized Please check credentails");
+  //     }
+  //     else {
+  //       toast.error("Unexpected response from server.");
+  //     }
+
+  //   } catch (err: any) {
+  //     console.error(err);
+  //     if (err.name === "ValidationError") {
+  //       const fieldErrors: Record<string, string> = {};
+  //       err.inner.forEach((validationErr: any) => {
+  //         if (validationErr.path) {
+  //           fieldErrors[validationErr.path] = validationErr.message;
+  //         }
+  //       });
+  //       setErrors(fieldErrors);
+  //     } else {
+  //       toast.error("Login failed. Please try again.");
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,30 +90,44 @@ export default function SignInForm() {
       await schema.validate({ email, password }, { abortEarly: false });
 
       const payload = { email, password };
-      const response = await loginUser(payload) as any;
-     
+      const response = await loginUser(payload);
 
-      const resStatus = Number(response?.status);
-      const resMsg = response?.message || "Something went wrong.";
+      const resStatus = response?.data?.status;
+      const resMsg = response?.data?.message || "Something went wrong.";
 
       if (resStatus === 201) {
         toast.success(resMsg);
-        if (response?.data?.role === 'Admin') {
-          localStorage.setItem('token', response.additionalData);
-          localStorage.setItem('user', JSON.stringify(response.data));
+        if (response?.data?.data?.role === "Admin") {
+          localStorage.setItem("token", response.data.additionalData);
+          localStorage.setItem("user", JSON.stringify(response?.data?.data));
           router.push("/");
         }
-      }
-      else if ([400, 401, 404, 409].includes(resStatus)) {
-        toast.error(resMsg);
-      }
-      else {
+      } else {
         toast.error("Unexpected response from server.");
       }
 
     } catch (err: any) {
-      console.error(err);
-      if (err.name === "ValidationError") {
+      console.error("Login error:", err);
+
+      if (err.response) {
+        const status = err.response.status;
+        const message = err.response.data?.message || "Login failed";
+
+        if (status === 401) {
+          toast.error("User is unauthorized. Please check your credentials.");
+        } else if (status === 404) {
+          toast.error("User not found.");
+        } else if (status === 400) {
+          toast.error("Invalid request.");
+        } else if (status === 409) {
+          toast.error("Conflict detected.");
+        } else {
+          toast.error(message);
+        }
+      }
+
+      // ✅ Handle validation errors
+      else if (err.name === "ValidationError") {
         const fieldErrors: Record<string, string> = {};
         err.inner.forEach((validationErr: any) => {
           if (validationErr.path) {
@@ -77,6 +142,7 @@ export default function SignInForm() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">

@@ -63,7 +63,6 @@ const navItems: NavItem[] = [
     path: "/calendar",
     subItems: [{ name: "View Tee Sheet", path: "/tee-time-management", pro: false },
     { name: "Tee Time Calendar", path: "/calendar", pro: false },
-      // { name: "Cancellations & Reschedules", path: "/calendar2", pro: false }
     ],
   },
   {
@@ -73,7 +72,6 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Member List", path: "/members-management", pro: false },
       { name: "Membership Plans", path: "/membership-plans", pro: false },
-      // { name: "Expiring Memberships", path: "/expiring-memberships", pro: false }
     ],
   },
   {
@@ -89,23 +87,14 @@ const navItems: NavItem[] = [
     icon: <Persons />,
     subItems: [
       { name: "Staff List", path: "/staff-management", pro: false },
-      // { name: "Shift Scheduling", path: "/xyz10", pro: false },
-      // { name: "Staff Directory", path: "/xyz8", pro: false },
-      // { name: "Attendance", path: "/xyz11", pro: false },
     ],
   },
   {
     name: "Tournament",
     icon: <TableIcon />,
     subItems: [
-      // { name: "Upcoming Tournaments", path: "/basic-tables", pro: false },
-      // { name: "Register Players", path: "/basic-tables1", pro: false },
-      // { name: "Leaderboards", path: "/basic-tables2", pro: false },
-      // { name: "Past Events", path: "/basic-tables3", pro: false }
-
       { name: "Events", path: "/tournament", pro: false },
       { name: "Register Players", path: "/players", pro: false },
-      // { name: "Leaderboards", path: "/basic-tables2", pro: false },
     ],
   },
   {
@@ -117,48 +106,16 @@ const navItems: NavItem[] = [
       { name: "Sales Reports", path: "/rental-sales-report", pro: false },
     ],
   },
-  // {
-  //   name: "Billing & Payments",
-  //   icon: <Paymnets />,
-  //   subItems: [
-  //     { name: "Daily Transactions", path: "/xyz", pro: false },
-  //     { name: "Generate Invoices", path: "/xyz1", pro: false },
-  //     { name: "Online Payment", path: "/xyz2", pro: false },
-  //     { name: "Refunds", path: "/xyz3", pro: false },
-  //   ],
-  // },
   {
     name: "Reports",
     icon: <PageIcon />,
     subItems: [
       { name: "Daily Summary", path: "/daily-report", pro: false },
       { name: "Custom Reports", path: "/xyz7", pro: false },
-      // { name: "Course Utilization", path: "/xyz5", pro: false },
-      // { name: "Staff Activity", path: "/xyz6", pro: false },
-
     ],
   },
 
-  // {
-  //   name: "Communication Center",
-  //   icon: <Comnucation />,
-  //   subItems: [
-  //     { name: "Send Notifications", path: "/xyz12", pro: false },
-  //     { name: "Email Members", path: "/xyz13", pro: false },
-  //     { name: "Event Announcements", path: "/xyz14", pro: false },
 
-  //   ],
-  // },
-  // {
-  //   name: "Settings",
-  //   icon: <Settings />,
-  //   subItems: [
-  //     { name: "Course Configuration", path: "/course-configuration", pro: false },
-  //     { name: "User Roles & Permissions", path: "/xyz16", pro: false },
-  //     // { name: "Integrations (Stripe, Maps)", path: "/xyz17", pro: false },
-  //     // { name: "Backup & Restore", path: "/xyz18", pro: false },
-  //   ],
-  // },
 ];
 
 const othersItems: NavItem[] = [

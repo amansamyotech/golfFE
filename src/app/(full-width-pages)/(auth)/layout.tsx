@@ -6,6 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 export default function AuthLayout({
   children,
 }: {
@@ -18,7 +21,6 @@ export default function AuthLayout({
           {children}
           <div className="lg:w-1/2 w-full h-full bg-brand-950 dark:bg-white/5 lg:grid items-center hidden">
             <div className="relative items-center justify-center  flex z-1">
-              {/* <!-- ===== Common Grid Shape Start ===== --> */}
               <GridShape />
               <div className="flex flex-col items-center max-w-xs">
                 {/* <Link href="/" className="block mb-4"> */}
@@ -40,6 +42,18 @@ export default function AuthLayout({
             <ThemeTogglerTwo />
           </div>
         </div>
+
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          newestOnTop
+          closeOnClick
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          className="z-[9999]"
+          toastClassName="z-[9999]"
+        />
       </ThemeProvider>
     </div>
   );
