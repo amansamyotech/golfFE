@@ -7,10 +7,20 @@ const api = axios.create({
 
 // --- REQUEST INTERCEPTOR ---
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== "undefined") {
+        console.log("in REQUEST INTERCEPTOR");
+
+        const token = localStorage.getItem("token");
+        console.log("token :", token);
+
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
     }
+    // const token = localStorage.getItem("token");
+    // if (token) {
+    //     config.headers.Authorization = `Bearer ${token}`;
+    // }
     return config;
 });
 
@@ -20,15 +30,33 @@ api.interceptors.response.use(
     (error) => {
         const status = error.response?.status;
 
-        if (status === 401 || status === 403) {
-            console.warn("Unauthorized or session expired");
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            toast.error("Session expired or unauthorized. Please log in again.");
-            window.location.href = "/signin";
+        if (typeof window !== "undefined") {
+            if (status === 401 || status === 403) {
+                console.warn("Unauthorized or session expired");
+
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                toast.error("Session expired or unauthorized. Please log in again.");
+                window.location.href = "/signin";
+            } else {
+                console.error("API Error:", error);
+            }
+
         } else {
-            console.error("API Error:", error);
+            // Log silently during build/SSR
+            console.error("API error on server:", error.message);
         }
+
+        // if (status === 401 || status === 403) {
+        //     console.warn("Unauthorized or session expired");
+
+        //     localStorage.removeItem("token");
+        //     localStorage.removeItem("user");
+        //     toast.error("Session expired or unauthorized. Please log in again.");
+        //     window.location.href = "/signin";
+        // } else {
+        //     console.error("API Error:", error);
+        // }
 
         return Promise.reject(error);
     }

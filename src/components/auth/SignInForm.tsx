@@ -2,7 +2,6 @@
 import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
-// import Button from "@/components/ui/button/Button";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -11,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Button } from "@mui/material";
 import * as Yup from "yup";
+
 
 
 export default function SignInForm() {
@@ -32,55 +32,6 @@ export default function SignInForm() {
     password: Yup.string().required("Password is required"),
   });
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setError("");
-  //   setLoading(true);
-
-  //   try {
-  //     await schema.validate({ email, password }, { abortEarly: false });
-
-  //     const payload = { email, password };
-  //     const response = await loginUser(payload) as any;
-  //     const resStatus = Number(response?.status);
-  //     const resMsg = response?.data?.message || "Something went wrong.";
-
-  //     if (resStatus === 201) {
-  //       toast.success(resMsg);
-  //       if (response?.data?.data?.role === 'Admin') {
-  //         localStorage.setItem('token', response.data.additionalData);
-  //         localStorage.setItem('user', JSON.stringify(response?.data?.data));
-  //         router.push("/");
-  //       }
-  //     }
-  //     else if (resStatus === 404) {
-  //       toast.error("User not found");
-  //     }
-  //     else if (resStatus === 401) {
-  //       toast.error("User is unauthraized Please check credentails");
-  //     }
-  //     else {
-  //       toast.error("Unexpected response from server.");
-  //     }
-
-  //   } catch (err: any) {
-  //     console.error(err);
-  //     if (err.name === "ValidationError") {
-  //       const fieldErrors: Record<string, string> = {};
-  //       err.inner.forEach((validationErr: any) => {
-  //         if (validationErr.path) {
-  //           fieldErrors[validationErr.path] = validationErr.message;
-  //         }
-  //       });
-  //       setErrors(fieldErrors);
-  //     } else {
-  //       toast.error("Login failed. Please try again.");
-  //     }
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -95,17 +46,30 @@ export default function SignInForm() {
       const resStatus = response?.data?.status;
       const resMsg = response?.data?.message || "Something went wrong.";
 
-      if (resStatus === 201) {
-        toast.success(resMsg);
-        if (response?.data?.data?.role === "Admin") {
-          localStorage.setItem("token", response.data.additionalData);
-          localStorage.setItem("user", JSON.stringify(response?.data?.data));
-          router.push("/");
-        }
-      } else {
-        toast.error("Unexpected response from server.");
-      }
+      // if (resStatus === 201) {
+      //   toast.success(resMsg);
+      //   if (response?.data?.data?.role === "Admin") {
+      //     localStorage.setItem("token", response.data.additionalData);
+      //     localStorage.setItem("user", JSON.stringify(response?.data?.data));
+      //     router.push("/");
+      //   }
+      // } else {
+      //   toast.error("Unexpected response from server.");
+      // }
 
+
+     
+        if (resStatus === 201) {
+          toast.success(resMsg);
+          if (response?.data?.data?.role === "Admin") {
+            localStorage.setItem("token", response.data.additionalData);
+            localStorage.setItem("user", JSON.stringify(response?.data?.data));
+            router.push("/");
+          }
+        } else {
+          toast.error("Unexpected response from server.");
+        }
+     
     } catch (err: any) {
       console.error("Login error:", err);
 
