@@ -58,18 +58,18 @@ export default function SignInForm() {
       // }
 
 
-     
-        if (resStatus === 201) {
-          toast.success(resMsg);
-          if (response?.data?.data?.role === "Admin") {
-            localStorage.setItem("token", response.data.additionalData);
-            localStorage.setItem("user", JSON.stringify(response?.data?.data));
-            router.push("/");
-          }
-        } else {
-          toast.error("Unexpected response from server.");
+
+      if (resStatus === 201) {
+        toast.success(resMsg);
+        if (response?.data?.data?.role === "Admin") {
+          localStorage.setItem("token", response.data.additionalData);
+          localStorage.setItem("user", JSON.stringify(response?.data?.data));
+          router.push("/");
         }
-     
+      } else {
+        toast.error("Unexpected response from server.");
+      }
+
     } catch (err: any) {
       console.error("Login error:", err);
 
@@ -167,7 +167,7 @@ export default function SignInForm() {
 
 
 
-              <div className="flex items-center justify-between">
+              {/* <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Checkbox checked={isChecked} onChange={setIsChecked} />
                   <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
@@ -180,7 +180,7 @@ export default function SignInForm() {
                 >
                   Forgot password?
                 </Link>
-              </div>
+              </div> */}
 
               {/* {error && (
                 <p className="text-sm text-error-500 text-center">{error}</p>

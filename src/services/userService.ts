@@ -12,6 +12,15 @@ export const loginUser = async (payload) => {
 export const getUserProfile = async (id) => {
     const url = `${api_urls.baseUrl}${api_urls.user.getProfile}/${id}`;
     const response = await getData(url);
-    // return response;
     return handleApiResponse(response);
 };
+
+export const editUserProfileData = async (id, data) => {
+    const url = `${api_urls.baseUrl}${api_urls.user.update}/${id}`;
+    const response = await putData(url, data);
+    return handleApiResponse(response, 'UPDATE');
+};
+
+
+
+

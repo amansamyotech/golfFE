@@ -1,4 +1,5 @@
 import Tournament from "@/app/(admin)/(others-pages)/tournament/page";
+import { updateCourse } from "@/services/courseService";
 import { getById } from "@/services/customerService";
 import { dailySalesReport, monthlySalesReport } from "@/services/reportService";
 import { useDateInput } from "@heroui/react";
@@ -120,7 +121,8 @@ export const api_urls = {
 
     user: {
         login: "auth/login",
-        getProfile: "auth/profile"
+        getProfile: "auth/profile",
+        update: "auth/update"
     },
 
     payment: {

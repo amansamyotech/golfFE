@@ -2,33 +2,80 @@
 import React from "react";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
-import Button from "../ui/button/Button";
+// import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { getUserProfile } from "@/services/userService";
+import { getUserProfile, editUserProfileData } from "@/services/userService";
 import { useEffect, useState } from "react";
+import * as Yup from 'yup';
+import { Button } from "@mui/material";
+import { useFormik } from "formik";
+
+interface User {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+}
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
-  const [user, setUserData] = useState([]);
+  const [user, setUser] = useState({} as User);
 
   const handleSave = () => {
     closeModal();
   };
 
-  // const fetchUserData = async () => {
-  //   try {
-  //     const response = await getUserProfile() as any[];
-  //     setUserData(response)
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-  // };
+  const fetchData = async () => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
 
-  // useEffect(() => {
-  //   fetchUserData();
-  // }, []);
+      if (!storedUser || !storedUser._id) {
+        throw new Error("User ID not found in localStorage.");
+      }
 
+      const response = await getUserProfile(storedUser._id) as User;
+      setUser(response);
+
+    } catch (err) {
+      console.error("Failed to fetch user profile:", err);
+
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [isOpen]);
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      address: user?.address || "",
+    },
+    validationSchema: Yup.object({
+      firstName: Yup.string().required("Required"),
+      lastName: Yup.string().required("Required"),
+      email: Yup.string().email("Invalid email").required("Required"),
+      phone: Yup.string(),
+      address: Yup.string(),
+    }),
+    onSubmit: async (values) => {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        if (!storedUser._id) throw new Error("User ID not found");
+
+        const updatedUser = await editUserProfileData(storedUser?._id, values);
+        closeModal();
+      } catch (error) {
+        console.error("Failed to update profile:", error);
+      }
+    },
+  });
 
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -44,7 +91,7 @@ export default function UserInfoCard() {
                 First Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Musharof
+                {user ? user.firstName : 'Musharof'}
               </p>
             </div>
 
@@ -53,7 +100,7 @@ export default function UserInfoCard() {
                 Last Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Chowdhury
+                {user ? user.lastName : 'Chowdhury'}
               </p>
             </div>
 
@@ -62,7 +109,7 @@ export default function UserInfoCard() {
                 Email address
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                randomuser@pimjo.com
+                {user ? user.email : 'randomuser@pimjo.com'}
               </p>
             </div>
 
@@ -71,16 +118,16 @@ export default function UserInfoCard() {
                 Phone
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                +09 363 398 46
+                {user ? user.phone : '+09 363 398 46'}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Bio
+                Address
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Team Manager
+                {user ? user.address : 'Head Office, Uk'}
               </p>
             </div>
           </div>
@@ -119,83 +166,50 @@ export default function UserInfoCard() {
               Update your details to keep your profile up-to-date.
             </p>
           </div>
-          <form className="flex flex-col">
+          <form onSubmit={formik.handleSubmit} className="flex flex-col space-y-5">
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
-              <div>
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
-
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div>
-                    <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.facebook.com/PimjoHQ"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>X.com</Label>
-                    <Input type="text" defaultValue="https://x.com/PimjoHQ" />
-                  </div>
-
-                  <div>
-                    <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.linkedin.com/company/pimjo"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Instagram</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://instagram.com/PimjoHQ"
-                    />
-                  </div>
-                </div>
-              </div>
               <div className="mt-7">
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Personal Information
+                  Personal Information Edit
                 </h5>
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
                     <Label>First Name</Label>
-                    <Input type="text" defaultValue="Musharof" />
+                    <Input name="firstName" type="text" value={formik.values.firstName} onChange={formik.handleChange} />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Last Name</Label>
-                    <Input type="text" defaultValue="Chowdhury" />
+                    <Input name='lastName' type="text" value={formik.values.lastName} onChange={formik.handleChange} />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Email Address</Label>
-                    <Input type="text" defaultValue="randomuser@pimjo.com" />
+                    <Input name='email' type="text" value={formik.values.email} onChange={formik.handleChange} disabled />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Phone</Label>
-                    <Input type="text" defaultValue="+09 363 398 46" />
+                    <Input name='phone' type="text" value={formik.values.phone} onChange={formik.handleChange} />
                   </div>
 
                   <div className="col-span-2">
-                    <Label>Bio</Label>
-                    <Input type="text" defaultValue="Team Manager" />
+                    <Label>Address</Label>
+                    <Input name="address" type="text" value={formik.values.address} onChange={formik.handleChange} />
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                onClick={closeModal}
+              >
                 Close
               </Button>
-              <Button size="sm" onClick={handleSave}>
-                Save Changes
+              <Button type="submit" variant="contained">
+                Save
               </Button>
             </div>
           </form>
