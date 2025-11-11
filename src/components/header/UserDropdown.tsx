@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-   const router = useRouter();
+  const router = useRouter();
 
   function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.stopPropagation();
@@ -19,11 +19,13 @@ export default function UserDropdown() {
     setIsOpen(false);
   }
   function handleSignOut() {
-    localStorage.removeItem("token"); 
-    localStorage.removeItem("user"); 
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     closeDropdown();
     router.push("/signin");
   }
+
+  const user = JSON.parse(localStorage.getItem('user'));
 
   return (
     <div className="relative">
@@ -68,10 +70,10 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            Musharof Chowdhury
+            {user?.firstName}  {user?.lastName}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            randomuser@pimjo.com
+            {user?.email}
           </span>
         </div>
 
@@ -101,7 +103,7 @@ export default function UserDropdown() {
               Edit profile
             </DropdownItem>
           </li>
-          <li>
+          {/* <li>
             <DropdownItem
               onItemClick={closeDropdown}
               tag="a"
@@ -150,7 +152,7 @@ export default function UserDropdown() {
               </svg>
               Support
             </DropdownItem>
-          </li>
+          </li> */}
         </ul>
         {/* <Link
           href="/signin"

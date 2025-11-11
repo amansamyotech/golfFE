@@ -6,7 +6,6 @@ import axios from "axios";
 export const loginUser = async (payload) => {
     const url = api_urls.baseUrl + api_urls.user.login;
     const response = await axios.post(url, payload);
-    console.log("in login response :", response.status);
     return response;
 };
 
