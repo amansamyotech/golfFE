@@ -1,216 +1,266 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import {
-  EventInput,
-  DateSelectArg,
-  EventClickArg,
-  EventContentArg,
-} from "@fullcalendar/core";
-import { useModal } from "@/hooks/useModal";
-import { Modal } from "@/components/ui/modal";
-import AddGuestBookings from "../guest/addBooking";
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Button,
+  Typography,
+  Box,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { getBooking } from "@/services/bookingService";
-
-
-interface CalendarEvent extends EventInput {
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
   extendedProps: {
     calendar: string;
+    bookedBy: string;
+    course: string;
+    notes?: string;
+    bookingType?: string;
+    status?: string;
   };
 }
 
 const Calendar: React.FC = () => {
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
-    null
-  );
-  const [eventTitle, setEventTitle] = useState("");
-  const [eventStartDate, setEventStartDate] = useState("");
-  const [eventEndDate, setEventEndDate] = useState("");
-  const [eventLevel, setEventLevel] = useState("");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [filter, setFilter] = useState("All");
+  const [selectedDayEvents, setSelectedDayEvents] = useState<CalendarEvent[]>(
+    []
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const calendarRef = useRef<FullCalendar>(null);
-  const { isOpen, openModal, closeModal } = useModal();
 
-  const [open, setOpen] = useState(false);
-  const [bookings, setBookings] = useState([]);
-
-  const calendarsEvents = {
-    Danger: "danger",
-    Success: "success",
-    Primary: "primary",
-    Warning: "warning",
-  };
-
+  // ---- Fetch Bookings ----
   const fetchAllBookings = async () => {
     try {
-      const response = await getBooking();
+      const response = await getBooking() as any[];
 
-      // const formattedEvents = response?.map((booking: any) => {
-      //   const startISO = new Date(booking.startTime).toISOString();
-      //   const endISO = booking.endTime ? new Date(booking.endTime).toISOString() : null;
+      const formattedEvents = response?.flatMap((booking) => {
+        const customer = booking.customerId || {};
+        const isMember = customer?.role === "member";
+        const courseName = booking.course?.name;
 
-      //   return {
-      //     id: booking._id,
-      //     title: `${booking.customerId?.name || "Guest"}`,
-      //     start: booking.startTime,
-      //     end: booking.endTime,
-      //     extendedProps: {
-      //       calendar: booking.customerId?.role === "member" ? "Member" : "Guest",
-      //       bookedBy: booking.customerId?.name,
-      //       course: booking.course?.name,
-      //       notes: booking.specialInfo,
-      //     },
-      //   };
-      // });
-      setEvents([]);
+        return (booking.slotIds || []).map((slot) => {
+          const start = new Date(slot.start.replace(" ", "T"));
+          const end = new Date(slot.end.replace(" ", "T"));
+
+          return {
+            id: slot._id,
+            title: `${customer?.name || "Guest"}`,
+            start,
+            end,
+            extendedProps: {
+              calendar: isMember ? "Member" : "Guest",
+              bookedBy: customer?.name,
+              course: courseName,
+              notes: booking.specialInfo,
+              bookingType: booking.bookingType,
+              status: booking.bookingStatus,
+            },
+          };
+        });
+      });
+
+      setEvents(formattedEvents || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching bookings:", error);
     }
   };
 
   useEffect(() => {
     fetchAllBookings();
-  }, [open]);
+  }, []);
 
-  const handleDateSelect = (selectInfo: DateSelectArg) => {
-    resetModalFields();
-    setEventStartDate(selectInfo.startStr);
-    setEventEndDate(selectInfo.endStr || selectInfo.startStr);
-    openModal();
+  // ---- Filtering ----
+  const filteredEvents = useMemo(() => {
+    if (filter === "All") return events;
+    return events.filter(
+      (e) => e.extendedProps.calendar.toLowerCase() === filter.toLowerCase()
+    );
+  }, [events, filter]);
+
+  // ---- Event Content ----
+  const renderEventContent = React.useCallback((eventInfo: any) => {
+    const { bookedBy, course, calendar } = eventInfo.event.extendedProps;
+    const borderColor =
+      calendar === "Member" ? "border-green-500" : "border-blue-500";
+    const textColor =
+      calendar === "Member" ? "text-green-700" : "text-blue-700";
+
+    const formatTime = (date: Date | null) =>
+      date
+        ? new Intl.DateTimeFormat("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        }).format(date)
+        : "";
+
+    return (
+      <div
+        className={`w-full overflow-hidden rounded border ${borderColor} bg-white p-1 shadow-sm hover:shadow-md transition-all duration-200`}
+      >
+        <div className={`font-semibold text-sm truncate ${textColor}`}>
+          {bookedBy || "Guest"}
+        </div>
+        <div className="text-xs text-gray-500">
+          {formatTime(eventInfo.event.start)} -{" "}
+          {formatTime(eventInfo.event.end)}
+        </div>
+        {course && (
+          <div className="text-xs italic text-gray-400 truncate">{course}</div>
+        )}
+      </div>
+    );
+  }, []);
+
+  // ---- Handle More Link ----
+  const handleMoreClick = (info: any) => {
+    const dayEvents = info.allSegs.map((seg: any) => seg.event);
+    setSelectedDayEvents(dayEvents);
+    setIsModalOpen(true);
+    return "popover";
   };
 
-  const handleEventClick = (clickInfo: EventClickArg) => {
-    const event = clickInfo.event;
-    setSelectedEvent(event as unknown as CalendarEvent);
-    setEventTitle(event.title);
-    setEventStartDate(event.start?.toISOString().split("T")[0] || "");
-    setEventEndDate(event.end?.toISOString().split("T")[0] || "");
-    setEventLevel(event.extendedProps.calendar);
-    openModal();
-  };
-
-  const handleAddOrUpdateEvent = () => {
-    if (selectedEvent) {
-      // Update existing event
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === selectedEvent.id
-            ? {
-              ...event,
-              title: eventTitle,
-              start: eventStartDate,
-              end: eventEndDate,
-              extendedProps: { calendar: eventLevel },
-            }
-            : event
-        )
-      );
-    } else {
-      // Add new event
-      const newEvent: CalendarEvent = {
-        id: Date.now().toString(),
-        title: eventTitle,
-        start: eventStartDate,
-        end: eventEndDate,
-        allDay: true,
-        extendedProps: { calendar: eventLevel },
-      };
-      setEvents((prevEvents) => [...prevEvents, newEvent]);
-    }
-    closeModal();
-    resetModalFields();
-  };
-
-  const resetModalFields = () => {
-    setEventTitle("");
-    setEventStartDate("");
-    setEventEndDate("");
-    setEventLevel("");
-    setSelectedEvent(null);
-  };
-
-  const handleOpenAdd = () => {
-    setOpen(true);
-  };
-
-  const handleCloseAdd = () => {
-    setOpen(false);
-  };
 
   return (
-    <>
-      <AddGuestBookings open={open} handleClose={handleCloseAdd} />
-      <div className="rounded-2xl border  border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="custom-calendar">
-          <FullCalendar
-            ref={calendarRef}
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            headerToolbar={{
-              left: "prev,next addEventButton",
-              center: "title",
-              right: "dayGridMonth,timeGridWeek,timeGridDay",
-            }}
-            events={events}
-            selectable={true}
-            select={handleDateSelect}
-            eventClick={handleEventClick}
-            eventContent={renderEventContent}
-            customButtons={{
-              addEventButton: {
-                text: "Guest Booking +",
-                // click: openModal,
-                click: handleOpenAdd,
-
-              },
-            }}
-          />
+    <div className="p-4 space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Tee Time Calendar
+        </h2>
+        <div className="space-x-2">
+          {["All", "Member", "Guest"].map((type) => (
+            <button
+              key={type}
+              onClick={() => setFilter(type)}
+              className={`px-4 py-1.5 rounded-full border text-sm ${filter === type
+                ? "bg-blue-600 text-white"
+                : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                }`}
+            >
+              {type}
+            </button>
+          ))}
         </div>
       </div>
-    </>
-  );
-};
 
-const renderEventContent = (eventInfo: EventContentArg) => {
-  const { bookedBy, course, calendar } = eventInfo.event.extendedProps;
-
-  // Set color based on role
-  let borderColor = "border-gray-300"; // default
-  let bgColor = "bg-white";
-
-  if (calendar === "Member") {
-    borderColor = "border-green-500";
-    bgColor = "bg-green-50";
-  } else if (calendar === "Guest") {
-    borderColor = "border-blue-500";
-    bgColor = "bg-blue-50";
-  }
-
-  const formatTime = (date: Date | null) => {
-    if (!date) return "";
-    return new Intl.DateTimeFormat("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    }).format(date);
-  };
-
-  return (
-    <div className={`w-full overflow-hidden rounded border-l-4 ${borderColor} ${bgColor} p-1 shadow-sm`}>
-      <div className="font-semibold text-sm truncate text-gray-800">
-        {bookedBy || "Guest"}
+      {/* ---- Calendar ---- */}
+      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay",
+          }}
+          height="auto"
+          expandRows={true}
+          dayMaxEventRows={3}
+          moreLinkClick={handleMoreClick}
+          events={filteredEvents}
+          eventContent={renderEventContent}
+        />
       </div>
-      <div className="text-xs text-gray-500">
-        {formatTime(eventInfo.event.start)} - {formatTime(eventInfo.event.end)}
-      </div>
-      {course && (
-        <div className="text-xs italic text-gray-400 truncate">{course}</div>
-      )}
+
+      {/* ---- Modal ---- */}
+      <Dialog
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pr: 2 }}>
+          <Typography variant="h6" fontWeight="600">
+            Bookings for Selected Day
+          </Typography>
+          <IconButton
+            aria-label="close"
+            onClick={() => setIsModalOpen(false)}
+            sx={{
+              color: (theme) => theme.palette.grey[500]
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          {selectedDayEvents.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              No bookings found for this date.
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                maxHeight: 400,
+                // overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.5,
+                mt: 1,
+              }}
+            >
+              {selectedDayEvents.map((ev) => {
+                const isMember = ev.extendedProps.calendar === "Member";
+                return (
+                  <Box
+                    key={ev.id}
+                    sx={{
+                      border: `1px solid ${isMember ? "#22c55e" : "#3b82f6"}`,
+                      borderRadius: 2,
+                      p: 1.5,
+                      bgcolor: "background.paper",
+                      boxShadow: 1,
+
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      fontWeight="600"
+                      color={isMember ? "success.main" : "primary.main"}
+                    >
+                      {ev.extendedProps.bookedBy}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {ev.extendedProps.course}
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled">
+                      {new Intl.DateTimeFormat("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      }).format(ev.start)}{" "}
+                      -{" "}
+                      {new Intl.DateTimeFormat("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      }).format(ev.end)}
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
 export default Calendar;
+

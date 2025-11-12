@@ -369,7 +369,7 @@ const AddTimeSlot: React.FC<AddTimeSlotProps> = ({ open, handleClose, data }) =>
 
                         <Grid>
                             <Label className="block text-sm font-medium text-gray-700 mb-2">
-                                Ground Closing Time (On Weekdays)
+                                Ground Closing Time (On Weekends)
                             </Label>
                             <div className="border border-gray-300 rounded-lg shadow-sm">
                                 <TimeInput
