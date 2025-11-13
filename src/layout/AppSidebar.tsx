@@ -111,7 +111,7 @@ const navItems: NavItem[] = [
     icon: <PageIcon />,
     subItems: [
       { name: "Daily Summary", path: "/daily-report", pro: false },
-      { name: "Custom Reports", path: "/xyz7", pro: false },
+      // { name: "Custom Reports", path: "/xyz7", pro: false },
     ],
   },
 
