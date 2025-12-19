@@ -46,18 +46,6 @@ export default function SignInForm() {
       const resStatus = response?.data?.status;
       const resMsg = response?.data?.message || "Something went wrong.";
 
-      // if (resStatus === 201) {
-      //   toast.success(resMsg);
-      //   if (response?.data?.data?.role === "Admin") {
-      //     localStorage.setItem("token", response.data.additionalData);
-      //     localStorage.setItem("user", JSON.stringify(response?.data?.data));
-      //     router.push("/");
-      //   }
-      // } else {
-      //   toast.error("Unexpected response from server.");
-      // }
-
-
 
       if (resStatus === 201) {
         toast.success(resMsg);
@@ -106,6 +94,45 @@ export default function SignInForm() {
       setLoading(false);
     }
   };
+
+  const handleAdminLogin = async () => {
+    const adminEmail = "admin@gmail.com";
+    const adminPassword = "Admin@123";
+
+    setEmail(adminEmail);
+    setPassword(adminPassword);
+    setLoading(true);
+
+    try {
+      const payload = {
+        email: adminEmail,
+        password: adminPassword,
+      };
+
+      const response = await loginUser(payload);
+
+      const resStatus = response?.data?.status;
+      const resMsg = response?.data?.message || "Something went wrong.";
+
+      if (resStatus === 201) {
+        toast.success(resMsg);
+
+        if (response?.data?.data?.role === "Admin") {
+          localStorage.setItem("token", response.data.additionalData);
+          localStorage.setItem("user", JSON.stringify(response?.data?.data));
+          router.push("/");
+        }
+      } else {
+        toast.error("Unexpected response from server.");
+      }
+    } catch (err: any) {
+      console.error("Admin login error:", err);
+      toast.error("Admin login failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
 
   return (
@@ -165,32 +192,31 @@ export default function SignInForm() {
                 )}
               </div>
 
-
-
-              {/* <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Checkbox checked={isChecked} onChange={setIsChecked} />
-                  <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                    Keep me logged in
-                  </span>
-                </div>
-                <Link
-                  href="/reset-password"
-                  className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
+              <div>
+                <Button
+                  className="w-full"
+                  type="button"
+                  onClick={handleAdminLogin}
+                  disabled={loading}
+                  variant="contained"
+                  sx={{
+                    backgroundColor: "#115293",
+                    "&:hover": {
+                      backgroundColor: "#1976d2",
+                    },
+                  }}
                 >
-                  Forgot password?
-                </Link>
-              </div> */}
-
-              {/* {error && (
-                <p className="text-sm text-error-500 text-center">{error}</p>
-              )} */}
+                  {loading ? "Signing in..." : "Auto Login"}
+                </Button>
+              </div>
 
               <div>
                 <Button className="w-full" type="submit" disabled={loading}>
                   {loading ? "Signing in..." : "Sign in"}
                 </Button>
               </div>
+
+
             </div>
           </form>
         </div>
