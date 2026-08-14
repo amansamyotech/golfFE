@@ -1,0 +1,154 @@
+import { api_urls } from "@/utils/apiRoutes";
+import { getData, postData, postFormData, putFormData, deleteData, putData } from "@/utils/apiHandler";
+import { handleApiResponse } from "@/utils/common";
+
+interface SlotDetails {
+    _id: string;
+    start: string;
+    end: string;
+    status: string;
+    course?: string;
+    isWeekend?: boolean;
+    slot?: any;
+}
+interface BookingPayload {
+    _id?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    govId?: string;
+    groupSize?: any;
+    startDateTime?: string;
+    caddyCart?: any;
+    amount?: number | any;
+    paymentMode?: string;
+    acceptRules?: boolean | any;
+    acknowledgePolicy?: boolean | any;
+    startTime?: string;
+    specialInfo?: string;
+    customerId?: {
+        name?: string;
+        email?: string;
+        phone?: string;
+        govId?: string;
+        role?: string;
+        startTime?: string;
+    }
+    course: { _id: string; name: string };
+    selectedSlot?: { start: string; end: string; status?: string };
+    slot?: SlotDetails | any;
+}
+
+export const addBooking = async (payload: BookingPayload) => {
+    const url = api_urls.baseUrl + api_urls.booking.add;
+    const response = await postData(url, payload);
+    return await handleApiResponse(response);
+};
+
+export const guestBooking = async (payload: BookingPayload) => {
+    const url = api_urls.baseUrl + api_urls.booking.add;
+    const response = await postFormData(url, payload);
+    return await handleApiResponse(response);
+};
+
+export const getBooking = async () => {
+    const url = api_urls.baseUrl + api_urls.booking.getAll;
+    const response = await getData(url);
+    return await handleApiResponse(response);
+};
+
+export const updateGuestBooking = async (id: any, payload: BookingPayload) => {
+    const url = `${api_urls.baseUrl}${api_urls.booking.updateGuestBooking}/${id}`;
+    const response = await putFormData(url, payload);
+    return await handleApiResponse(response, 'UPDATE');
+};
+
+export const cancelGuestBooking = async (id: any) => {
+    const url = `${api_urls.baseUrl}${api_urls.booking.cancelGuestBooking}/${id}`;
+    const response = await deleteData(url);
+    return await handleApiResponse(response, 'DELETE');
+};
+
+export const assignSlot = async (id: any, payload: BookingPayload) => {
+    const url = `${api_urls.baseUrl}${api_urls.booking.assignSlot}/${id}`;
+    const response = await postData(url, payload);
+    return await handleApiResponse(response);
+};
+
+export const getBookingByID = async (id: any) => {
+    const url = `${api_urls.baseUrl}${api_urls.booking.bookingById}/${id}`;
+    const response = await getData(url);
+    return await handleApiResponse(response);
+};
+
+export const updateBookingSlotService = async (
+    bookingId: string,
+    previousSlotId: string,
+    newSlotId: string
+) => {
+    const url = `${api_urls.baseUrl}${api_urls.booking.updateBookingAssignSlot}/${bookingId}`;
+    const payload = {
+        previousSlotId,
+        newSlotId
+    }
+    const response = await putData(url, payload);
+    return await handleApiResponse(response, 'UPDATE');
+};
+
+export const cancelBookingSlotService = async (
+    bookingId: string,
+    slotId: string
+) => {
+    const url = `${api_urls.baseUrl}${api_urls.booking.cancelBookingAssignSlot}/${bookingId}`;
+    const payload = {
+        slotId,
+    }
+    const response = await putData(url, payload);
+    return await handleApiResponse(response, 'DELETE');
+};
+
+export const cancelBookingOfGuest = async (
+    bookingId: string,
+    slotId: string
+) => {
+    const url = `${api_urls.baseUrl}${api_urls.booking.cancelBookingOfGuest}/${bookingId}`;
+    const payload = {
+        slotId,
+    }
+    const response = await putData(url, payload);
+    return await handleApiResponse(response, 'DELETE');
+};
+
+export const assignCaddy = async (
+    bookingId: string,
+    caddyId: string
+) => {
+    const url = `${api_urls.baseUrl}${api_urls.booking.assignCaddy}/${bookingId}`;
+    const payload = {
+        caddyId,
+    }
+    const response = await putData(url, payload);
+    return await handleApiResponse(response);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
